@@ -1,0 +1,116 @@
+<resources>
+    <string name="app_name">Festival Adbanao</string>
+
+    <string name="admob_app_id">ca-app-pub-5706123402805812~5204909772</string>
+
+    <string name="notice">Notice</string>
+    <string name="ok">OK</string>
+    <string name="no_thanks">No Thanks</string>
+    <string name="watch_now">Watch Now</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="need_permission">Need Permission</string>
+    <string name="permission_msg">This app need permission to use this feature. You can grant them in app settings.</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings">Settings</string>
+    <string name="something_went_wrong">Something went wrong!!</string>
+    <string name="internet_error">Make sure you are connected to internet!!</string>
+    <string name="select_bg">Select Background</string>
+    <string name="select_picture">Select picture using</string>
+    <string name="select_color">Select Color</string>
+    <string name="select_poster">Select Poster</string>
+    <string name="text">Text</string>
+    <string name="stickers">Stickers</string>
+    <string name="effects">Effects</string>
+    <string name="image">Image</string>
+    <string name="background">Background</string>
+
+    <string name="txt_controls">Controls</string>
+    <string name="txt_colorOpacty">Colors and Opacity</string>
+    <string name="txt_fonts">Fonts</string>
+    <string name="txt_rotation">Rotation</string>
+    <string name="txt_colors">Colors</string>
+    <string name="txt_shadow">Shadow</string>
+    <string name="txt_backgnd">Background</string>
+    <string name="txt_style">Style</string>
+    <string name="texture">Texture</string>
+    <string name="water_color">Water Color</string>
+    <string name="blur">Blur</string>
+    <string name="share_poster">Share Poster</string>
+    <string name="remove_watermark">Remove WaterMark</string>
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
+    <string name="no_layers">No Layers</string>
+    <string name="design_saved">Design Saved</string>
+    <string name="your_design_successfully_saved_in_my_poster">Your Design successfully saved in My Poster.</string>
+    <string name="leavepage_alert">Are you sure you want to leave this Editing?</string>
+    <string name="alert">Unsaved Work</string>
+    <string name="crop">Crop</string>
+    <string name="add_text_here">Add Text here</string>
+    <string name="add_text">Add Text</string>
+    <string name="add">Add</string>
+    <string name="save_premium_msg">Watermark Removed Successfully.</string>
+    <string name="my_design">My Design</string>
+    <string name="no_saved_poster">No Saved Poster</string>
+    <string name="my_creation">My Creation</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+
+    <!--                    Brand Post                        -->
+
+    <!--    <string name="app_name">Brand Post</string>-->
+    <!--    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>-->
+
+    <!-- ExChange Rate API-->
+
+    <!-- Facebook SDK-->
+    <string name="facebook_app_id"></string>
+    <string name="facebook_client_token"></string>
+
+    <!--WhatsApp Login-->
+
+    <!--    SplashScreen-->
+
+    <!--IntroScreen-->
+
+    <!-- Login & Sign Up   -->
+
+    <!--    HomeScreen-->
+
+    <!--    <string name="yes">Yes</string>-->
+
+    <!-- Verify Email -->
+
+    <!--Business-->
+
+    <!--Editor Screen-->
+    <!--    <string name="add_text">Add Text</string>-->
+    <!--    <string name="camera">Camera</string>-->
+    <!--    <string name="cancel">Cancel</string>-->
+    <!--    <string name="image">Image</string>-->
+
+    <!--Subscribe-->
+
+    <!--Settings-->
+    <!--    <string name="ok">Ok</string>-->
+    <!--    <string name="no">No</string>-->
+
+    <!--Profile-->
+
+    <!--About-->
+
+    <!--VCard-->
+
+    <!-- Eraser -->
+    <!--    <string name="alert">Unsaved work</string>-->
+
+
+
+
+<!--    <string name="upgrade">Upgrade</string>-->
+<!--    <string name="please_add_business_titles">Please Add Your Business \n for Create Post</string>-->
+<!--    <string name="add_business">+Add</string>-->
+
+
+
+</resources>

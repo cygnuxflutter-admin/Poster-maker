@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lay_StkrMain"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/bottom_ly"
+    android:splitMotionEvents="false"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:id="@+id/seekbar_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="45.0dip"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:weightSum="4.0">
+
+            <RelativeLayout
+                android:id="@+id/btn_controlStkr"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="1.0"
+                android:background="@drawable/spawner_ripple_effect">
+
+                <TextView
+                    android:id="@+id/conTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/txt_controls"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="1.0dip"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="5.0dip"
+                android:layout_marginBottom="5.0dip"
+                android:background="@color/new_selected"
+                android:visibility="visible" />
+
+            <RelativeLayout
+                android:id="@+id/btn_colorOpacity"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="2.0"
+                android:background="@drawable/spawner_ripple_effect">
+
+                <TextView
+                    android:id="@+id/coloTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/txt_colorOpacty"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="1.0dip"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="5.0dip"
+                android:layout_marginBottom="5.0dip"
+                android:background="@color/new_selected"
+                android:visibility="visible" />
+
+            <RelativeLayout
+                android:id="@+id/btn_stk_rotation"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="1.0"
+                android:background="@drawable/spawner_ripple_effect">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/txt_rotation"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="120.0dip"
+            android:splitMotionEvents="false">
+
+            <LinearLayout
+                android:id="@+id/ly_controlsShow"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="visible"
+                android:weightSum="1.0">
+
+                <RelativeLayout
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.5">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_margin="5dp"
+                        android:orientation="vertical"
+                        android:splitMotionEvents="false">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:weightSum="3">
+
+                            <RelativeLayout
+                                android:id="@+id/sti_btn_up"
+                                android:layout_width="57dp"
+                                android:layout_height="35dp"
+                                android:layout_gravity="center">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_horizontal"
+                                    android:background="@drawable/spawner_btn_rounded_text_bg"
+                                    android:src="@drawable/spawner_bt_up" />
+                            </RelativeLayout>
+
+                        </LinearLayout>
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <RelativeLayout
+                                android:id="@+id/sti_btnLeft"
+                                android:layout_width="57dp"
+                                android:layout_height="35dp"
+                                android:layout_alignParentStart="true">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/spawner_btn_rounded_text_bg"
+                                    android:src="@drawable/spawner_bt_left" />
+                            </RelativeLayout>
+
+
+                            <RelativeLayout
+                                android:id="@+id/sti_btnRight"
+                                android:layout_width="57dp"
+                                android:layout_height="35dp"
+                                android:layout_alignParentEnd="true">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/spawner_btn_rounded_text_bg"
+                                    android:src="@drawable/spawner_bt_right" />
+                            </RelativeLayout>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <RelativeLayout
+                                android:id="@+id/sti_btnDown"
+                                android:layout_width="57dp"
+                                android:layout_height="35dp"
+                                android:layout_gravity="center">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_horizontal"
+                                    android:background="@drawable/spawner_btn_rounded_text_bg"
+                                    android:src="@drawable/spawner_bt_down" />
+                            </RelativeLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="0.0dip"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.4"
+                    android:orientation="vertical"
+                    android:weightSum="2.0">
+
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="0.0dip"
+                        android:layout_weight="1.0">
+
+
+                        <RelativeLayout
+                            android:id="@+id/lay_duplicateSticker"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/spawner_btn_rounded_text_bg"
+                                android:orientation="vertical"
+                                android:src="@drawable/spawner_bt_duplicate">
+
+                            </ImageView>
+
+
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="0.0dip"
+                        android:layout_weight="1.0">
+
+                        <RelativeLayout
+                            android:id="@+id/lay_str_delete"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/spawner_btn_rounded_text_bg"
+                                android:orientation="vertical"
+                                android:src="@drawable/spawner_bt_delete">
+
+                            </ImageView>
+
+                        </RelativeLayout>
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lay_colorOpacity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5.0dip">
+
+                    <ImageView
+                        android:id="@+id/btnColor"
+                        android:layout_width="30.0dip"
+                        android:layout_height="30.0dip"
+                        android:layout_centerVertical="true"
+                        android:layout_margin="5.0dip"
+                        android:background="@drawable/spawner_btn_rounded_text_bg"
+                        android:src="@drawable/spawner_ic_color"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ss"
+                        android:layout_width="30.0dip"
+                        android:layout_height="30.0dip"
+                        android:layout_centerVertical="true"
+                        android:layout_margin="5.0dip"
+                        android:background="@drawable/spawner_btn_rounded_text_bg"
+                        android:src="@drawable/spawner_ic_br_tranfarant" />
+
+                    <SeekBar
+                        android:id="@+id/alpha_seekBar"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="5.0dip"
+                        android:layout_toEndOf="@+id/ss"
+                        android:max="100"
+                        android:maxHeight="2dp"
+                        android:progress="100"
+                        android:progressDrawable="@drawable/spawner_seekbar_new"
+                        android:thumbTint="@color/new_selected" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/lay_hue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5.0dip"
+                    android:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/pick_hue_color"
+                        android:layout_width="30.0dip"
+                        android:layout_height="30.0dip"
+                        android:layout_centerVertical="true"
+                        android:layout_margin="5.0dip"
+                        android:background="@drawable/spawner_btn_bg"
+                        android:padding="5dp"
+                        android:src="@drawable/spawner_ic_hue_seek" />
+
+                    <com.festival.flyer.postermaker.color_palette.MailER_LineColorPicker
+                        android:id="@+id/hue_seekBar"
+                        android:layout_width="fill_parent"
+                        android:layout_height="35.0dip"
+                        android:layout_centerInParent="true"
+                        android:layout_marginLeft="10.0dip"
+                        android:layout_marginRight="10.0dip"
+                        android:layout_toEndOf="@+id/pick_hue_color"
+                        app:orientation="horizontal" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ly_stk_rotation"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:splitMotionEvents="false"
+                android:visibility="gone">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="fill_parent"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/stk_view_rotate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="@color/black"
+                        android:fontFamily="visbyroundcf_semibold"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <com.festival.flyer.postermaker.view.MailER_HorizontalProgressWheelView
+                        android:id="@+id/stk_rotate_scroll_wheel"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:layout_below="@+id/stk_view_rotate"
+                        android:layout_toStartOf="@+id/stk_wrapper_rotate_by_angle"
+                        android:layout_toEndOf="@+id/stk_wrapper_reset_rotate" />
+
+
+                    <FrameLayout
+                        android:id="@+id/stk_wrapper_reset_rotate"
+                        style="@style/ucrop_WrapperRotateButton"
+                        android:layout_below="@+id/stk_view_rotate"
+                        android:background="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="30.0dip"
+                            android:layout_height="30.0dip"
+                            android:layout_gravity="center"
+                            android:layout_margin="5.0dip"
+                            android:background="@drawable/spawner_btn_rounded_text_bg"
+                            android:padding="5dp"
+                            android:src="@drawable/spawner_ic_reset"
+                            app:tint="@color/white" />
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/stk_wrapper_rotate_by_angle"
+                        style="@style/ucrop_WrapperRotateButton"
+                        android:layout_below="@+id/stk_view_rotate"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="30.0dip"
+                            android:layout_height="30.0dip"
+                            android:layout_gravity="center"
+                            android:layout_margin="5.0dip"
+                            android:background="@drawable/spawner_btn_rounded_text_bg"
+                            android:padding="5dp"
+                            android:src="@drawable/ucrop_ic_angle"
+                            app:tint="@color/white" />
+
+                    </FrameLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

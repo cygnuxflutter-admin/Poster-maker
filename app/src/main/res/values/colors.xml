@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#151515</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#127CB4</color>
+   <!-- <color name="purple_700">#4e4e4e</color>-->
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="new_selected">#127CB4</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_tab_pressed">#151515</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="light_select">#CDDCF0</color>
+
+
+    <!--    <color name="purple_200">#FFBB86FC</color>-->
+<!--    <color name="purple_500">#FF6200EE</color>-->
+<!--    <color name="purple_700">#FF3700B3</color>-->
+<!--    <color name="black">#2E2E2E</color>-->
+<!--    <color name="white">#FFFFFFFF</color>-->
+
+<!--    <color name="primary_color">#4056dd</color>-->
+
+    <!--    <color name="active_color">#4056dd</color>-->
+
+    <!--grey-->
+
+    <!-- red -->
+
+    <!-- pink -->
+
+    <!-- deep purples -->
+
+    <!-- indigo -->
+
+    <!--blue-->
+
+    <!-- light blue-->
+
+    <!-- cyan -->
+
+    <!-- teal -->
+
+    <!-- green -->
+
+    <!--light green-->
+
+    <!-- lime-->
+
+    <!--yellow -->
+
+    <!--amber-->
+
+    <!--orange-->
+
+    <!--deep orange-->
+
+    <!--brown -->
+
+    <!--blue grey-->
+
+    <!--PosterEditor-->
+    <!--PosterEditor-->
+
+</resources>

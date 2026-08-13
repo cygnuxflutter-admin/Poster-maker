@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lay_effects"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/bottom_ly"
+    android:background="@color/white"
+    android:gravity="center_vertical"
+    android:splitMotionEvents="false"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:id="@+id/ll_texture"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/texture"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1.0dip"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="5.0dip"
+                android:layout_marginBottom="5.0dip"
+                android:background="@color/new_selected"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/ll_water"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/water_color"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1.0dip"
+                android:layout_height="fill_parent"
+                android:layout_marginTop="5.0dip"
+                android:layout_marginBottom="5.0dip"
+                android:background="@color/new_selected"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/ll_blur"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/spawner_visbyroundcf_semibold"
+                    android:text="@string/blur"
+                    android:textColor="@color/new_selected"
+                    android:textSize="14.0sp" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/lay_filter"
+            android:layout_width="fill_parent"
+            android:layout_height="80.0dip"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/ii"
+                android:layout_width="30.0dip"
+                android:layout_height="30.0dip"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5.0dip"
+                android:background="@drawable/spawner_btn_rounded_text_bg"
+                android:src="@drawable/spawner_ic_br_tranfarant"
+                android:visibility="visible" />
+
+            <SeekBar
+                android:id="@+id/effect_alpha_seekbar"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="5.0dip"
+                android:layout_marginEnd="10.0dip"
+                android:layout_toEndOf="@+id/ii"
+                android:max="255"
+                android:maxHeight="2dp"
+                android:progress="100"
+                android:progressDrawable="@drawable/spawner_seekbar_new"
+                android:thumbTint="@color/new_selected"
+                android:visibility="visible" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="80.0dip"
+            android:paddingTop="10dp">
+
+            <ImageView
+                android:id="@+id/btn_clear_effect"
+                android:layout_width="30.0dip"
+                android:layout_height="30.0dip"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5.0dip"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/spawner_btn_rounded_text_bg"
+                android:src="@drawable/spawner_ic_close" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/effect_rv"
+                android:layout_width="fill_parent"
+                android:layout_height="50.0dip"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10.0dip"
+                android:layout_marginEnd="5.0dip"
+                android:layout_toEndOf="@+id/btn_clear_effect" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "270868846641",
+    "firebase_url": "https://poster---text-art-default-rtdb.firebaseio.com",
+    "project_id": "poster---text-art",
+    "storage_bucket": "poster---text-art.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:270868846641:android:9d303ce7ebb9c3d6a55d10",
+        "android_client_info": {
+          "package_name": "com.addtext.textonphoto.textart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1WQ9fLAzeQkzGbHGHNTwrslyN7clDXfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:270868846641:android:3bde6cdda22ce488a55d10",
+        "android_client_info": {
+          "package_name": "com.festival.flyer.postermaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1WQ9fLAzeQkzGbHGHNTwrslyN7clDXfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

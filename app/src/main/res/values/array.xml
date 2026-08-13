@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <string name="AliceBlue">#F0F8FF</string>
+    <string name="AntiqueWhite">#FAEBD7</string>
+    <string name="Aqua">#00FFFF</string>
+    <string name="Aquamarine">#7FFFD4</string>
+    <string name="Azure">#F0FFFF</string>
+    <string name="Beige">#F5F5DC</string>
+    <string name="Bisque">#FFE4C4</string>
+    <string name="Black">#000000</string>
+    <string name="BlanchedAlmond">#FFEBCD</string>
+    <string name="Blue">#0000FF</string>
+    <string name="BlueViolet">#8A2BE2</string>
+    <string name="Brown">#A52A2A</string>
+    <string name="BurlyWood">#DEB887</string>
+    <string name="CadetBlue">#5F9EA0</string>
+    <string name="Chartreuse">#7FFF00</string>
+    <string name="Chocolate">#D2691E</string>
+    <string name="Coral">#FF7F50</string>
+    <string name="CornflowerBlue">#6495ED</string>
+    <string name="Cornsilk">#FFF8DC</string>
+    <string name="Crimson">#DC143C</string>
+    <string name="Cyan">#00FFFF</string>
+    <string name="DarkBlue">#00008B</string>
+    <string name="DarkCyan">#008B8B</string>
+    <string name="DarkGoldenrod">#B8860B</string>
+    <string name="DarkGray">#A9A9A9</string>
+    <string name="DarkGreen">#006400</string>
+    <string name="DarkKhaki">#BDB76B</string>
+    <string name="DarkMagenta">#8B008B</string>
+    <string name="DarkOliveGreen">#556B2F</string>
+    <string name="DarkOrange">#FF8C00</string>
+    <string name="DarkOrchid">#9932CC</string>
+    <string name="DarkRed">#8B0000</string>
+    <string name="DarkSalmon">#E9967A</string>
+    <string name="DarkSeaGreen">#8FBC8F</string>
+    <string name="DarkSlateBlue">#483D8B</string>
+    <string name="DarkSlateGray">#2F4F4F</string>
+    <string name="DarkTurquoise">#00CED1</string>
+    <string name="DarkViolet">#9400D3</string>
+    <string name="DeepPink">#FF1493</string>
+    <string name="DeepSkyBlue">#00BFFF</string>
+    <string name="DimGray">#696969</string>
+    <string name="DodgerBlue">#1E90FF</string>
+    <string name="FireBrick">#B22222</string>
+    <string name="FloralWhite">#FFFAF0</string>
+    <string name="ForestGreen">#228B22</string>
+    <string name="Fuchsia">#FF00FF</string>
+    <string name="Gainsboro">#DCDCDC</string>
+    <string name="GhostWhite">#F8F8FF</string>
+    <string name="Gold">#FFD700</string>
+    <string name="Goldenrod">#DAA520</string>
+    <string name="Gray">#808080</string>
+    <string name="Green">#008000</string>
+    <string name="GreenYellow">#ADFF2F</string>
+    <string name="Honeydew">#F0FFF0</string>
+    <string name="HotPink">#FF69B4</string>
+    <string name="IndianRed">#CD5C5C</string>
+    <string name="Indigo">#4B0082</string>
+    <string name="Ivory">#FFFFF0</string>
+    <string name="Khaki">#F0E68C</string>
+    <string name="Lavender">#E6E6FA</string>
+    <string name="LavenderBlush">#FFF0F5</string>
+    <string name="LawnGreen">#7CFC00</string>
+    <string name="LemonChiffon">#FFFACD</string>
+    <string name="LightBlue">#ADD8E6</string>
+    <string name="LightCoral">#F08080</string>
+    <string name="LightCyan">#E0FFFF</string>
+    <string name="LightGoldenrodYellow">#FAFAD2</string>
+    <string name="LightGreen">#90EE90</string>
+    <string name="LightGrey">#D3D3D3</string>
+    <string name="LightPink">#FFB6C1</string>
+    <string name="LightSalmon">#FFA07A</string>
+    <string name="LightSeaGreen">#20B2AA</string>
+    <string name="LightSkyBlue">#87CEFA</string>
+    <string name="LightSlateGray">#778899</string>
+    <string name="LightSteelBlue">#B0C4DE</string>
+    <string name="LightYellow">#FFFFE0</string>
+    <string name="Lime">#00FF00</string>
+    <string name="LimeGreen">#32CD32</string>
+    <string name="Linen">#FAF0E6</string>
+    <string name="Magenta">#FF00FF</string>
+    <string name="Maroon">#800000</string>
+    <string name="MediumAquamarine">#66CDAA</string>
+    <string name="MediumBlue">#0000CD</string>
+    <string name="MediumOrchid">#BA55D3</string>
+    <string name="MediumPurple">#9370DB</string>
+    <string name="MediumSeaGreen">#3CB371</string>
+    <string name="MediumSlateBlue">#7B68EE</string>
+    <string name="MediumSpringGreen">#00FA9A</string>
+    <string name="MediumTurquoise">#48D1CC</string>
+    <string name="MediumVioletRed">#C71585</string>
+    <string name="MidnightBlue">#191970</string>
+    <string name="MintCream">#F5FFFA</string>
+    <string name="MistyRose">#FFE4E1</string>
+    <string name="Moccasin">#FFE4B5</string>
+    <string name="NavajoWhite">#FFDEAD</string>
+    <string name="Navy">#000080</string>
+    <string name="OldGold">#CFB53B</string>
+    <string name="OldLace">#FDF5E6</string>
+    <string name="Olive">#808000</string>
+    <string name="OliveDrab">#6B8E23</string>
+    <string name="Orange">#FFA500</string>
+    <string name="OrangeRed">#FF4500</string>
+    <string name="Orchid">#DA70D6</string>
+    <string name="PaleGoldenrod">#EEE8AA</string>
+    <string name="PaleGreen">#98FB98</string>
+    <string name="PaleTurquoise">#AFEEEE</string>
+    <string name="PaleVioletRed">#DB7093</string>
+    <string name="PapayaWhip">#FFEFD5</string>
+    <string name="PeachPuff">#FFDAB9</string>
+    <string name="Peru">#CD853F</string>
+    <string name="Pink">#FFC0CB</string>
+    <string name="Plum">#DDA0DD</string>
+    <string name="PowderBlue">#B0E0E6</string>
+    <string name="Purple">#800080</string>
+    <string name="Red">#FF0000</string>
+    <string name="RosyBrown">#BC8F8F</string>
+    <string name="RoyalBlue">#4169E1</string>
+    <string name="SaddleBrown">#8B4513</string>
+    <string name="Salmon">#FA8072</string>
+    <string name="SandyBrown">#F4A460</string>
+    <string name="SeaGreen">#2E8B57</string>
+    <string name="Seashell">#FFF5EE</string>
+    <string name="Sienna">#A0522D</string>
+    <string name="Silver">#C0C0C0</string>
+    <string name="SkyBlue">#87CEEB</string>
+    <string name="SlateBlue">#6A5ACD</string>
+    <string name="SlateGray">#708090</string>
+    <string name="Snow">#FFFAFA</string>
+    <string name="SpringGreen">#00FF7F</string>
+    <string name="SteelBlue">#4682B4</string>
+    <string name="Tan">#D2B48C</string>
+    <string name="Teal">#008080</string>
+    <string name="Thistle">#D8BFD8</string>
+    <string name="Tomato">#FF6347</string>
+    <string name="Turquoise">#40E0D0</string>
+    <string name="Violet">#EE82EE</string>
+    <string name="Wheat">#F5DEB3</string>
+    <string name="WhiteSmoke">#F5F5F5</string>
+    <string name="Yellow">#FFFF00</string>
+    <string name="YellowGreen">#9ACD32</string>
+
+
+    <string-array name="color_list">
+        <item>@string/AliceBlue</item>
+        <item>@string/AntiqueWhite</item>
+        <item>@string/Aqua</item>
+        <item>@string/Aquamarine</item>
+        <item>@string/Azure</item>
+        <item>@string/Beige</item>
+        <item>@string/Bisque</item>
+        <item>@string/Black</item>
+        <item>@string/BlanchedAlmond</item>
+        <item>@string/Blue</item>
+        <item>@string/BlueViolet</item>
+        <item>@string/Brown</item>
+        <item>@string/BurlyWood</item>
+        <item>@string/CadetBlue</item>
+        <item>@string/Chartreuse</item>
+        <item>@string/Chocolate</item>
+        <item>@string/Coral</item>
+        <item>@string/CornflowerBlue</item>
+        <item>@string/Cornsilk</item>
+        <item>@string/Crimson</item>
+        <item>@string/Cyan</item>
+        <item>@string/DarkBlue</item>
+        <item>@string/DarkCyan</item>
+        <item>@string/DarkGoldenrod</item>
+        <item>@string/DarkGray</item>
+        <item>@string/DarkGreen</item>
+        <item>@string/DarkKhaki</item>
+        <item>@string/DarkMagenta</item>
+        <item>@string/DarkOliveGreen</item>
+        <item>@string/DarkOrange</item>
+        <item>@string/DarkOrchid</item>
+        <item>@string/DarkRed</item>
+        <item>@string/DarkSalmon</item>
+        <item>@string/DarkSeaGreen</item>
+        <item>@string/DarkSlateBlue</item>
+        <item>@string/DarkSlateGray</item>
+        <item>@string/DarkTurquoise</item>
+        <item>@string/DarkViolet</item>
+        <item>@string/DeepPink</item>
+        <item>@string/DeepSkyBlue</item>
+        <item>@string/DimGray</item>
+        <item>@string/DodgerBlue</item>
+        <item>@string/FireBrick</item>
+        <item>@string/FloralWhite</item>
+        <item>@string/ForestGreen</item>
+        <item>@string/Fuchsia</item>
+        <item>@string/Gainsboro</item>
+        <item>@string/GhostWhite</item>
+        <item>@string/Gold</item>
+        <item>@string/Goldenrod</item>
+        <item>@string/Gray</item>
+        <item>@string/Green</item>
+        <item>@string/GreenYellow</item>
+        <item>@string/Honeydew</item>
+        <item>@string/HotPink</item>
+        <item>@string/IndianRed</item>
+        <item>@string/Indigo</item>
+        <item>@string/Ivory</item>
+        <item>@string/Khaki</item>
+        <item>@string/Lavender</item>
+        <item>@string/LavenderBlush</item>
+        <item>@string/LawnGreen</item>
+        <item>@string/LemonChiffon</item>
+        <item>@string/LightBlue</item>
+        <item>@string/LightCoral</item>
+        <item>@string/LightCyan</item>
+        <item>@string/LightGoldenrodYellow</item>
+        <item>@string/LightGreen</item>
+        <item>@string/LightGrey</item>
+        <item>@string/LightPink</item>
+        <item>@string/LightSalmon</item>
+        <item>@string/LightSeaGreen</item>
+        <item>@string/LightSkyBlue</item>
+        <item>@string/LightSlateGray</item>
+        <item>@string/LightSteelBlue</item>
+        <item>@string/LightYellow</item>
+        <item>@string/Lime</item>
+        <item>@string/LimeGreen</item>
+        <item>@string/Linen</item>
+        <item>@string/Magenta</item>
+        <item>@string/Maroon</item>
+        <item>@string/MediumAquamarine</item>
+        <item>@string/MediumBlue</item>
+        <item>@string/MediumOrchid</item>
+        <item>@string/MediumPurple</item>
+        <item>@string/MediumSeaGreen</item>
+        <item>@string/MediumSlateBlue</item>
+        <item>@string/MediumSpringGreen</item>
+        <item>@string/MediumTurquoise</item>
+        <item>@string/MediumVioletRed</item>
+        <item>@string/MidnightBlue</item>
+        <item>@string/MintCream</item>
+        <item>@string/MistyRose</item>
+        <item>@string/Moccasin</item>
+        <item>@string/NavajoWhite</item>
+        <item>@string/Navy</item>
+        <item>@string/OldGold</item>
+        <item>@string/OldLace</item>
+        <item>@string/Olive</item>
+        <item>@string/OliveDrab</item>
+        <item>@string/Orange</item>
+        <item>@string/OrangeRed</item>
+        <item>@string/Orchid</item>
+        <item>@string/PaleGoldenrod</item>
+        <item>@string/PaleGreen</item>
+        <item>@string/PaleTurquoise</item>
+        <item>@string/PaleVioletRed</item>
+        <item>@string/PapayaWhip</item>
+        <item>@string/PeachPuff</item>
+        <item>@string/Peru</item>
+        <item>@string/Pink</item>
+        <item>@string/Plum</item>
+        <item>@string/PowderBlue</item>
+        <item>@string/Purple</item>
+        <item>@string/Red</item>
+        <item>@string/RosyBrown</item>
+        <item>@string/RoyalBlue</item>
+        <item>@string/SaddleBrown</item>
+        <item>@string/Salmon</item>
+        <item>@string/SandyBrown</item>
+        <item>@string/SeaGreen</item>
+        <item>@string/Seashell</item>
+        <item>@string/Sienna</item>
+        <item>@string/Silver</item>
+        <item>@string/SkyBlue</item>
+        <item>@string/SlateBlue</item>
+        <item>@string/SlateGray</item>
+        <item>@string/Snow</item>
+        <item>@string/SpringGreen</item>
+        <item>@string/SteelBlue</item>
+        <item>@string/Tan</item>
+        <item>@string/Teal</item>
+        <item>@string/Thistle</item>
+        <item>@string/Tomato</item>
+        <item>@string/Turquoise</item>
+        <item>@string/Violet</item>
+        <item>@string/Wheat</item>
+        <item>@string/WhiteSmoke</item>
+        <item>@string/Yellow</item>
+        <item>@string/YellowGreen</item>
+    </string-array>
+
+    <array name="palette">
+        <item>#ffffff</item>
+        <item>#cccccc</item>
+        <item>#999999</item>
+        <item>#666666</item>
+        <item>#333333</item>
+        <item>#000000</item>
+        <item>#ffee90</item>
+        <item>#ffd700</item>
+        <item>#daa520</item>
+        <item>#b8860b</item>
+        <item>#ccff66</item>
+        <item>#adff2f</item>
+        <item>#00fa9a</item>
+        <item>#00ff7f</item>
+        <item>#00ff00</item>
+        <item>#32cd32</item>
+        <item>#3cb371</item>
+        <item>#99cccc</item>
+        <item>#66cccc</item>
+        <item>#339999</item>
+        <item>#669999</item>
+        <item>#006666</item>
+        <item>#336666</item>
+        <item>#ffcccc</item>
+        <item>#ff9999</item>
+        <item>#ff6666</item>
+        <item>#ff3333</item>
+        <item>#ff0033</item>
+        <item>#cc0033</item>
+    </array>
+
+
+    <array name="palette2">
+        <item>#00000000</item>
+        <item>#ffffff</item>
+        <item>#cccccc</item>
+        <item>#999999</item>
+        <item>#666666</item>
+        <item>#333333</item>
+        <item>#000000</item>
+        <item>#ffee90</item>
+        <item>#ffd700</item>
+        <item>#daa520</item>
+        <item>#b8860b</item>
+        <item>#ccff66</item>
+        <item>#adff2f</item>
+        <item>#00fa9a</item>
+        <item>#00ff7f</item>
+        <item>#00ff00</item>
+        <item>#32cd32</item>
+        <item>#3cb371</item>
+        <item>#99cccc</item>
+        <item>#66cccc</item>
+        <item>#339999</item>
+        <item>#669999</item>
+        <item>#006666</item>
+        <item>#336666</item>
+        <item>#ffcccc</item>
+        <item>#ff9999</item>
+        <item>#ff6666</item>
+        <item>#ff3333</item>
+        <item>#ff0033</item>
+        <item>#cc0033</item>
+    </array>
+
+    <string-array name="fonts_array">
+        <item>Default.ttf</item>
+        <item>1.ttf</item>
+        <item>2.otf</item>
+        <item>3.ttf</item>
+        <item>4.ttf</item>
+        <item>5.otf</item>
+        <item>6.TTF</item>
+        <item>7.otf</item>
+        <item>8.otf</item>
+        <item>9.TTF</item>
+        <item>10.TTF</item>
+        <item>11.ttf</item>
+        <item>12.ttf</item>
+        <item>13.ttf</item>
+        <item>14.ttf</item>
+        <item>15.TTF</item>
+        <item>16.TTF</item>
+        <item>17.ttf</item>
+        <item>18.OTF</item>
+        <item>19.TTF</item>
+        <item>20.otf</item>
+        <item>21.ttf</item>
+        <item>22.TTF</item>
+        <item>23.otf</item>
+        <item>Aleo-Light.otf</item>
+        <item>ALICE-REGULAR.TTF</item>
+        <item>Aleo-Regular.otf</item>
+        <item>ALLER.TTF</item>
+        <item>ALLER_LT.TTF</item>
+        <item>ALLERDISPLAY.TTF</item>
+        <item>aparaj.ttf</item>
+        <item>aparajb_0.ttf</item>
+        <item>BAUHS93.TTF</item>
+        <item>BEBAS.TTF</item>
+        <item>BEBAS___.ttf</item>
+        <item>BebasKai-Regular.otf</item>
+        <item>BebasNeue Bold.ttf</item>
+        <item>BebasNeue Book.ttf</item>
+        <item>BebasNeue Light.ttf</item>
+        <item>BebasNeue Regular.ttf</item>
+        <item>BIRA_PERSONAL_USE_ONLY.TTF</item>
+        <item>BLAIRMDITC TT MEDIUM.TTF</item>
+        <item>BrushScriptStd_0.otf</item>
+        <item>Butler_Medium.otf</item>
+        <item>Channel.ttf</item>
+        <item>Chasing Hearts - OTF.otf</item>
+        <item>Chunkfive.otf</item>
+        <item>Cookie-Regular.ttf</item>
+        <item>COOLVETICA RG.TTF</item>
+        <item>edo.ttf</item>
+        <item>elmessiri-bold.otf</item>
+        <item>ENGLEBERT-REGULAR.TTF</item>
+        <item>NORICAN-REGULAR.TTF</item>
+        <item>EXO-BOLD.TTF</item>
+        <item>MATURASC.TTF</item>
+        <item>EXO-MEDIUM.TTF</item>
+        <item>FredokaOne-Regular.ttf</item>
+        <item>FunnyKid.ttf</item>
+        <item>GOOD TIMES RG.TTF</item>
+        <item>GREATVIBES-REGULAR.TTF</item>
+        <item>Harabara Mais Black.otf</item>
+        <item>Harabara Mais Bold.otf</item>
+        <item>Harabara Mais Light.otf</item>
+        <item>Harabara Mais.otf</item>
+        <item>HARABARA.TTF</item>
+        <item>Lato-Black.ttf</item>
+        <item>Lato-Bold.ttf</item>
+        <item>Lato-BoldItalic.ttf</item>
+        <item>Lato-Light.ttf</item>
+        <item>Lato-Regular.ttf</item>
+        <item>LemonMilk.otf</item>
+        <item>LemonMilkbold.otf</item>
+        <item>Merriweather-BoldItalic.ttf</item>
+        <item>MISTRAL.TTF</item>
+        <item>Montserrat-Black.ttf</item>
+        <item>Montserrat-Bold.ttf</item>
+        <item>Montserrat-ExtraBold.ttf</item>
+        <item>Montserrat-Light.ttf</item>
+        <item>Montserrat-Medium.ttf</item>
+        <item>Montserrat-Regular.ttf</item>
+        <item>Montserrat-SemiBold.ttf</item>
+        <item>MONTSERRATSUBRAYADA-BOLD.TTF</item>
+        <item>MONTSERRATSUBRAYADA-REGULAR.TTF</item>
+        <item>NEUROPOL.ttf</item>
+        <item>Nexa Bold.otf</item>
+        <item>Nexa Light.otf</item>
+        <item>NexaRustSans-Black.otf</item>
+        <item>NexaRustScriptL-0.otf</item>
+        <item>OSWALD-BOLD.TTF</item>
+        <item>Oswald-Bold_0.ttf</item>
+        <item>Oswald-DemiBold.ttf</item>
+        <item>Oswald-Light_0.ttf</item>
+        <item>Oswald-Medium.ttf</item>
+        <item>OSWALD-REGULAR.TTF</item>
+        <item>Oswald-Regular_0.ttf</item>
+        <item>Oswald-SemiBold.ttf</item>
+        <item>PatuaOne-Regular.ttf</item>
+        <item>Raleway-Bold.ttf</item>
+        <item>Raleway-ExtraBold.ttf</item>
+        <item>Raleway-ExtraLight.ttf</item>
+        <item>Raleway-Medium.ttf</item>
+        <item>Raleway-Regular.ttf</item>
+        <item>Raleway-SemiBold.ttf</item>
+        <item>RifficFree-Bold.ttf</item>
+        <item>Roboto-Black.ttf</item>
+        <item>Roboto-Bold.ttf</item>
+        <item>Roboto-Condensed.ttf</item>
+        <item>Roboto-Light.ttf</item>
+        <item>Roboto-Medium.ttf</item>
+        <item>Roboto-Regular.ttf</item>
+        <item>ROUND BOLD.TTF</item>
+        <item>SansitaOne.ttf</item>
+        <item>segoesc_0.ttf</item>
+        <item>Sofia-Regular.otf</item>
+        <item>spyagencyv3.ttf</item>
+        <item>steelfish rg.ttf</item>
+        <item>times_0.ttf</item>
+        <item>timesbd_0.ttf</item>
+    </string-array>
+
+</resources>

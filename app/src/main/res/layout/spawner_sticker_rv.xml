@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.festival.flyer.postermaker.view.MailER_CustomSquareFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:layout_margin="5dp"
+    android:background="@android:color/transparent">
+
+    <com.festival.flyer.postermaker.view.MailER_CustomSquareImageView
+        android:id="@+id/thumbnail_image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="10dp"
+        android:layout_gravity="center"
+        android:background="#9E9E9E" />
+
+</com.festival.flyer.postermaker.view.MailER_CustomSquareFrameLayout>
