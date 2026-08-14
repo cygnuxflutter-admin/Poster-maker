@@ -31,13 +31,6 @@ public class MailER_LoadAds {
     public static ShimmerFrameLayout shimmerFrameLayout;
 
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            mainLayout.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.setVisibility(View.GONE);
-            }
-            return;
-        }
         String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
 
         shimmerFrameLayout = shimmer_view_container;
@@ -54,6 +47,7 @@ public class MailER_LoadAds {
             AdRequest adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
             mainLayout.setVisibility(View.VISIBLE);
             try {
+                Log.d("AdTracker", "Requesting Collapsible Banner (AdMob) with ID: " + bannerAdunitID);
                 adView.loadAd(adRequest);
             } catch (Exception e) {
                 Log.e("TAG", "loadCollapsibleBanner: Catch"+ e.getMessage() );
@@ -64,12 +58,14 @@ public class MailER_LoadAds {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
+                    Log.d("AdTracker", "Collapsible Banner (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                     mainLayout.setVisibility(View.GONE);
-                    loadADXBannerAd(activity, relativeLayout);
+                    // loadADXBannerAd(activity, relativeLayout);
                     Log.e("TAG", "onAdFailedToLoad: Collapse Fail="+ loadAdError.getMessage() );
                 }
                 @Override
                 public void onAdLoaded() {
+                    Log.d("AdTracker", "AdMob Collapsible Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
                     if (shimmerFrameLayout!= null) {
                         shimmerFrameLayout.stopShimmer();
@@ -105,13 +101,6 @@ public class MailER_LoadAds {
     }
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            mainLayout.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.setVisibility(View.GONE);
-            }
-            return;
-        }
         shimmerFrameLayout = shimmer_view_container;
         mainLayout.removeAllViews();
         String bannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
@@ -124,6 +113,7 @@ public class MailER_LoadAds {
             AdRequest adRequest = new AdRequest.Builder().build();
 
             try {
+                Log.d("AdTracker", "Requesting Banner Ad (AdMob) with ID: " + bannerAdunitID);
                 adView.loadAd(adRequest);
             } catch (Exception e) {
 
@@ -134,10 +124,12 @@ public class MailER_LoadAds {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    loadADXBannerAd(activity, mainLayout);
+                    Log.d("AdTracker", "Banner Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
+                    // loadADXBannerAd(activity, mainLayout);
                 }
                 @Override
                 public void onAdLoaded() {
+                    Log.d("AdTracker", "AdMob Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
                     if (shimmerFrameLayout!= null) {
                         shimmerFrameLayout.stopShimmer();
@@ -167,16 +159,19 @@ public class MailER_LoadAds {
             adView.setAdUnitId(AdxBannerAdunitID);
 
             AdRequest adRequest = new AdRequest.Builder().build();
+            Log.d("AdTracker", "Requesting Banner Ad (AdX) with ID: " + AdxBannerAdunitID);
             adView.loadAd(adRequest);
 
             adView.setAdListener(new AdListener() {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    loadFBBannerAd(activity, mainLayout);
+                    Log.d("AdTracker", "Banner Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
+                    // loadFBBannerAd(activity, mainLayout);
                 }
                 @Override
                 public void onAdLoaded() {
+                    Log.d("AdTracker", "AdX Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
                     if (shimmerFrameLayout!= null) {
                         shimmerFrameLayout.stopShimmer();
@@ -198,6 +193,7 @@ public class MailER_LoadAds {
     private static void loadFBBannerAd(Activity activity, RelativeLayout mainLayout) {
         mainLayout.removeAllViews();
         String fbBannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("fbBannerAdunitID");
+        Log.d("AdTracker", "Requesting Banner Ad (Facebook) with ID: " + fbBannerAdunitID);
         com.facebook.ads.AdView fbBannerView = new com.facebook.ads.AdView(activity, fbBannerAdunitID, com.facebook.ads.AdSize.BANNER_HEIGHT_50);
         mainLayout.addView(fbBannerView);
 
@@ -206,10 +202,17 @@ public class MailER_LoadAds {
         com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
             @Override
             public void onError(Ad ad, AdError adError) {
+                Log.d("AdTracker", "Banner Ad (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                mainLayout.setVisibility(View.GONE);
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
+                Log.d("AdTracker", "Facebook Banner Ad Loaded Successfully!");
                 if (shimmerFrameLayout!= null) {
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.setVisibility(View.GONE);
