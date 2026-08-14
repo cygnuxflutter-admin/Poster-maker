@@ -54,13 +54,6 @@ public class MailER_NativeAdUtil {
     }
 
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            nativeAdContainer.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.setVisibility(View.GONE);
-            }
-            return;
-        }
         shimmerFrameLayout = shimmer_view_container;
         nativeAdContainer.setVisibility(View.VISIBLE);
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
@@ -68,7 +61,9 @@ public class MailER_NativeAdUtil {
     }
 
     public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer) {
-        AdLoader.Builder builder = new AdLoader.Builder(context, preferenceClass.getAdsId("NativeUnitID") /*"ca-app-pub-5706123402805812/8186296336"*/);
+        String nativeId = preferenceClass.getAdsId("NativeUnitID");
+        Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
+        AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
         builder.forNativeAd(nativeAd -> {
             if (this.nativeAd != null) {
@@ -89,7 +84,15 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                fillAdXNativeAd(nativeAdContainer);
+                Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
+                Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
+                // fillAdXNativeAd(nativeAdContainer);
+            }
+            @Override
+            public void onAdLoaded() {
+                Log.d("AdTracker", "AdMob Native Ad Loaded Successfully!");
+                Log.e("AdMob_Error", "AdMob Native Ad Loaded Successfully!");
+                super.onAdLoaded();
             }
         }).build();
 
@@ -99,7 +102,9 @@ public class MailER_NativeAdUtil {
 
     public void fillAdXNativeAd(final RelativeLayout nativeAdContainer) {
 
-        AdLoader.Builder builder = new AdLoader.Builder(context, preferenceClass.getAdsId("AdxNativeUnitID") /*"ca-app-pub-5706123402805812/8186296336"*/);
+        String adxNativeId = preferenceClass.getAdsId("AdxNativeUnitID");
+        Log.d("AdTracker", "Requesting Native Ad (AdX) with ID: " + adxNativeId);
+        AdLoader.Builder builder = new AdLoader.Builder(context, adxNativeId);
 
         builder.forNativeAd(nativeAd -> {
             if (this.nativeAd != null) {
@@ -126,7 +131,15 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                fbNativeAd(nativeAdContainer);
+                Log.d("AdTracker", "Native Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
+                Log.e("AdMob_Error", "AdX Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
+                // fbNativeAd(nativeAdContainer);
+            }
+            @Override
+            public void onAdLoaded() {
+                Log.d("AdTracker", "AdX Native Ad Loaded Successfully!");
+                Log.e("AdMob_Error", "AdX Native Ad Loaded Successfully!");
+                super.onAdLoaded();
             }
         }).build();
 
@@ -135,7 +148,9 @@ public class MailER_NativeAdUtil {
     }
 
     private void fbNativeAd(final RelativeLayout nativeAdContainer) {
-        com.facebook.ads.NativeAd nativeAd = new com.facebook.ads.NativeAd(context, preferenceClass.getAdsId("fbNativeUnitID"));
+        String fbNativeId = preferenceClass.getAdsId("fbNativeUnitID");
+        Log.d("AdTracker", "Requesting Native Ad (Facebook) with ID: " + fbNativeId);
+        com.facebook.ads.NativeAd nativeAd = new com.facebook.ads.NativeAd(context, fbNativeId);
 
         Log.e("TAG", "fb fetch native ad");
         NativeAdListener nativeAdListener = new NativeAdListener() {
@@ -147,10 +162,17 @@ public class MailER_NativeAdUtil {
             @Override
             public void onError(Ad ad, AdError adError) {
                 // Native ad failed to load
+                Log.d("AdTracker", "Native Ad (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
+                if (shimmerFrameLayout!= null){
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                nativeAdContainer.setVisibility(View.GONE);
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
+                Log.d("AdTracker", "Facebook Native Ad Loaded Successfully!");
                 if (nativeAd != ad) {
                     return;
                 }

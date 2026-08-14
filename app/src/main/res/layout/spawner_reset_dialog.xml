@@ -21,13 +21,13 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_150sdp"
+                android:layout_height="@dimen/_250sdp"
                 android:layout_margin="10dp">
 
                 <RelativeLayout
                     android:id="@+id/native_banner_ad_containers"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_150sdp"
+                    android:layout_height="@dimen/_250sdp"
                     android:visibility="gone" />
 
                 <com.facebook.shimmer.ShimmerFrameLayout

@@ -5,6 +5,7 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleObserver;
@@ -48,7 +49,6 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
      * Request an ad
      */
     public void fetchAd() {
-        if (BuildConfig.DEBUG) return;
         if (AppOpenAdShow == 0) {
             return;
         }
@@ -60,14 +60,15 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(AppOpenAd ad) {
+                Log.d("AdTracker", "AppOpen Ad (AdMob) Loaded Successfully using ID: " + AD_UNIT_ID1);
                 MailER_AppOpenManager.this.appOpenAd = ad;
                 MailER_AppOpenManager.this.loadTime = (new Date()).getTime();
             }
 
             @Override
             public void onAdFailedToLoad(LoadAdError loadAdError) {
-                // Handle the error.
-                fetchAdX();
+                Log.d("AdTracker", "AppOpen Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
+                // fetchAdX();
             }
         };
 
@@ -78,6 +79,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         AD_UNIT_ID2 = preferenceClass.getAdsId("AdxAppOpenID");
 
         AdRequest request = getAdRequest();
+        Log.d("AdTracker", "Requesting AppOpen Ad (AdMob) with Firebase ID: " + AD_UNIT_ID1);
         AppOpenAd.load(myApplication, AD_UNIT_ID1, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
     }
 
@@ -88,13 +90,14 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
+                Log.d("AdTracker", "AppOpen Ad (AdX) Loaded Successfully using ID: " + AD_UNIT_ID2);
                 MailER_AppOpenManager.this.appOpenAd = ad;
                 MailER_AppOpenManager.this.loadTime = new Date().getTime();
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-
+                Log.d("AdTracker", "AppOpen Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
             }
         };
         if (preferenceClass == null) {
@@ -104,6 +107,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         AD_UNIT_ID2 = preferenceClass.getAdsId("AdxAppOpenID");
 
         AdRequest request = getAdRequest();
+        Log.d("AdTracker", "Requesting AppOpen Ad (AdX) with Firebase ID: " + AD_UNIT_ID2);
         AppOpenAd.load(myApplication, AD_UNIT_ID2, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
     }
 
@@ -167,10 +171,6 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     }
 
     public void showAdIfSplashAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (BuildConfig.DEBUG) {
-            onShowAdCompleteListener.onShowAdComplete();
-            return;
-        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
@@ -240,10 +240,6 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     }
 
     public void showAdIfAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (BuildConfig.DEBUG) {
-            onShowAdCompleteListener.onShowAdComplete();
-            return;
-        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override

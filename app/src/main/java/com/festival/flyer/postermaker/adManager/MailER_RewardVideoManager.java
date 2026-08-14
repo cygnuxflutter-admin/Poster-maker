@@ -31,10 +31,6 @@ public class MailER_RewardVideoManager {
 
 
     public static void showRewardVideoAd(final Activity context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
-        if (BuildConfig.DEBUG) {
-            onAdLoadInterface.onAdClose();
-            return;
-        }
         if (preferenceClass == null) {
             preferenceClass = new MailER_PreferenceClass(context);
         }
@@ -87,13 +83,14 @@ public class MailER_RewardVideoManager {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
-//                if (alertDialog != null) {
-//                    if (alertDialog.isShowing()) {
-//                        alertDialog.dismiss();
-//                    }
-//                }
-                fbInterstitial(context, onAdLoadInterface);
-//                onAdLoadInterface.onAdClose();
+                Log.d("AdTracker", "Reward Video (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
+                if (alertDialog != null) {
+                    if (alertDialog.isShowing()) {
+                        alertDialog.dismiss();
+                    }
+                }
+//                fbInterstitial(context, onAdLoadInterface);
+                onAdLoadInterface.onAdClose();
             }
         });
 
@@ -194,10 +191,6 @@ public class MailER_RewardVideoManager {
 
 
     public static void fbInterstitial(Context context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
-        if (BuildConfig.DEBUG) {
-            onAdLoadInterface.onAdClose();
-            return;
-        }
         interstitialFB = new com.facebook.ads.InterstitialAd(context, preferenceClass.getAdsId("fbInterstitalAdunitID"));
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
@@ -220,6 +213,7 @@ public class MailER_RewardVideoManager {
 
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                Log.d("AdTracker", "Reward Video (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
                 Log.e("#3", "" + adError.getErrorMessage());
                 Log.e("#3_1", "" + adError.getErrorCode());
                 // Ad error callback
