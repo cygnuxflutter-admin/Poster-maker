@@ -44,6 +44,7 @@ public class MailER_InterstitialAdManager {
     private void fetchFbAd() {
 
         fbInterstitialAd = new com.facebook.ads.InterstitialAd(context, fbInterstitialAdId);
+        Log.d("AdTracker", "Requesting Interstitial Ad (Facebook) with ID: " + fbInterstitialAdId);
 
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
@@ -64,11 +65,13 @@ public class MailER_InterstitialAdManager {
 
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                Log.d("AdTracker", "Interstitial Ad (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
                 isFailed = true;
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
+                Log.d("AdTracker", "Facebook Interstitial Ad Loaded Successfully!");
             }
 
             @Override
@@ -86,7 +89,6 @@ public class MailER_InterstitialAdManager {
     }
 
     public void fetchAdMobAd() {
-        if (BuildConfig.DEBUG) return;
         if (isAdmobAdAvailable()) {
             return;
         }
@@ -94,16 +96,19 @@ public class MailER_InterstitialAdManager {
         InterstitialAdLoadCallback loadCallback = new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
+                Log.d("AdTracker", "AdMob Interstitial Ad Loaded Successfully! ID: " + admobInterstitialAdId);
                 admobInterstitialAd = ad;
 
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                fetchAdXAd();
+                Log.d("AdTracker", "Interstitial Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
+                // fetchAdXAd();
             }
         };
         AdRequest request = getAdRequest();
+        Log.d("AdTracker", "Requesting Interstitial Ad (AdMob) with ID: " + admobInterstitialAdId);
         InterstitialAd.load(context, admobInterstitialAdId, request, loadCallback);
     }
 
@@ -115,16 +120,19 @@ public class MailER_InterstitialAdManager {
         InterstitialAdLoadCallback loadCallback = new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
+                Log.d("AdTracker", "AdX Interstitial Ad Loaded Successfully! ID: " + adXInterstitialAdId);
                 admobInterstitialAd = ad;
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                fetchFbAd();
+                Log.d("AdTracker", "Interstitial Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
+                // fetchFbAd();
             }
         };
 
         AdRequest request = getAdRequest();
+        Log.d("AdTracker", "Requesting Interstitial Ad (AdX) with ID: " + adXInterstitialAdId);
         InterstitialAd.load(context, adXInterstitialAdId, request, loadCallback);
     }
 
@@ -143,13 +151,6 @@ public class MailER_InterstitialAdManager {
 
     public void showAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
         this.onAdLoadInterface = onAdLoadInterface;
-
-        if (BuildConfig.DEBUG) {
-            if (onAdLoadInterface != null) {
-                onAdLoadInterface.onAdClose();
-            }
-            return;
-        }
 
         if (!isADTimer) {
             if (progressDialog != null && progressDialog.isShowing()) {
@@ -254,13 +255,6 @@ public class MailER_InterstitialAdManager {
     public void showInterstitialAd(Activity activity, OnAdLoadInterface onAdLoadInterface) {
         this.onAdLoadInterface = onAdLoadInterface;
 
-        if (BuildConfig.DEBUG) {
-            if (onAdLoadInterface != null) {
-                onAdLoadInterface.onAdClose();
-            }
-            return;
-        }
-
         if (isFailed) {
             isFailed = false;
             fetchAdMobAd();
@@ -323,13 +317,6 @@ public class MailER_InterstitialAdManager {
 
     public void showEDitAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
         this.onAdLoadInterface = onAdLoadInterface;
-
-        if (BuildConfig.DEBUG) {
-            if (onAdLoadInterface != null) {
-                onAdLoadInterface.onAdClose();
-            }
-            return;
-        }
 
         if (isFailed) {
             isFailed = false;

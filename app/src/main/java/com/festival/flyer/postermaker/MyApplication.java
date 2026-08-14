@@ -93,9 +93,15 @@ public class MyApplication extends android.app.Application {
 
 
         AudienceNetworkAds.initialize(this);
-        List<String> testDeviceIds = Collections.singletonList("9EB1C89D5458256B2C93F844BAAC93F5");
-        RequestConfiguration configuration = new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
-        MobileAds.setRequestConfiguration(configuration);
+
+        // Debug ma tamara phone ne Test Device banave → Account Safe
+        // Release (Play Store) ma aa code chalse j nahi → Real Ads aavse
+        if (BuildConfig.DEBUG) {
+            List<String> testDeviceIds = Collections.singletonList("9EB1C89D5458256B2C93F844BAAC93F5");
+            RequestConfiguration configuration = new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
+            MobileAds.setRequestConfiguration(configuration);
+        }
+
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
 
     }

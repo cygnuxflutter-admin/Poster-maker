@@ -171,59 +171,57 @@ public class MailER_SplashScreen extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             Log.e("snapshot", String.valueOf(snapshot));
-                            preferenceClass.setDataType("BannerAdunitID", Objects.requireNonNull(snapshot.child("BannerAdunitID").getValue()).toString());
-                            preferenceClass.setDataType("CollapsibleBannerID", Objects.requireNonNull(snapshot.child("CollapsibleBannerID").getValue()).toString());
-                            preferenceClass.setDataType("InterstitalAdunitID", Objects.requireNonNull(snapshot.child("InterstitalAdunitID").getValue()).toString());
-                            preferenceClass.setDataType("RewardVideoUnitID", Objects.requireNonNull(snapshot.child("RewardVideoUnitID").getValue()).toString());
-                            preferenceClass.setDataType("NativeUnitID", Objects.requireNonNull(snapshot.child("NativeUnitID").getValue()).toString());
 
-                            preferenceClass.setDataType("AdxBannerAdunitID", Objects.requireNonNull(snapshot.child("AdxBannerAdunitID").getValue()).toString());
-                            preferenceClass.setDataType("AdxInterstitalAdunitID", Objects.requireNonNull(snapshot.child("AdxInterstitalAdunitID").getValue()).toString());
-                            preferenceClass.setDataType("AdxRewardVideoUnitID", Objects.requireNonNull(snapshot.child("AdxRewardVideoUnitID").getValue()).toString());
-                            preferenceClass.setDataType("AdxNativeUnitID", Objects.requireNonNull(snapshot.child("AdxNativeUnitID").getValue()).toString());
+                            // ----------------------------------------------- All Ads from Firebase
+                                preferenceClass.setDataType("BannerAdunitID", Objects.requireNonNull(snapshot.child("BannerAdunitID").getValue()).toString());
+                                Log.e("AD_CONFIG", "Banner Ad ID from Firebase: " + preferenceClass.getDataType("BannerAdunitID"));
+                                preferenceClass.setDataType("CollapsibleBannerID", Objects.requireNonNull(snapshot.child("CollapsibleBannerID").getValue()).toString());
+                                Log.e("AD_CONFIG", "Collapsible Banner ID from Firebase: " + preferenceClass.getDataType("CollapsibleBannerID"));
+                                preferenceClass.setDataType("InterstitalAdunitID", Objects.requireNonNull(snapshot.child("InterstitalAdunitID").getValue()).toString());
+                                Log.e("AD_CONFIG", "Interstitial Ad ID from Firebase: " + preferenceClass.getDataType("InterstitalAdunitID"));
+                                preferenceClass.setDataType("RewardVideoUnitID", Objects.requireNonNull(snapshot.child("RewardVideoUnitID").getValue()).toString());
+                                Log.e("AD_CONFIG", "Reward Video ID from Firebase: " + preferenceClass.getDataType("RewardVideoUnitID"));
+                                preferenceClass.setDataType("NativeUnitID", Objects.requireNonNull(snapshot.child("NativeUnitID").getValue()).toString());
+                                Log.e("AD_CONFIG", "Native Ad ID from Firebase: " + preferenceClass.getDataType("NativeUnitID"));
+                                preferenceClass.setDataType("AppOpenID", Objects.requireNonNull(snapshot.child("AppOpenID").getValue()).toString());
+                                Log.e("AD_CONFIG", "App Open Ad ID from Firebase: " + preferenceClass.getDataType("AppOpenID"));
 
-                            preferenceClass.setDataType("AppOpenID", Objects.requireNonNull(snapshot.child("AppOpenID").getValue()).toString());
-                            preferenceClass.setDataType("AdxAppOpenID", Objects.requireNonNull(snapshot.child("AdxAppOpenID").getValue()).toString());
+                                // AdX IDs
+                                if (snapshot.hasChild("AdxAppOpenID")) preferenceClass.setAdsId("AdxAppOpenID", snapshot.child("AdxAppOpenID").getValue().toString());
+                                if (snapshot.hasChild("AdxBannerAdunitID")) preferenceClass.setAdsId("AdxBannerAdunitID", snapshot.child("AdxBannerAdunitID").getValue().toString());
+                                if (snapshot.hasChild("AdxInterstitalAdunitID")) preferenceClass.setAdsId("AdxInterstitalAdunitID", snapshot.child("AdxInterstitalAdunitID").getValue().toString());
+                                if (snapshot.hasChild("AdxNativeUnitID")) preferenceClass.setAdsId("AdxNativeUnitID", snapshot.child("AdxNativeUnitID").getValue().toString());
+                                if (snapshot.hasChild("AdxRewardVideoUnitID")) preferenceClass.setAdsId("AdxRewardVideoUnitID", snapshot.child("AdxRewardVideoUnitID").getValue().toString());
+                                
+                                // Facebook IDs
+                                if (snapshot.hasChild("fbBannerAdunitID")) preferenceClass.setAdsId("fbBannerAdunitID", snapshot.child("fbBannerAdunitID").getValue().toString());
+                                if (snapshot.hasChild("fbInterstitalAdunitID")) preferenceClass.setAdsId("fbInterstitalAdunitID", snapshot.child("fbInterstitalAdunitID").getValue().toString());
+                                if (snapshot.hasChild("fbNativeUnitID")) preferenceClass.setAdsId("fbNativeUnitID", snapshot.child("fbNativeUnitID").getValue().toString());
 
-                            preferenceClass.setDataType("fbNativeUnitID", Objects.requireNonNull(snapshot.child("fbNativeUnitID").getValue()).toString());
-                            preferenceClass.setDataType("fbInterstitalAdunitID", Objects.requireNonNull(snapshot.child("fbInterstitalAdunitID").getValue()).toString());
-                            preferenceClass.setDataType("fbBannerAdunitID", Objects.requireNonNull(snapshot.child("fbBannerAdunitID").getValue()).toString());
-                            preferenceClass.setAdsStatus("bannerAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("bannerAdStatus").getValue()).toString()));
-                            preferenceClass.setAdsStatus("interstitalAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("interstitalAdStatus").getValue()).toString()));
-                            preferenceClass.setAdsStatus("EditScreenAdCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("EditScreenAdCount").getValue()).toString()));
+                                preferenceClass.setAdsStatus("bannerAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("bannerAdStatus").getValue()).toString()));
+                                preferenceClass.setAdsStatus("interstitalAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("interstitalAdStatus").getValue()).toString()));
+                                preferenceClass.setAdsStatus("EditScreenAdCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("EditScreenAdCount").getValue()).toString()));
+                                preferenceClass.setAdsStatus("BGSelectScreen_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("BGSelectScreen_BannerAD").getValue()).toString()));
+                                preferenceClass.setAdsStatus("ReadymadePoste_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("ReadymadePoste_BannerAD").getValue()).toString()));
+                                preferenceClass.setInt("MainScreen_Native", Integer.parseInt(Objects.requireNonNull(snapshot.child("MainScreen_Native").getValue()).toString()));
 
-                            preferenceClass.setAdsId("google_Rw_ID", Objects.requireNonNull(snapshot.child("google_Rw_ID").getValue()).toString());//Premium background Post Count
-                            preferenceClass.setAdsId("PremiumAdType", Objects.requireNonNull(snapshot.child("PremiumAdType").getValue()).toString());//Premium background Ads Type Reward / Full
-                            preferenceClass.setAdsId("AD_FB_Rw_ID", Objects.requireNonNull(snapshot.child("AD_FB_Rw_ID").getValue()).toString());//Premium background Post Count
+                                preferenceClass.setAdsId("google_Rw_ID", Objects.requireNonNull(snapshot.child("google_Rw_ID").getValue()).toString());
+                                preferenceClass.setAdsId("PremiumAdType", Objects.requireNonNull(snapshot.child("PremiumAdType").getValue()).toString());
 
-//                            ----------------------------------------------- Test ADS
-//                            preferenceClass.setDataType("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
-////                          preferenceClass.setDataType("CollapsibleBannerID", "ca-app-pub-3940256099942544/9214589741");
-//                            preferenceClass.setDataType("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
-//                            preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
-//                            preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
-//
-//                            preferenceClass.setDataType("AdxBannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
-//                            preferenceClass.setDataType("AdxInterstitalAdunitID", "ca-app-pub-5706123402805812/9175979414");
-//                            preferenceClass.setDataType("AdxRewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
-//                            preferenceClass.setDataType("AdxNativeUnitID", "ca-app-pub-3940256099942544/2247696110");
-//
-//                            preferenceClass.setDataType("AppOpenID", "ca-app-pub-3940256099942544/3419835294");
-//                            preferenceClass.setDataType("AdxAppOpenID", "ca-app-pub-3940256099942544/3419835294");
-//
-//                            preferenceClass.setDataType("fbNativeUnitID", "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID");
-//                            preferenceClass.setDataType("fbInterstitalAdunitID", "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID");
-//                            preferenceClass.setDataType("fbBannerAdunitID", "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID");
-//                            preferenceClass.setAdsStatus("bannerAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("bannerAdStatus").getValue()).toString()));
-//                            preferenceClass.setAdsStatus("interstitalAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("interstitalAdStatus").getValue()).toString()));
-//                            preferenceClass.setAdsStatus("EditScreenAdCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("EditScreenAdCount").getValue()).toString()));
-//
-//                            preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5224354917");//Premium background Post Count
-//                            preferenceClass.setDataType("PremiumAdType", "Reward");//Premium background Ads Type Reward / Full
-//
-//                            preferenceClass.setAdsId("AD_FB_Rw_ID", "YOUR_PLACEMENT_ID");//Premium background Post Count
+                                // DEBUG MODE PROTECTION: Override with AdMob Test IDs when running from Android Studio
+                                // This ensures the developer's live AdMob account is never blocked due to self-testing.
+                                if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
+                                    preferenceClass.setDataType("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
+                                    preferenceClass.setDataType("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
+                                    preferenceClass.setDataType("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
+                                    preferenceClass.setDataType("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
+                                    preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
+                                    preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
+                                    preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5354046379");
+                                    Log.e("AD_CONFIG", "DEBUG MODE ACTIVE: Automatically using AdMob Test IDs to protect your account.");
+                                }
 
-//                            ---------------------------------------------------
+//                            -------------------------------------------------------
                             MailER_AppOpenManager.AppOpenAdShow = Integer.parseInt(snapshot.child("AppOpenAdShow").getValue().toString());
                             MailER_InterstitialAdManager.InterAdTimer = Integer.parseInt(snapshot.child("InterAdTimer").getValue().toString());
 
@@ -233,17 +231,13 @@ public class MailER_SplashScreen extends AppCompatActivity {
                             preferenceClass.setInt("download", Integer.parseInt(Objects.requireNonNull(snapshot.child("download").getValue()).toString()));
                             preferenceClass.setInt("splashscreen", Integer.parseInt(Objects.requireNonNull(snapshot.child("splashscreen").getValue()).toString()));
 
-                            preferenceClass.setInt("MainScreen_Native", Integer.parseInt(Objects.requireNonNull(snapshot.child("MainScreen_Native").getValue()).toString()));//native ads count in poster background
-                            preferenceClass.setInt("IsEditScreenBannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("IsEditScreenBannerAD").getValue()).toString()));//native ads count in poster background
-                            preferenceClass.setInt("rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("rv_count").getValue()).toString()));//native ads count in poster background
-                            preferenceClass.setInt("First_rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("First_rv_count").getValue()).toString()));//native ads count in poster background
-                            preferenceClass.setInt("PremiumPostCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("PremiumPostCount").getValue()).toString()));//Premium background Post Count
+                            preferenceClass.setInt("IsEditScreenBannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("IsEditScreenBannerAD").getValue()).toString()));
+                            preferenceClass.setInt("rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("rv_count").getValue()).toString()));
+                            preferenceClass.setInt("First_rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("First_rv_count").getValue()).toString()));
+                            preferenceClass.setInt("PremiumPostCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("PremiumPostCount").getValue()).toString()));
 
                             preferenceClass.setDataType("main_key", Objects.requireNonNull(snapshot.child("main_key").getValue()).toString());
                             preferenceClass.setDecryptionType(Integer.parseInt(Objects.requireNonNull(snapshot.child("decryptionType").getValue()).toString()));
-//
-                            preferenceClass.setAdsStatus("BGSelectScreen_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("BGSelectScreen_BannerAD").getValue()).toString()));
-                            preferenceClass.setAdsStatus("ReadymadePoste_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("ReadymadePoste_BannerAD").getValue()).toString()));
 
                             Log.e("TAG", "onDataChange:MainScreen_Native "+ preferenceClass.getInt("MainScreen_Native", 0));
 //                            AppOpenManager.loadGoogleRewardVideoAd(SplashScreen.this);
