@@ -5,6 +5,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
+import com.festival.flyer.postermaker.utils.MailER_BottomNavHelper;
 import android.os.Bundle;
 import android.util.Log;
 import android.os.Environment;
@@ -57,6 +58,7 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
     private int cat_id, post_id;
     private boolean local_permission = false;
     private boolean isRewarded = false;
+    private boolean isProModeActive = false;
     private MailER_PreferenceClass preferenceClass;
 
     @Override
@@ -64,25 +66,20 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_template_selection);
+        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_explore);
+
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
 
         View statusBarSpacer = findViewById(R.id.status_bar_spacer);
-        ViewCompat.setOnApplyWindowInsetsListener(statusBarSpacer, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.getLayoutParams().height = systemBars.top;
-            v.requestLayout();
-            return insets;
-        });
+        if (statusBarSpacer != null) {
+            statusBarSpacer.setVisibility(View.GONE); // Let fitsSystemWindows handle it
+        }
 
         RelativeLayout btm = this.findViewById(R.id.btm);
-        ViewCompat.setOnApplyWindowInsetsListener(btm, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-            return insets;
-        });
+        // WindowInsets are handled by fitsSystemWindows on root now
 
         findByID();
 
@@ -102,6 +99,22 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         }
 
         findViewById(R.id.ic_back).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        
+        View proToggle = findViewById(R.id.ll_pro_toggle);
+        if (proToggle != null) {
+            proToggle.setOnClickListener(v -> {
+                isProModeActive = !isProModeActive;
+                if (isProModeActive) {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFD700"))); // Gold color for active
+                } else {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF8C00"))); // Orange for inactive
+                }
+                if (templateSelectionController != null) {
+                    templateSelectionController.applyProFilter(isProModeActive);
+                }
+            });
+        }
+        
         deleteFromExternalStorage();
 
     }
@@ -122,7 +135,8 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
     private void findByID() {
         preferenceClass = new MailER_PreferenceClass(this);
-        templateSelectionController = new MailER_TemplateSelectionController(this, getSupportFragmentManager(), preferenceClass);
+        String selectedCategory = getIntent().getStringExtra("selected_category");
+        templateSelectionController = new MailER_TemplateSelectionController(this, getSupportFragmentManager(), preferenceClass, selectedCategory);
     }
 
     @Override

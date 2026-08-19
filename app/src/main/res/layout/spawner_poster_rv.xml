@@ -1,71 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rlMain"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_margin="5dp"
-    android:background="#CDDCF0"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="2dp">
+    android:layout_margin="@dimen/_6sdp"
+    app:cardCornerRadius="@dimen/_16sdp"
+    app:cardElevation="@dimen/_2sdp"
+    app:cardBackgroundColor="@color/white">
 
     <RelativeLayout
-        android:id="@+id/content_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#CDDCF0"
-        android:padding="4dp">
-
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminateTint="#333333" />
-
-        <ImageView
-            android:id="@+id/iv_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY" />
-
-        <ImageView
-            android:id="@+id/iv_rate_us"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="bottom"
-            android:layout_marginStart="5dp"
-            android:layout_marginBottom="5dp"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/iv_lock"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/spawner_ic_locked"
-            android:visibility="gone" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/ad_layout"
+        android:id="@+id/rlMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:padding="4dp">
+        android:gravity="center">
 
+        <RelativeLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="#6200EE" />
+
+            <ImageView
+                android:id="@+id/iv_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop" />
+
+            <ImageView
+                android:id="@+id/iv_rate_us"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/iv_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="@dimen/_6sdp"
+                android:layout_marginTop="@dimen/_6sdp"
+                android:background="@drawable/spawner_tab_pill_background"
+                android:backgroundTint="#FF8C00"
+                android:drawableStart="@drawable/spawner_ic_crown"
+                android:drawablePadding="@dimen/_4sdp"
+                android:drawableTint="@color/white"
+                android:text="PRO"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/_8ssp"
+                android:textStyle="bold"
+                android:paddingHorizontal="@dimen/_6sdp"
+                android:paddingVertical="@dimen/_2sdp"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:gravity="center"
+                android:elevation="@dimen/_2sdp"
+                android:visibility="gone" />
+
+            <!-- Like Button -->
+            <ImageView
+                android:id="@+id/iv_like"
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:background="@drawable/spawner_bg_circle_white"
+                android:padding="@dimen/_5sdp"
+                android:src="@drawable/spawner_ic_heart_outline"
+                android:elevation="@dimen/_2sdp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/ad_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
 
             <RelativeLayout
                 android:id="@+id/native_banner_ad_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#CDDCF0"
                 android:gravity="center"
                 android:visibility="visible">
 
@@ -75,35 +104,11 @@
                     android:layout_height="match_parent"
                     app:shimmer_auto_start="true">
 
-<!--                <ImageView-->
-<!--                    android:id="@+id/titanicTextView"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:alpha="0.6"-->
-<!--                    android:gravity="center"-->
-<!--                    android:src="@mipmap/ic_launcher_round" />-->
-
-                    <include  android:id="@+id/ad_load_layout" layout="@layout/spawner_native_ad_layout"/>
+                    <include android:id="@+id/ad_load_layout" layout="@layout/spawner_native_ad_layout"/>
 
                 </com.facebook.shimmer.ShimmerFrameLayout>
-                <!-- <com.festival.flyer.postermaker.view.MailER_TitanicTextView
-                    android:id="@+id/titanicTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:gravity="center"
-                    android:text="Ad\nArea"
-                    android:textColor="#ffffff"
-                    android:textSize="35sp" />
-    -->
             </RelativeLayout>
 
+        </RelativeLayout>
     </RelativeLayout>
-
-
-</RelativeLayout>
+</androidx.cardview.widget.CardView>

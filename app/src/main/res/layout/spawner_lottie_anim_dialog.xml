@@ -1,29 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#00000000"
-    android:orientation="vertical">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="@dimen/_15sdp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/white">
 
-    <!--    <com.airbnb.lottie.LottieAnimationView-->
-    <com.github.ybq.android.spinkit.SpinKitView
-        android:id="@+id/animation_view"
-        style="@style/SpinKitView.Circle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
+    <LinearLayout
+        android:layout_width="@dimen/_130sdp"
+        android:layout_height="@dimen/_130sdp"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/animation_view"
-        android:layout_gravity="bottom"
-        android:layout_marginTop="@dimen/_15sdp"
-        android:gravity="center_horizontal"
-        android:padding="8dp"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/animation_view"
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="@dimen/_70sdp"
+            app:lottie_rawRes="@raw/loader"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:text="Loading..."
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/_12ssp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

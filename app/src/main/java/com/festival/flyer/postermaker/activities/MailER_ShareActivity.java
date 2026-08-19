@@ -15,8 +15,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.print.PrintHelper;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -48,9 +52,24 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(1024, 1024);
         setContentView(R.layout.spawner_activity_share);
+
+        View statusBarSpacer = findViewById(R.id.status_bar_spacer);
+        ViewCompat.setOnApplyWindowInsetsListener(statusBarSpacer, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.getLayoutParams().height = systemBars.top;
+            v.requestLayout();
+            return insets;
+        });
+
+        View activity_share = findViewById(R.id.activity_share);
+        ViewCompat.setOnApplyWindowInsetsListener(activity_share, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            return insets;
+        });
 
 
         findByID();

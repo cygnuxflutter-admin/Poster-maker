@@ -21,6 +21,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
         <intent>
@@ -45,10 +46,22 @@
         android:enableOnBackInvokedCallback="true">
 
         <activity
+            android:name=".activities.MailER_AllBackgroundsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MailER_LikedBackgroundsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MailER_LikedTemplatesActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_PrivacyPolicyActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_MyCreationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MailER_SettingsActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_MyDesignActivity"
@@ -63,6 +76,9 @@
             android:name=".activities.MailER_PosterEditActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.MailER_CreateActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_TemplateSelectionActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -70,8 +86,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_PosterMainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_SplashScreen"
             android:exported="true"
@@ -85,7 +100,7 @@
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- <provider -->
+            android:theme="@style/UCropTheme" /> <!-- <provider -->
 
         <provider
             android:name="androidx.core.content.FileProvider"

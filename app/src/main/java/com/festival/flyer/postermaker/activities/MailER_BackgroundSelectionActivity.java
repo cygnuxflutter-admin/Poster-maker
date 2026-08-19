@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -46,6 +49,8 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
     private String mode, path;
     private boolean local = false;
     private boolean isRewarded = false;
+    private boolean local_permission = false;
+    private boolean isProModeActive = false;
     private MailER_PreferenceClass preferenceClass;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,35 +62,16 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
             getSupportActionBar().hide();
         }
 
+        com.festival.flyer.postermaker.utils.MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
+
         View statusBarSpacer = findViewById(R.id.status_bar_spacer);
-        ViewCompat.setOnApplyWindowInsetsListener(statusBarSpacer, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.getLayoutParams().height = systemBars.top;
-            v.requestLayout();
-            return insets;
-        });
+        // WindowInsets are handled by fitsSystemWindows on root now
+        if (statusBarSpacer != null) {
+            statusBarSpacer.setVisibility(View.GONE);
+        }
 
         View bottomLy = findViewById(R.id.bottom_ly);
-        ViewCompat.setOnApplyWindowInsetsListener(bottomLy, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-            return insets;
-        });
-
         View cameraContainer = findViewById(R.id.camera_container);
-        int originalMargin = 0;
-        if (cameraContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams p) {
-            originalMargin = p.bottomMargin;
-        }
-        int finalOriginalMargin = originalMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(cameraContainer, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            if (v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams p) {
-                p.bottomMargin = finalOriginalMargin + systemBars.bottom;
-                v.requestLayout();
-            }
-            return insets;
-        });
 
         findByID();
 
@@ -138,6 +124,20 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
 
         findViewById(R.id.ic_color).setOnClickListener(v -> bgSelectionController.openColorDialog());
 
+        View proToggle = findViewById(R.id.ll_pro_toggle);
+        if (proToggle != null) {
+            proToggle.setOnClickListener(v -> {
+                isProModeActive = !isProModeActive;
+                if (isProModeActive) {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFD700"))); // Gold color for active
+                } else {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF8C00"))); // Orange for inactive
+                }
+                if (bgSelectionController != null) {
+                    bgSelectionController.applyProFilter(isProModeActive);
+                }
+            });
+        }
     }
 
     private void findByID() {

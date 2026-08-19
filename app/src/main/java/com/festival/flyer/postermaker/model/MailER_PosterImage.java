@@ -4,13 +4,39 @@ import java.io.Serializable;
 
 public class MailER_PosterImage implements Serializable {
     int post_id;
+    int cat_id;
     String post_thumb;
     String ratio;
+    boolean isPremium;
 
     public MailER_PosterImage(String post_id, String post_thumb, String ratio) {
         this.post_id = Integer.parseInt(post_id);
         this.post_thumb = post_thumb;
         this.ratio = ratio;
+        this.isPremium = false;
+    }
+
+    public MailER_PosterImage(String post_id, String post_thumb, String ratio, boolean isPremium) {
+        this.post_id = Integer.parseInt(post_id);
+        this.post_thumb = post_thumb;
+        this.ratio = ratio;
+        this.isPremium = isPremium;
+    }
+    
+    public int getCat_id() {
+        return cat_id;
+    }
+
+    public void setCat_id(int cat_id) {
+        this.cat_id = cat_id;
+    }
+
+    public boolean getPremium() {
+        return isPremium;
+    }
+
+    public void setPremium(boolean premium) {
+        isPremium = premium;
     }
 
     public int getPost_id() {

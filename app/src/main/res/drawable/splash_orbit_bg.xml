@@ -1,0 +1,53 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="280dp"
+    android:viewportWidth="280"
+    android:viewportHeight="280">
+
+    <!-- Outer dotted circle -->
+    <path
+        android:pathData="M 140 10 A 130 130 0 1 1 139.9 10"
+        android:strokeColor="#207B2FF7"
+        android:strokeWidth="1" />
+
+    <!-- Inner dotted circle -->
+    <path
+        android:pathData="M 140 40 A 100 100 0 1 1 139.9 40"
+        android:strokeColor="#207B2FF7"
+        android:strokeWidth="1" />
+
+    <!-- Hollow Purple Circle (Top Left) -->
+    <path
+        android:pathData="M 64 56 A 6 6 0 1 1 63.9 56"
+        android:strokeColor="#7B2FF7"
+        android:strokeWidth="1.5" />
+
+    <!-- Solid Purple Dot (Top) -->
+    <path
+        android:pathData="M 90 40 A 4 4 0 1 1 89.9 40"
+        android:fillColor="#7B2FF7" />
+
+    <!-- Hollow Pink Drop (Left) -->
+    <path
+        android:pathData="M 32 140 A 5 5 0 1 1 31.9 140"
+        android:strokeColor="#E040A0"
+        android:strokeWidth="1.5" />
+
+    <!-- Hollow Light Purple Circle (Top Right) -->
+    <path
+        android:pathData="M 230 64 A 4 4 0 1 1 229.9 64"
+        android:strokeColor="#407B2FF7"
+        android:strokeWidth="1" />
+
+    <!-- Solid Pink Dot (Bottom Right) -->
+    <path
+        android:pathData="M 190 230 A 4 4 0 1 1 189.9 230"
+        android:fillColor="#E040A0" />
+
+    <!-- Hollow Purple Circle (Right) -->
+    <path
+        android:pathData="M 240 140 A 6 6 0 1 1 239.9 140"
+        android:strokeColor="#407B2FF7"
+        android:strokeWidth="1.5" />
+
+</vector>

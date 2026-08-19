@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     android:background="@color/white">
     <!-- android:background="@color/purple_200"-->
 
@@ -20,29 +21,50 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_12sdp">
 
             <ImageView
                 android:id="@+id/ic_back"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="@dimen/_48sdp"
+                android:layout_height="@dimen/_48sdp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="12dp"
-                android:padding="2dp"
-                android:src="@drawable/spawner_ic_back" />
+                android:layout_marginStart="@dimen/_4sdp"
+                android:padding="@dimen/_12sdp"
+                android:src="@drawable/spawner_ic_chevron_left_new"
+                app:tint="#381079"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:gravity="center"
-                android:singleLine="true"
-                android:text="@string/my_creation"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:visibility="visible" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/spawner_visbyroundcf_bold"
+                    android:text="My Creation"
+                    android:textColor="#381079"
+                    android:textSize="@dimen/_20ssp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium"
+                    android:text="All your saved posters in one place"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/_11ssp" />
+
+            </LinearLayout>
 
         </RelativeLayout>
     </LinearLayout>
@@ -59,7 +81,7 @@
             android:id="@+id/template_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="10dp" />
+            android:layout_margin="@dimen/_10sdp" />
 
         <TextView
             android:id="@+id/txtEmptyMsg"
@@ -69,7 +91,7 @@
             android:fontFamily="@font/spawner_visbyroundcf_bold"
             android:text="@string/no_saved_poster"
             android:textColor="@color/black"
-            android:textSize="20sp"
+            android:textSize="@dimen/_20ssp"
             android:textStyle="bold" />
 
     </RelativeLayout>
@@ -80,7 +102,7 @@
     <RelativeLayout
         android:id="@+id/btm"
         android:layout_width="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/bottom_nav_bar"
         android:layout_height="wrap_content">
 
         <RelativeLayout
@@ -92,7 +114,7 @@
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/_50sdp"
             app:shimmer_auto_start="true">
 
             <TextView
@@ -101,10 +123,184 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="Ad Loading...."
-                android:textSize="20sp" />
+                android:textSize="@dimen/_20ssp" />
 
         </com.facebook.shimmer.ShimmerFrameLayout>
 
     </RelativeLayout>
 
+
+    <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->
+    <RelativeLayout
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_72sdp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/spawner_bg_bottom_nav"
+        android:elevation="@dimen/_16sdp"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:clipChildren="false">
+
+            <!-- Home Tab -->
+            <LinearLayout
+                android:id="@+id/tab_home"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_home"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_home"
+                    android:contentDescription="Home" />
+
+                <TextView
+                    android:id="@+id/txt_tab_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Home"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Explore Tab -->
+            <LinearLayout
+                android:id="@+id/tab_explore"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_explore"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_explore"
+                    android:contentDescription="Explore" />
+
+                <TextView
+                    android:id="@+id/txt_tab_explore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Explore"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Center FAB Container -->
+            <LinearLayout
+                android:id="@+id/tab_create"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:clickable="true"
+                android:focusable="true">
+
+                <RelativeLayout
+                    android:layout_width="@dimen/_46sdp"
+                    android:layout_height="@dimen/_46sdp"
+                    android:background="@drawable/spawner_bg_fab_gradient"
+                    android:elevation="0dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="+"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_26ssp"
+                        android:includeFontPadding="false"
+                        android:fontFamily="sans-serif-light" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <!-- My Creations Tab -->
+            <LinearLayout
+                android:id="@+id/tab_creations"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_creations"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_creations"
+                    android:contentDescription="My Creations" />
+
+                <TextView
+                    android:id="@+id/txt_tab_creations"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Creations"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Settings Tab -->
+            <LinearLayout
+                android:id="@+id/tab_settings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_settings"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_settings_gear"
+                    android:contentDescription="Settings" />
+
+                <TextView
+                    android:id="@+id/txt_tab_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Settings"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 </RelativeLayout>

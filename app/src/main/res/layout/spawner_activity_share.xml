@@ -2,106 +2,109 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_share"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/white"
-    android:keepScreenOn="true"
-    android:orientation="vertical">
+    android:keepScreenOn="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/top_ly"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <View
+            android:id="@+id/status_bar_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:rotation="180" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:weightSum="1">
+            android:layout_height="@dimen/_50sdp">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.1"
-                android:gravity="center">
+                android:orientation="horizontal"
+                android:weightSum="1">
 
-                <ImageView
-                    android:id="@+id/ic_back"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:padding="3dp"
-                    android:src="@drawable/spawner_ic_back" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/txt_head_ll"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.8">
-
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:fontFamily="@font/spawner_visbyroundcf_bold"
-                    android:gravity="center"
-                    android:text="@string/share_poster"
-                    android:textColor="@color/black"
-                    android:textSize="18sp" />
+                    android:layout_weight="0.1"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/ic_back"
+                        android:layout_width="@dimen/_25sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:padding="@dimen/_3sdp"
+                        android:src="@drawable/spawner_ic_chevron_left_new"
+                        app:tint="#381079" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/txt_head_ll"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.8">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:text="@string/share_poster"
+                        android:textColor="#381079"
+                        android:textSize="@dimen/_18ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ic_print_ll"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.1"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/spawner_ic_print"
+                        app:tint="#381079" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/ic_print_ll"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1"
-                android:gravity="center">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/spawner_ic_print"
-                    app:tint="@color/new_selected" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_ly"
         android:layout_below="@id/top_ly"
-        android:layout_margin="5dp"
+        android:layout_margin="@dimen/_5sdp"
         android:orientation="vertical">
 
         <RelativeLayout
             android:id="@+id/remove_wm_ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp">
+            android:layout_margin="@dimen/_5sdp">
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="@dimen/_40sdp"
                 android:background="@drawable/spawner_btn_rounded_text_bg"
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:gravity="center"
                 android:text="@string/remove_watermark"
                 android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:textSize="@dimen/_18ssp" />
 
         </RelativeLayout>
 
@@ -122,18 +125,17 @@
 
     <LinearLayout
         android:id="@+id/bottom_ly"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="center"
         android:gravity="center"
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:padding="@dimen/_10sdp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -142,12 +144,13 @@
                 android:layout_weight="1.0"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="@dimen/_5sdp">
 
                 <ImageView
                     android:id="@+id/iv_whatsapp"
                     android:layout_width="50.0dip"
                     android:layout_height="50.0dip"
+                    android:background="@drawable/spawner_bg_rounded_purple"
                     android:src="@drawable/spawner_ic_whatsapp" />
 
             </LinearLayout>
@@ -159,12 +162,13 @@
                 android:layout_weight="1.0"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="@dimen/_5sdp">
 
                 <ImageView
                     android:id="@+id/iv_facebook"
                     android:layout_width="50.0dip"
                     android:layout_height="50.0dip"
+                    android:background="@drawable/spawner_bg_rounded_purple"
                     android:src="@drawable/spawner_ic_facebook" />
 
             </LinearLayout>
@@ -176,12 +180,13 @@
                 android:layout_weight="1.0"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="@dimen/_5sdp">
 
                 <ImageView
                     android:id="@+id/iv_instagram"
                     android:layout_width="50.0dip"
                     android:layout_height="50.0dip"
+                    android:background="@drawable/spawner_bg_rounded_purple"
                     android:src="@drawable/spawner_ic_instagram" />
 
             </LinearLayout>
@@ -193,12 +198,13 @@
                 android:layout_weight="1.0"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="@dimen/_5sdp">
 
                 <ImageView
                     android:id="@+id/ic_twitter"
                     android:layout_width="50.0dip"
                     android:layout_height="50.0dip"
+                    android:background="@drawable/spawner_bg_rounded_purple"
                     android:src="@drawable/spawner_ic_twitter" />
 
             </LinearLayout>
@@ -210,12 +216,13 @@
                 android:layout_weight="1.0"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="@dimen/_5sdp">
 
                 <ImageView
                     android:id="@+id/iv_more"
                     android:layout_width="50.0dip"
                     android:layout_height="50.0dip"
+                    android:background="@drawable/spawner_bg_rounded_purple"
                     android:src="@drawable/spawner_ic_download_share" />
 
             </LinearLayout>
@@ -234,7 +241,7 @@
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmer_view_container"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/_50sdp"
                 app:shimmer_auto_start="true">
 
                 <TextView
@@ -243,7 +250,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="Ad Loading...."
-                    android:textSize="20sp" />
+                    android:textSize="@dimen/_20ssp" />
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 

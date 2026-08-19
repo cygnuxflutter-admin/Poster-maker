@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/_250sdp"
             android:layout_marginTop="@dimen/_10sdp"
-            android:layout_margin="10dp">
+            android:layout_margin="@dimen/_10sdp">
 
             <RelativeLayout
                 android:id="@+id/native_banner_ad_containers"
@@ -45,19 +45,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:layout_margin="10dp"
+                android:layout_margin="@dimen/_10sdp"
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:text="@string/app_name"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="@dimen/_18ssp" />
 
         </RelativeLayout>
 
         <View
             android:layout_width="fill_parent"
             android:layout_height="5.0dip"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginRight="@dimen/_10sdp"
             android:background="@drawable/spawner_seprator_line"
             android:backgroundTint="@color/purple_200" />
 
@@ -70,7 +70,7 @@
             android:gravity="center_horizontal"
             android:text="@string/app_name"
             android:textColor="@color/black"
-            android:textSize="15sp" />
+            android:textSize="@dimen/_15ssp" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -96,14 +96,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_30sdp"
                     android:layout_gravity="center"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
                     android:background="@drawable/spawner_btn_rounded_text_bg"
                     android:fontFamily="@font/spawner_visbyroundcf_bold"
                     android:gravity="center"
                     android:text="@string/no"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/_12ssp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -119,14 +119,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_30sdp"
                     android:layout_gravity="center"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginEnd="@dimen/_10sdp"
                     android:background="@drawable/spawner_btn_rounded_text_bg"
                     android:fontFamily="@font/spawner_visbyroundcf_bold"
                     android:gravity="center"
                     android:text="@string/yes"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/_12ssp"
                     android:textStyle="bold" />
             </LinearLayout>
 

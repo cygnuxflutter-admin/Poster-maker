@@ -9,6 +9,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
+import com.festival.flyer.postermaker.utils.MailER_BottomNavHelper;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -54,13 +55,34 @@ import androidx.core.view.WindowCompat;
 import androidx.activity.OnBackPressedCallback;
 
 import java.util.UUID;
+import androidx.viewpager2.widget.ViewPager2;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.view.ViewGroup;
+import androidx.core.content.ContextCompat;
+import com.festival.flyer.postermaker.model.HeroSliderModel;
+import com.festival.flyer.postermaker.adapter.HeroSliderAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
+import android.widget.HorizontalScrollView;
 public class MailER_PosterMainActivity extends AppCompatActivity {
+
+    private HorizontalScrollView hsvTrending;
+    private Handler autoScrollHandler = new Handler(Looper.getMainLooper());
+    private Runnable autoScrollRunnable;
+    private boolean isScrollingForward = true;
+
+    private ViewPager2 heroViewPager;
+    private LinearLayout heroIndicatorLayout;
+    private HeroSliderAdapter heroSliderAdapter;
+    private Handler sliderHandler = new Handler(Looper.getMainLooper());
+    private Runnable sliderRunnable;
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
 
-    public DrawerLayout drawerLayout;
-    public ActionBarDrawerToggle actionBarDrawerToggle;
     public NavigationView navigationView;
 
     //    private CarouselView carouselView;
@@ -77,12 +99,41 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
         setContentView(R.layout.spawner_activity_mainposter);
 
-        OneSignal.getDebug().setLogLevel(LogLevel.VERBOSE);
-        OneSignal.initWithContext(this, "83d4adaf-4ae7-4f59-b91a-d0050698af6a");
+        hsvTrending = findViewById(R.id.hsv_trending);
+        setupTrendingAutoScroll();
+
+        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
+
+
+        // Set light status bar
+        getWindow().setStatusBarColor(getResources().getColor(R.color.home_bg));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
+
+        // OneSignal Permission Request
         OneSignal.getNotifications().requestPermission(true, Continue.none());
+
+        // OneSignal Token Logging
+        if (OneSignal.getUser().getPushSubscription() != null) {
+            String pushToken = OneSignal.getUser().getPushSubscription().getToken();
+            String subscriptionId = OneSignal.getUser().getPushSubscription().getId();
+            android.util.Log.d("FCM_TOKEN", "OneSignal Push Token: " + pushToken);
+            android.util.Log.d("FCM_TOKEN", "OneSignal Subscription ID: " + subscriptionId);
+        }
+
+        // Direct FCM Token Logging
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String fcmToken = task.getResult();
+                android.util.Log.d("FCM_TOKEN", "Direct FCM Token: " + fcmToken);
+            } else {
+                android.util.Log.e("FCM_TOKEN", "Token Error: ", task.getException());
+            }
+        });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -132,13 +183,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                 });
 
 
-        drawerLayout = findViewById(R.id.my_drawer_layout);
-        navigationView = findViewById(R.id.nav_view_poster_maker);
-
-        setupDrawerContent(navigationView);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
         ActionBar actionBar = this.getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -147,6 +191,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         preferenceClass = new MailER_PreferenceClass(this);
 
         findByID();
+        setupHeroSlider();
 
         findViewById(R.id.lay_poster).setOnClickListener(v -> {
             activityIndex = 1;
@@ -232,7 +277,91 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+        findViewById(R.id.btn_view_all).setOnClickListener(v -> {
+            findViewById(R.id.lay_template).performClick();
+        });
+
+        // Bottom Nav: Explore tab -> same as lay_template (Readymade Poster)
+        findViewById(R.id.tab_explore).setOnClickListener(v -> {
+            activityIndex = 2;
+            if (!checkPermission()) {
+                try {
+                    requestPermission();
+                    MailER_MaterialDialogUtils.getInstance().PermissionDialog(MailER_PosterMainActivity.this);
+                } catch (ActivityNotFoundException e) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+                    startActivity(intent);
+                }
+            } else {
+                nextActivity(MailER_TemplateSelectionActivity.class);
+            }
+        });
+
+        // Bottom Nav: Create FAB (+) -> open new Create screen
+        findViewById(R.id.tab_create).setOnClickListener(v -> {
+            activityIndex = 1;
+            if (!checkPermission()) {
+                try {
+                    requestPermission();
+                    MailER_MaterialDialogUtils.getInstance().PermissionDialog(MailER_PosterMainActivity.this);
+                } catch (ActivityNotFoundException e) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+                    startActivity(intent);
+                }
+            } else {
+                nextActivity(MailER_CreateActivity.class);
+            }
+        });
+
+        // Bottom Nav: My Creations tab -> same as lay_creation
+        findViewById(R.id.tab_creations).setOnClickListener(v -> {
+            activityIndex = 4;
+            if (!checkPermission()) {
+                try {
+                    requestPermission();
+                    MailER_MaterialDialogUtils.getInstance().PermissionDialog(MailER_PosterMainActivity.this);
+                } catch (ActivityNotFoundException e) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+                    startActivity(intent);
+                }
+            } else {
+                nextActivity(MailER_MyCreationActivity.class);
+            }
+        });
+
+        // Bottom Nav: Settings tab
+        findViewById(R.id.tab_settings).setOnClickListener(v -> {
+            nextActivity(MailER_SettingsActivity.class);
+        });
+
 //        MediationTestSuite.launch(MainActivity.this);
+
+        findViewById(R.id.chip_festival).setOnClickListener(v -> openCategory("Festival"));
+        findViewById(R.id.chip_wedding).setOnClickListener(v -> openCategory("Wedding"));
+        findViewById(R.id.chip_sale).setOnClickListener(v -> openCategory("Sale"));
+        findViewById(R.id.chip_birthday).setOnClickListener(v -> openCategory("Birthday"));
+        findViewById(R.id.chip_business).setOnClickListener(v -> openCategory("Business"));
+    }
+
+    private void openCategory(String category) {
+        if (!checkPermission()) {
+            try {
+                requestPermission();
+                MailER_MaterialDialogUtils.getInstance().PermissionDialog(MailER_PosterMainActivity.this);
+            } catch (ActivityNotFoundException e) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
+                startActivity(intent);
+            }
+        } else {
+            MyApplication.showInterstitialAd(this, () -> {
+                Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
+                intent.putExtra("selected_category", category);
+                startActivity(intent);
+            });
+        }
     }
 
 
@@ -242,9 +371,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -285,32 +411,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void setupDrawerContent(NavigationView nvDrawer) {
-        nvDrawer.setNavigationItemSelectedListener(item -> {
-                    selectDrawerItem(item);
-                    return true;
-                }
-        );
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void selectDrawerItem(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.nav_share_app) {
-            MailER_ShareUtils.onShare(MailER_PosterMainActivity.this);
-        } else if (id == R.id.nav_rate_app) {
-            MailER_ShareUtils.rateUs(MailER_PosterMainActivity.this);
-        } else if (id == R.id.iv_instagram_app) {
-            MailER_ShareUtils.onInstagram(MailER_PosterMainActivity.this);
-        } else if (id == R.id.iv_privacy_policy) {
-            Intent intent = new Intent(MailER_PosterMainActivity.this, MailER_PrivacyPolicyActivity.class);
-            startActivity(intent);
-        }
-        item.setChecked(true);
-        setTitle(item.getTitle());
-        drawerLayout.closeDrawers();
-    }
 
     public void nextActivity(Class<? extends Activity> activity) {
         MyApplication.showInterstitialAd(this, () -> startIntent1(activity));
@@ -372,4 +472,123 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sliderHandler.removeCallbacks(sliderRunnable);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (sliderHandler != null && sliderRunnable != null) {
+            sliderHandler.removeCallbacks(sliderRunnable);
+            sliderHandler.postDelayed(sliderRunnable, 3000);
+        }
+    }
+
+    private void setupHeroSlider() {
+        heroViewPager = findViewById(R.id.hero_viewpager);
+        heroIndicatorLayout = findViewById(R.id.hero_indicator_layout);
+
+        List<HeroSliderModel> list = new ArrayList<>();
+        list.add(new HeroSliderModel("Custom\nDesigns", "Create stunning custom posters in minutes", "Start Design", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
+        list.add(new HeroSliderModel("Festival\nPosts", "Explore thousands of readymade festival designs", "Explore Now", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
+        list.add(new HeroSliderModel("Business\nAds", "Grow your business with professional ad templates", "Create Ad", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
+
+        heroSliderAdapter = new HeroSliderAdapter(list, item -> {
+            // No navigation on hero card for now as requested
+        });
+
+        heroViewPager.setAdapter(heroSliderAdapter);
+        
+        setupSliderIndicators(list.size());
+        setCurrentIndicator(0);
+
+        sliderRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (heroViewPager.getAdapter() != null) {
+                    int nextItem = heroViewPager.getCurrentItem() + 1;
+                    if (nextItem >= heroViewPager.getAdapter().getItemCount()) {
+                        nextItem = 0;
+                    }
+                    heroViewPager.setCurrentItem(nextItem, true);
+                }
+            }
+        };
+
+        heroViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                setCurrentIndicator(position);
+                sliderHandler.removeCallbacks(sliderRunnable);
+                sliderHandler.postDelayed(sliderRunnable, 3000);
+            }
+        });
+    }
+
+    private void setupSliderIndicators(int count) {
+        ImageView[] indicators = new ImageView[count];
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(8, 0, 8, 0);
+
+        for (int i = 0; i < indicators.length; i++) {
+            indicators[i] = new ImageView(getApplicationContext());
+            indicators[i].setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.spawner_dot_unselected));
+            indicators[i].setLayoutParams(layoutParams);
+            heroIndicatorLayout.addView(indicators[i]);
+        }
+    }
+
+    private void setCurrentIndicator(int index) {
+        int childCount = heroIndicatorLayout.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ImageView imageView = (ImageView) heroIndicatorLayout.getChildAt(i);
+            if (i == index) {
+                imageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.spawner_dot_selected));
+            } else {
+                imageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.spawner_dot_unselected));
+            }
+        }
+    }
+
+    private void setupTrendingAutoScroll() {
+        if (hsvTrending == null) return;
+        
+        autoScrollRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (hsvTrending.getChildCount() > 0) {
+                    android.view.ViewGroup innerContainer = (android.view.ViewGroup) hsvTrending.getChildAt(0);
+                    if (innerContainer.getChildCount() > 0) {
+                        int cardTotalWidth = innerContainer.getWidth() / innerContainer.getChildCount();
+                        int maxScrollX = innerContainer.getWidth() - hsvTrending.getWidth();
+                        
+                        if (maxScrollX > 0) {
+                            if (hsvTrending.getScrollX() < maxScrollX - 10) {
+                                hsvTrending.smoothScrollBy(cardTotalWidth, 0);
+                            } else {
+                                hsvTrending.smoothScrollTo(0, 0);
+                            }
+                        }
+                    }
+                }
+                autoScrollHandler.postDelayed(this, 3000);
+            }
+        };
+        
+        // Start scrolling
+        autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (autoScrollHandler != null && autoScrollRunnable != null) {
+            autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        }
+    }
 }

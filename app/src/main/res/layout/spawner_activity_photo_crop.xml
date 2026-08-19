@@ -6,47 +6,41 @@
     android:background="@color/white"
     android:keepScreenOn="true">
 
-    <RelativeLayout
-        android:id="@+id/top_ly"
+    <RelativeLayout android:id="@+id/top_ly"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="@dimen/_55sdp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <RelativeLayout android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/white"
             android:rotation="180" />
 
-        <RelativeLayout
-            android:id="@+id/save_ly"
+        <RelativeLayout android:id="@+id/save_ly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <LinearLayout android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/btn_backPress"
+                <LinearLayout android:id="@+id/btn_backPress"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:src="@drawable/spawner_ic_back" />
+                        android:layout_width="@dimen/_25sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:src="@drawable/spawner_ic_chevron_left_new" app:tint="#381079" />
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <LinearLayout android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="2.5"
                     android:gravity="center">
@@ -56,24 +50,22 @@
                         android:layout_height="match_parent"
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
                         android:gravity="center"
-                        android:text="@string/crop"
-                        android:textColor="@color/black"
-                        android:textSize="18sp" />
+                        android:text="@string/crop" android:textColor="#381079"
+                        android:textSize="@dimen/_18ssp" />
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/done_ly"
+                <LinearLayout android:id="@+id/done_ly"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.5"
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="@dimen/_25sdp"
+                        android:layout_height="@dimen/_25sdp"
                         android:rotation="180"
-                        android:src="@drawable/spawner_ic_back" />
+                        android:src="@drawable/spawner_ic_chevron_left_new" app:tint="#381079" />
 
                 </LinearLayout>
 
@@ -82,8 +74,7 @@
         </RelativeLayout>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/rel"
+    <RelativeLayout android:id="@+id/rel"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/bottom_ly"
@@ -95,26 +86,23 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             app:cropBorderCornerOffset="0dp"
-            app:cropBorderCornerThickness="7dp"
-            app:cropBorderLineThickness="2dp"
+            app:cropBorderCornerThickness="@dimen/_7sdp"
+            app:cropBorderLineThickness="@dimen/_2sdp"
             app:cropGuidelines="off" />
     </RelativeLayout>
 
 
-    <RelativeLayout
-        android:id="@+id/bottom_ly"
+    <RelativeLayout android:id="@+id/bottom_ly"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <LinearLayout android:layout_width="match_parent"
             android:layout_height="@dimen/_50sdp"
             android:orientation="horizontal"
             android:weightSum="7">
 
-            <RelativeLayout
-                android:id="@+id/freeRatio"
+            <RelativeLayout android:id="@+id/freeRatio"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"
@@ -135,8 +123,7 @@
             </RelativeLayout>
 
 
-            <RelativeLayout
-                android:id="@+id/ratio1"
+            <RelativeLayout android:id="@+id/ratio1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"
@@ -156,8 +143,7 @@
                     android:textSize="12.0sp" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/ratio2"
+            <RelativeLayout android:id="@+id/ratio2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"
@@ -177,8 +163,7 @@
                     android:textSize="12.0sp" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/ratio3"
+            <RelativeLayout android:id="@+id/ratio3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"
@@ -198,8 +183,7 @@
                     android:textSize="12.0sp" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/ratio4"
+            <RelativeLayout android:id="@+id/ratio4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"
@@ -219,8 +203,7 @@
                     android:textSize="12.0sp" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/ratio5"
+            <RelativeLayout android:id="@+id/ratio5"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/_3sdp"

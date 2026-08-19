@@ -3,8 +3,10 @@ package com.festival.flyer.postermaker;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -15,6 +17,8 @@ import com.festival.flyer.postermaker.adManager.MailER_AppOpenManager;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
+import com.onesignal.OneSignal;
+import com.onesignal.debug.LogLevel;
 //import com.google.android.play.core.review.ReviewInfo;
 //import com.google.android.play.core.review.ReviewManager;
 //import com.google.android.play.core.review.ReviewManagerFactory;
@@ -80,12 +84,10 @@ public class MyApplication extends android.app.Application {
 
         context = this;
 
+        // OneSignal Initialization
+        OneSignal.getDebug().setLogLevel(LogLevel.VERBOSE);
+        OneSignal.initWithContext(this, "43959a09-0f52-41be-a5b7-eda74bdbc1b6");
 
- /*       MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                    @Override
-                    public void onInitializationComplete(InitializationStatus initializationStatus) {}
-                });*/
-        /*       AudienceNetworkAds.initialize(this);*/
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
 //        appOpenAdManager = new AppOpenManager(this);
 
@@ -93,6 +95,29 @@ public class MyApplication extends android.app.Application {
 
 
         AudienceNetworkAds.initialize(this);
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+                View rootView = activity.getWindow().getDecorView().findViewById(android.R.id.content);
+                if (rootView != null) {
+                    androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+                        androidx.core.graphics.Insets systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                        // Don't pad Splash Screen or Crop Activity if we want them full screen
+                        if (activity.getClass().getSimpleName().contains("Splash") ) {
+                            return insets;
+                        }
+                        v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                        return androidx.core.view.WindowInsetsCompat.CONSUMED;
+                    });
+                }
+            }
+            @Override public void onActivityStarted(@NonNull Activity activity) {}
+            @Override public void onActivityResumed(@NonNull Activity activity) {}
+            @Override public void onActivityPaused(@NonNull Activity activity) {}
+            @Override public void onActivityStopped(@NonNull Activity activity) {}
+            @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+            @Override public void onActivityDestroyed(@NonNull Activity activity) {}
+        });
 
         // Debug ma tamara phone ne Test Device banave → Account Safe
         // Release (Play Store) ma aa code chalse j nahi → Real Ads aavse

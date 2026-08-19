@@ -31,6 +31,14 @@ public class MailER_LoadAds {
     public static ShimmerFrameLayout shimmerFrameLayout;
 
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
+        if (BuildConfig.DEBUG) {
+            mainLayout.setVisibility(View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            return;
+        }
         String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
 
         shimmerFrameLayout = shimmer_view_container;
@@ -101,6 +109,14 @@ public class MailER_LoadAds {
     }
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
+        if (BuildConfig.DEBUG) {
+            mainLayout.setVisibility(View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            return;
+        }
         shimmerFrameLayout = shimmer_view_container;
         mainLayout.removeAllViews();
         String bannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");

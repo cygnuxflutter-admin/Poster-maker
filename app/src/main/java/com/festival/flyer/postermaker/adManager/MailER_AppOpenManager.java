@@ -171,6 +171,10 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     }
 
     public void showAdIfSplashAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
+        if (BuildConfig.DEBUG) {
+            onShowAdCompleteListener.onShowAdComplete();
+            return;
+        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
@@ -240,6 +244,10 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     }
 
     public void showAdIfAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
+        if (BuildConfig.DEBUG) {
+            onShowAdCompleteListener.onShowAdComplete();
+            return;
+        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override

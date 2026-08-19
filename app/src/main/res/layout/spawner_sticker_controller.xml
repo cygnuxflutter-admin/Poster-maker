@@ -96,7 +96,7 @@
 
         <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="120.0dip"
+            android:layout_height="@dimen/_120sdp"
             android:splitMotionEvents="false">
 
             <LinearLayout
@@ -117,7 +117,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:layout_margin="5dp"
+                        android:layout_margin="@dimen/_5sdp"
                         android:orientation="vertical"
                         android:splitMotionEvents="false">
 
@@ -130,8 +130,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btn_up"
-                                android:layout_width="57dp"
-                                android:layout_height="35dp"
+                                android:layout_width="@dimen/_45sdp"
+                                android:layout_height="@dimen/_30sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -152,8 +152,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnLeft"
-                                android:layout_width="57dp"
-                                android:layout_height="35dp"
+                                android:layout_width="@dimen/_45sdp"
+                                android:layout_height="@dimen/_30sdp"
                                 android:layout_alignParentStart="true">
 
                                 <ImageView
@@ -166,8 +166,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnRight"
-                                android:layout_width="57dp"
-                                android:layout_height="35dp"
+                                android:layout_width="@dimen/_45sdp"
+                                android:layout_height="@dimen/_30sdp"
                                 android:layout_alignParentEnd="true">
 
                                 <ImageView
@@ -187,8 +187,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnDown"
-                                android:layout_width="57dp"
-                                android:layout_height="35dp"
+                                android:layout_width="@dimen/_45sdp"
+                                android:layout_height="@dimen/_30sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -304,7 +304,7 @@
                         android:layout_marginEnd="5.0dip"
                         android:layout_toEndOf="@+id/ss"
                         android:max="100"
-                        android:maxHeight="2dp"
+                        android:maxHeight="@dimen/_2sdp"
                         android:progress="100"
                         android:progressDrawable="@drawable/spawner_seekbar_new"
                         android:thumbTint="@color/new_selected" />
@@ -325,7 +325,7 @@
                         android:layout_centerVertical="true"
                         android:layout_margin="5.0dip"
                         android:background="@drawable/spawner_btn_bg"
-                        android:padding="5dp"
+                        android:padding="@dimen/_5sdp"
                         android:src="@drawable/spawner_ic_hue_seek" />
 
                     <com.festival.flyer.postermaker.color_palette.MailER_LineColorPicker
@@ -361,7 +361,7 @@
                         android:layout_centerHorizontal="true"
                         android:textColor="@color/black"
                         android:fontFamily="visbyroundcf_semibold"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/_13ssp"
                         android:textStyle="bold" />
 
                     <com.festival.flyer.postermaker.view.MailER_HorizontalProgressWheelView
@@ -385,7 +385,7 @@
                             android:layout_gravity="center"
                             android:layout_margin="5.0dip"
                             android:background="@drawable/spawner_btn_rounded_text_bg"
-                            android:padding="5dp"
+                            android:padding="@dimen/_5sdp"
                             android:src="@drawable/spawner_ic_reset"
                             app:tint="@color/white" />
 
@@ -405,7 +405,7 @@
                             android:layout_gravity="center"
                             android:layout_margin="5.0dip"
                             android:background="@drawable/spawner_btn_rounded_text_bg"
-                            android:padding="5dp"
+                            android:padding="@dimen/_5sdp"
                             android:src="@drawable/ucrop_ic_angle"
                             app:tint="@color/white" />
 

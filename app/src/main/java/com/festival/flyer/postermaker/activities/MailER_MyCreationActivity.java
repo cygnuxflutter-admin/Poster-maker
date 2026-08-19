@@ -1,5 +1,6 @@
 package com.festival.flyer.postermaker.activities;
 
+import com.festival.flyer.postermaker.utils.MailER_BottomNavHelper;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -35,6 +36,8 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_my_creation);
+        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_creations);
+
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();

@@ -54,6 +54,14 @@ public class MailER_NativeAdUtil {
     }
 
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+        if (BuildConfig.DEBUG) {
+            nativeAdContainer.setVisibility(View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            return;
+        }
         shimmerFrameLayout = shimmer_view_container;
         nativeAdContainer.setVisibility(View.VISIBLE);
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);

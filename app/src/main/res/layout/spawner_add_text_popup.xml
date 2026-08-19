@@ -13,7 +13,7 @@
         app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="@dimen/_10sdp"
         app:cardUseCompatPadding="true"
-        app:cardElevation="4dp">
+        app:cardElevation="@dimen/_4sdp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
 
             <View
                 android:layout_width="fill_parent"
-                android:layout_height="1dp"
+                android:layout_height="@dimen/_1sdp"
                 android:background="#7F7F7F" />
 
             <com.festival.flyer.postermaker.view.MailER_AutoResizeEditText
@@ -58,11 +58,11 @@
                 android:maxLength="250"
                 android:textColor="@color/black"
                 android:textColorHint="@color/black"
-                android:textSize="15sp" />
+                android:textSize="@dimen/_15ssp" />
 
             <LinearLayout
                 android:layout_width="fill_parent"
-                android:layout_height="40dp"
+                android:layout_height="@dimen/_40sdp"
                 android:layout_marginBottom="10.0dip"
                 android:orientation="horizontal"
                 android:paddingLeft="@dimen/_5sdp"
@@ -71,8 +71,8 @@
                 <RelativeLayout
                     android:id="@+id/btnCancelDialog"
                     android:layout_width="match_parent"
-                    android:layout_height="39dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_height="@dimen/_39sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
                     android:background="@drawable/spawner_rounded_border"
                     android:backgroundTint="#3F3F3F">
@@ -84,15 +84,15 @@
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
                         android:text="@string/cancel"
                         android:textColor="@color/black"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/_14ssp" />
 
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/btnAddTextSDialog"
                     android:layout_width="match_parent"
-                    android:layout_height="39dp"
-                    android:layout_marginLeft="8dp"
+                    android:layout_height="@dimen/_39sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_weight="1"
                     android:background="@drawable/spawner_btn_rounded_text_bg">
 
@@ -103,7 +103,7 @@
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
                         android:text="@string/add"
                         android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/_14ssp" />
 
                 </RelativeLayout>
             </LinearLayout>

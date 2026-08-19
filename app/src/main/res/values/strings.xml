@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Festival Adbanao</string>
+    <string name="app_name">Poster Maker</string>
 
     <string name="admob_app_id">ca-app-pub-5706123402805812~5204909772</string>
 
@@ -15,7 +15,7 @@
     <string name="settings">Settings</string>
     <string name="something_went_wrong">Something went wrong!!</string>
     <string name="internet_error">Make sure you are connected to internet!!</string>
-    <string name="select_bg">Select Background</string>
+    <string name="select_bg">Background</string>
     <string name="select_picture">Select picture using</string>
     <string name="select_color">Select Color</string>
     <string name="select_poster">Select Poster</string>

@@ -5,6 +5,8 @@ import android.app.Application;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -52,12 +54,55 @@ public class MailER_SplashScreen extends AppCompatActivity {
 //    private AppUpdateManager appUpdateManager;
     private Dialog dialog;
 
+    private long startTime;
+    private static final long MIN_SPLASH_TIME = 2500; // 2.5 seconds
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startTime = System.currentTimeMillis();
         preferenceClass = new MailER_PreferenceClass(this);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
         setContentView(R.layout.spawner_activity_splash_screen);
+
+        TextView tvAppName = findViewById(R.id.tv_splash_app_name);
+        if (tvAppName != null) {
+            float width = tvAppName.getPaint().measureText(tvAppName.getText().toString());
+            Shader textShader = new LinearGradient(0, 0, width, 0,
+                    new int[]{
+                            getResources().getColor(R.color.hero_start),
+                            getResources().getColor(R.color.hero_end)
+                    }, null, Shader.TileMode.CLAMP);
+            tvAppName.getPaint().setShader(textShader);
+        }
+
+        View logoContainer = findViewById(R.id.logo_container);
+        if (logoContainer != null) {
+            logoContainer.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(1000)
+                    .setStartDelay(200)
+                    .start();
+        }
+        
+        // Use modern approach for fullscreen to avoid black flash on transition
+        // This must be called AFTER setContentView so the DecorView exists
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+            if (getWindow().getInsetsController() != null) {
+                getWindow().getInsetsController().hide(android.view.WindowInsets.Type.statusBars());
+                getWindow().getInsetsController().setSystemBarsBehavior(
+                        android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
+        
         MyApplication.isAdsSplash = true;
 
 //        if (!preferenceClass.isFirstTimeLaunch()) {
@@ -318,6 +363,17 @@ public class MailER_SplashScreen extends AppCompatActivity {
     }
 
     public void callMainActivity() {
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - startTime;
+
+        if (elapsedTime < MIN_SPLASH_TIME) {
+            new android.os.Handler().postDelayed(this::performNavigation, MIN_SPLASH_TIME - elapsedTime);
+        } else {
+            performNavigation();
+        }
+    }
+
+    private void performNavigation() {
         MyApplication.isAdsSplash = false;
         ((MyApplication) getApplicationContext()).sendRequest();
         ((MyApplication) getApplicationContext()).loadInterstitialAd();

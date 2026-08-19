@@ -170,7 +170,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.spawner_activity_poster_edit);
@@ -1272,10 +1272,15 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         int ratioY = main_rel.getHeight() / gcd;
         options.withAspectRatio(ratioX, ratioY);
         options.withMaxResultSize(screenWidth, screenHeight);
-        options.setToolbarColor(ContextCompat.getColor(this, R.color.purple_700));
-        options.setStatusBarColor(ContextCompat.getColor(this, R.color.purple_700));
+        
+        options.setToolbarColor(Color.parseColor("#7B2FF7")); // Primary Purple
+        options.setStatusBarColor(Color.parseColor("#5A18C9")); // Darker Purple
         options.setToolbarWidgetColor(Color.WHITE);
-        options.setRootViewBackgroundColor(ContextCompat.getColor(this, R.color.purple_200));
+        options.setActiveControlsWidgetColor(Color.parseColor("#7B2FF7")); // Purple controls
+        options.setRootViewBackgroundColor(Color.WHITE); // Cleaner background
+        options.setCropFrameColor(Color.WHITE); // White crop frame
+        options.setCropGridColor(Color.WHITE); // White grid
+        
         return uCrop.withOptions(options);
     }
 
@@ -1735,6 +1740,11 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                     if (mMaterialDialog != null && mMaterialDialog.isShowing())
                         mMaterialDialog.dismiss();
                 }
+            } else {
+                if (mMaterialDialog != null && mMaterialDialog.isShowing())
+                    mMaterialDialog.dismiss();
+                Toast.makeText(MailER_PosterEditActivity.this, "Failed to load image. If this is a remote background, it needs to be downloaded first.", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }

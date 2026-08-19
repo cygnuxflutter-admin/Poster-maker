@@ -150,6 +150,10 @@ public class MailER_InterstitialAdManager {
     }
 
     public void showAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
+        if (BuildConfig.DEBUG) {
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
         this.onAdLoadInterface = onAdLoadInterface;
 
         if (!isADTimer) {
@@ -253,6 +257,10 @@ public class MailER_InterstitialAdManager {
     }
 
     public void showInterstitialAd(Activity activity, OnAdLoadInterface onAdLoadInterface) {
+        if (BuildConfig.DEBUG) {
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
         this.onAdLoadInterface = onAdLoadInterface;
 
         if (isFailed) {
@@ -316,6 +324,10 @@ public class MailER_InterstitialAdManager {
     }
 
     public void showEDitAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
+        if (BuildConfig.DEBUG) {
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
         this.onAdLoadInterface = onAdLoadInterface;
 
         if (isFailed) {

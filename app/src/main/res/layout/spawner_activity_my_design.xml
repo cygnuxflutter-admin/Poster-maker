@@ -5,21 +5,20 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <RelativeLayout
-        android:id="@+id/top_ly"
+    <RelativeLayout android:id="@+id/top_ly"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/_50sdp"
         android:background="@color/white">
 
         <ImageView
             android:id="@+id/ic_back"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="12dp"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_marginLeft="@dimen/_12sdp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:padding="5dp"
-            android:src="@drawable/spawner_ic_back"/>
+            android:padding="@dimen/_5sdp"
+            android:src="@drawable/spawner_ic_chevron_left_new" app:tint="#381079" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,13 +29,12 @@
             android:singleLine="true"
             android:text="@string/my_design"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="@dimen/_18ssp"
             android:visibility="visible" />
 
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/viewPagerLay"
+    <RelativeLayout android:id="@+id/viewPagerLay"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/top_ly"
@@ -46,7 +44,7 @@
             android:id="@+id/template_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="10dp" />
+            android:layout_margin="@dimen/_10sdp" />
 
         <TextView
             android:id="@+id/txtEmptyMsg"
@@ -55,21 +53,19 @@
             android:layout_centerInParent="true"
             android:fontFamily="@font/spawner_visbyroundcf_bold"
             android:text="@string/no_saved_poster"
-            android:textSize="20sp"
+            android:textSize="@dimen/_20ssp"
             android:textColor="@color/black"
             android:textStyle="bold" />
     </RelativeLayout>
 
 
 
-    <RelativeLayout
-        android:id="@+id/btm"
+    <RelativeLayout android:id="@+id/btm"
         android:layout_width="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/rl_ad"
+        <RelativeLayout android:id="@+id/rl_ad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true" />
@@ -77,7 +73,7 @@
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/_50sdp"
             app:shimmer_auto_start="true">
 
             <TextView
@@ -86,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="Ad Loading...."
-                android:textSize="20sp" />
+                android:textSize="@dimen/_20ssp" />
 
         </com.facebook.shimmer.ShimmerFrameLayout>
 

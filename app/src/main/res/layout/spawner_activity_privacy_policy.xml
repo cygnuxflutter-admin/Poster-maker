@@ -7,19 +7,18 @@
     android:background="@color/white"
     tools:context=".activities.MailER_PrivacyPolicyActivity">
 
-    <RelativeLayout
-        android:id="@+id/header_title"
+    <RelativeLayout android:id="@+id/header_title"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="@dimen/_55sdp"
         android:background="@color/white">
 
         <ImageView
             android:id="@+id/iv_back"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/spawner_ic_back" />
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:src="@drawable/spawner_ic_chevron_left_new"  app:tint="#381079" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,7 +27,7 @@
             android:fontFamily="@font/spawner_visbyroundcf_semibold"
             android:text="Privacy Policy"
             android:textColor="@color/black"
-            android:textSize="19sp" />
+            android:textSize="@dimen/_19ssp" />
 
     </RelativeLayout>
 
@@ -40,22 +39,20 @@
         android:layout_below="@id/header_title" />
 
 
-    <RelativeLayout
-        android:id="@+id/btm"
+    <RelativeLayout android:id="@+id/btm"
         android:layout_width="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginVertical="5dp"
+        android:layout_marginVertical="@dimen/_5sdp"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/rl_ad"
+        <RelativeLayout android:id="@+id/rl_ad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/_50sdp"
             app:shimmer_auto_start="true">
 
             <TextView
@@ -64,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="Ad Loading...."
-                android:textSize="20sp" />
+                android:textSize="@dimen/_20ssp" />
 
         </com.facebook.shimmer.ShimmerFrameLayout>
 

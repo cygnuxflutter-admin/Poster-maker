@@ -92,12 +92,24 @@ public class MailER_MyCreationAdapter extends RecyclerView.Adapter<MailER_MyCrea
 
             if (file.exists()) {
                 boolean delete = file.delete();
-                if (delete) {
+                try {
+                    activity.getContentResolver().delete(
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            android.provider.MediaStore.Images.Media.DATA + "=?",
+                            new String[]{file.getAbsolutePath()}
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                
+                if (delete || !file.exists()) {
                     itemList.remove(position);
                     notifyDataSetChanged();
                     if (itemList.size() == 0) {
                         myCreationListener.onEmptyAdapter();
                     }
+                } else {
+                    android.widget.Toast.makeText(activity, "Failed to delete file", android.widget.Toast.LENGTH_SHORT).show();
                 }
             }
 

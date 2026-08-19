@@ -37,7 +37,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:layout_margin="10dp"
+                        android:layout_margin="@dimen/_10sdp"
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
                         android:gravity="center"
                         android:text="@string/need_permission"
@@ -47,10 +47,10 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="5dp"
+                    android:layout_height="@dimen/_5sdp"
                     android:layout_below="@+id/header_rel"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
                     android:background="@drawable/spawner_seprator_line"
                     android:backgroundTint="@color/purple_200" />
 
@@ -70,10 +70,10 @@
                 <LinearLayout
                     android:id="@+id/button_ll"
                     android:layout_width="fill_parent"
-                    android:layout_height="60dp"
+                    android:layout_height="@dimen/_60sdp"
                     android:layout_below="@+id/msg"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:layout_marginBottom="@dimen/_20sdp"
                     android:orientation="horizontal"
                     android:weightSum="1">
 
@@ -100,7 +100,7 @@
                             android:gravity="center"
                             android:text="@string/cancel"
                             android:textColor="@color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_16ssp"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -123,7 +123,7 @@
                             android:gravity="center"
                             android:text="@string/settings"
                             android:textColor="@color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_16ssp"
                             android:textStyle="bold" />
 
                     </LinearLayout>
