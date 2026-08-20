@@ -30,7 +30,7 @@ public class MailER_InterstitialAdManager {
     private OnAdLoadInterface onAdLoadInterface;
     private boolean isFailed = false;
     private boolean isADTimer = true;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     public static Integer InterAdTimer = 20000;
     public MailER_InterstitialAdManager(Context context) {
         this.context = context;
@@ -186,8 +186,7 @@ public class MailER_InterstitialAdManager {
             return;
         }
 
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
+        progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -272,8 +271,7 @@ public class MailER_InterstitialAdManager {
             onAdLoadInterface.onAdClose();
             return;
         }
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
+        progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
         progressDialog.setCancelable(false);
         progressDialog.show();
         if (isAdmobAdAvailable()) {
@@ -352,8 +350,7 @@ public class MailER_InterstitialAdManager {
             return;
         }
 
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
+        progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
         progressDialog.setCancelable(false);
         progressDialog.show();
         new Handler().postDelayed(new Runnable() {

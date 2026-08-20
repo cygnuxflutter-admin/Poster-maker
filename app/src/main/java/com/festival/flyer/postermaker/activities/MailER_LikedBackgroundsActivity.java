@@ -33,7 +33,7 @@ public class MailER_LikedBackgroundsActivity extends AppCompatActivity {
     private MailER_BackgroundChildAdapter adapter;
     private ArrayList<MailER_BgImage> likedImages = new ArrayList<>();
     private MailER_LikeManager likeManager;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,8 +50,7 @@ public class MailER_LikedBackgroundsActivity extends AppCompatActivity {
         tvNoData = findViewById(R.id.tv_no_data);
         likeManager = new MailER_LikeManager(this);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
+        progressDialog = MailER_MaterialDialogUtils.getInstance().createAnimationDialog(this);
         progressDialog.setCancelable(false);
 
         setupRecyclerView();

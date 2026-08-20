@@ -212,12 +212,9 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
     public void loadPoster(String key, final int cat_id, final int pos_id) {
 
         String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
-        Log.e("---API_DATA---", "--- REQUEST START ---");
-        Log.e("---API_DATA---", "URL: " + requestUrl);
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL: " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
-            Log.e("---API_DATA---", "--- RESPONSE START ---");
-            Log.e("---API_DATA---", "URL: " + requestUrl);
-            Log.e("---API_DATA---", "Response: " + response);
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM: " + requestUrl + "\nDATA: " + response);
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 int error = jsonObject.getInt(preferenceClass.getDataType("field_3"));

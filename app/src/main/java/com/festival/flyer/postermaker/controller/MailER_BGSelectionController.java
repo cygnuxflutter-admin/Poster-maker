@@ -64,6 +64,11 @@ public class MailER_BGSelectionController {
     public File camera_file;
     public static ArrayList<MailER_BgModel> allCategoriesData = new ArrayList<>();
 
+    public interface CategorySelectionListener {
+        void onCategorySelected(int index);
+    }
+    public static CategorySelectionListener globalSelectionListener;
+
     private final Activity activity;
     private final FragmentManager supportFragmentManager;
     private final MailER_PreferenceClass preferenceClass;
@@ -84,12 +89,9 @@ public class MailER_BGSelectionController {
 
     private void getBgThumb(String key) {
         String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
-        Log.e("---API_DATA---", "--- REQUEST START (BG Thumb) ---");
-        Log.e("---API_DATA---", "URL: " + requestUrl);
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (BG): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
-            Log.e("---API_DATA---", "--- RESPONSE START (BG Thumb) ---");
-            Log.e("---API_DATA---", "URL: " + requestUrl);
-            Log.e("---API_DATA---", "Response: " + response);
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (BG): " + requestUrl + "\nDATA: " + response);
             String text1 = null;
 
             Log.d("qwertyu", "getBgThumb: " + response);
@@ -230,8 +232,17 @@ public class MailER_BGSelectionController {
         
         adapter = new com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter(activity, new ArrayList<>(), false, (position, model) -> {
             if ("More".equalsIgnoreCase(model.getCategory_name())) {
-                MailER_BgCategoryBottomSheet bottomSheet = new MailER_BgCategoryBottomSheet();
-                bottomSheet.show(((androidx.appcompat.app.AppCompatActivity) activity).getSupportFragmentManager(), "BgCategoryBottomSheet");
+                globalSelectionListener = new CategorySelectionListener() {
+                    @Override
+                    public void onCategorySelected(int actualIndex) {
+                        viewPager.setCurrentItem(actualIndex);
+                    }
+                };
+                android.content.Intent intent = new android.content.Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllBgCategoriesActivity.class);
+                if (viewPager != null) {
+                    intent.putExtra("selected_index", viewPager.getCurrentItem());
+                }
+                activity.startActivity(intent);
             } else {
                 // Find the actual index of the clicked model in the original posterModel list
                 int actualIndex = posterModel.indexOf(model);

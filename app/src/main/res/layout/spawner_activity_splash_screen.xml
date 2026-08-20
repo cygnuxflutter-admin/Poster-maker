@@ -8,88 +8,106 @@
     <!-- Bottom Wavy Background -->
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_180sdp"
+        android:layout_height="@dimen/_220sdp"
         android:layout_alignParentBottom="true"
         android:scaleType="fitXY"
         android:src="@drawable/splash_bottom_waves" />
 
-    <!-- Background Decorative Circles (Replaced spawner_ad_bg with orbit) -->
-    <ImageView
-        android:layout_width="@dimen/_280sdp"
-        android:layout_height="@dimen/_280sdp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/splash_orbit_bg" />
-
-    <LinearLayout
+    <!-- Center Content Group (Animates together) -->
+    <RelativeLayout
         android:id="@+id/logo_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:layout_marginBottom="@dimen/_70sdp"
         android:alpha="0"
         android:scaleX="0.8"
         android:scaleY="0.8">
 
-        <!-- Central Logo (Removed MaterialCardView to prevent clipping) -->
-        <ImageView
-            android:id="@+id/cv_logo"
-            android:layout_width="@dimen/_140sdp"
-            android:layout_height="@dimen/_140sdp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/newlogo" />
-
-        <!-- App Name with Gradient (Handled in Code) -->
-        <TextView
-            android:id="@+id/tv_splash_app_name"
+        <!-- Orbit & Logo Wrapper -->
+        <RelativeLayout
+            android:id="@+id/orbit_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_15sdp"
-            android:fontFamily="sans-serif-black"
-            android:text="Poster Maker"
-            android:textSize="@dimen/_28ssp"
-            android:textStyle="bold" />
+            android:layout_centerHorizontal="true">
 
-        <!-- Divider with Star/Diamond -->
+            <ImageView
+                android:id="@+id/splash_orbit_bg"
+                android:layout_width="@dimen/_280sdp"
+                android:layout_height="@dimen/_280sdp"
+                android:src="@drawable/splash_orbit_bg" />
+
+            <!-- Central Logo (Smaller to fit beautifully inside the circle) -->
+            <ImageView
+                android:id="@+id/cv_logo"
+                android:layout_width="@dimen/_115sdp"
+                android:layout_height="@dimen/_115sdp"
+                android:layout_centerInParent="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/newlogo" />
+        </RelativeLayout>
+
+        <!-- Text Elements Container -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/orbit_group"
             android:gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/_5sdp">
+            android:orientation="vertical">
 
-            <View
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="1dp"
-                android:alpha="0.4"
-                android:background="@color/hero_start" />
+            <!-- App Name (Dark as requested) -->
+            <TextView
+                android:id="@+id/tv_splash_app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:fontFamily="sans-serif-black"
+                android:text="Poster Maker"
+                android:textColor="#202020"
+                android:textSize="@dimen/_28ssp"
+                android:textStyle="bold" />
 
-            <ImageView
-                android:layout_width="@dimen/_12sdp"
-                android:layout_height="@dimen/_12sdp"
-                android:layout_marginHorizontal="@dimen/_8sdp"
-                android:src="@drawable/spawner_ic_sparkle"
-                app:tint="@color/hero_start" />
+            <!-- Divider with Star/Diamond -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/_5sdp">
 
-            <View
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="1dp"
-                android:alpha="0.4"
-                android:background="@color/hero_end" />
+                <View
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="1dp"
+                    android:alpha="0.6"
+                    android:background="@drawable/splash_gradient" />
+
+                <ImageView
+                    android:layout_width="@dimen/_12sdp"
+                    android:layout_height="@dimen/_12sdp"
+                    android:layout_marginHorizontal="@dimen/_8sdp"
+                    android:src="@drawable/spawner_ic_sparkle"
+                    app:tint="@color/hero_start" />
+
+                <View
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="1dp"
+                    android:alpha="0.6"
+                    android:background="@drawable/splash_gradient" />
+            </LinearLayout>
+
+            <!-- Tagline -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:alpha="0.6"
+                android:text="Create. Design. Impress."
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/_12ssp"
+                android:letterSpacing="0.05" />
+
         </LinearLayout>
-
-        <!-- Tagline -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:alpha="0.6"
-            android:text="Create. Design. Impress."
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/_12ssp"
-            android:letterSpacing="0.05" />
-
-    </LinearLayout>
+    </RelativeLayout>
 
 
     <LinearLayout
@@ -108,15 +126,6 @@
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/loader" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_5sdp"
-            android:alpha="0.5"
-            android:text="Loading..."
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/_11ssp" />
 
     </LinearLayout>
 

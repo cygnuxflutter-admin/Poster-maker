@@ -57,11 +57,85 @@ public class MailER_BgCategoryTabAdapter extends RecyclerView.Adapter<MailER_BgC
         return new ViewHolder(view);
     }
 
+    private String getEmojiForCategory(String title) {
+        if (title == null) return "✨";
+        String t = title.toLowerCase();
+        if (t.contains("raksha") || t.contains("rakhi")) return "🪢";
+        if (t.contains("thank")) return "🙏";
+        if (t.contains("summer")) return "☀️";
+        if (t.contains("education") || t.contains("webinar") || t.contains("educationss")) return "📚";
+        if (t.contains("sport") || t.contains("contest")) return "🏆";
+        if (t.contains("advertising") || t.contains("campaign")) return "📢";
+        if (t.contains("wedding") || t.contains("anniversary")) return "💍";
+        if (t.contains("photography")) return "📷";
+        if (t.contains("motivation")) return "💪";
+        if (t.contains("food")) return "🍔";
+        if (t.contains("christmas")) return "🎄";
+        if (t.contains("days") || t.contains("event")) return "📅";
+        if (t.contains("real estate")) return "🏠";
+        if (t.contains("beauty") || t.contains("cosmetic") || t.contains("spa")) return "💄";
+        if (t.contains("festa junina")) return "🎊";
+        if (t.contains("music")) return "🎵";
+        if (t.contains("fitness")) return "🏋️";
+        if (t.contains("car")) return "🚗";
+        if (t.contains("coffee")) return "☕";
+        if (t.contains("easter")) return "🥚";
+        if (t.contains("job") || t.contains("hiring")) return "💼";
+        if (t.contains("cleaning")) return "🧹";
+        if (t.contains("insurance")) return "🛡️";
+        if (t.contains("social") || t.contains("mobile") || t.contains("phone")) return "📱";
+        if (t.contains("ice cream")) return "🍦";
+        if (t.contains("conference")) return "🎤";
+        if (t.contains("oktober") || t.contains("festival")) return "🍻";
+        if (t.contains("carpentry") || t.contains("repair")) return "🪚";
+        if (t.contains("barber")) return "💈";
+        if (t.contains("electronic") || t.contains("computer")) return "💻";
+        if (t.contains("valentine") || t.contains("love")) return "❤️";
+        if (t.contains("party")) return "🎉";
+        if (t.contains("medical")) return "⚕️";
+        if (t.contains("jewellery")) return "💎";
+        if (t.contains("opening")) return "✂️";
+        if (t.contains("wanted")) return "🕵️";
+        if (t.contains("july") || t.contains("year")) return "🎆";
+        if (t.contains("sale") || t.contains("friday") || t.contains("monday")) return "🛍️";
+        if (t.contains("diwali") || t.contains("krathong")) return "🪔";
+        if (t.contains("halloween")) return "🎃";
+        if (t.contains("navratri") || t.contains("dance")) return "💃";
+        if (t.contains("muharram") || t.contains("eid") || t.contains("night")) return "🌙";
+        if (t.contains("brazilian")) return "🎭";
+        if (t.contains("tour") || t.contains("travel")) return "✈️";
+        if (t.contains("autumn")) return "🍁";
+        if (t.contains("giving")) return "🦃";
+        if (t.contains("sankranti")) return "🪁";
+        if (t.contains("republic") || t.contains("independence")) return "🇮🇳";
+        if (t.contains("church")) return "⛪";
+        if (t.contains("certificate") || t.contains("notice")) return "📜";
+        if (t.contains("black") || t.contains("plain")) return "⚫";
+        if (t.contains("mix")) return "🔀";
+        if (t.contains("baby")) return "👶";
+        if (t.contains("monsoon")) return "🌧️";
+        if (t.contains("art") || t.contains("design") || t.contains("holi")) return "🎨";
+        if (t.contains("ganesh")) return "🐘";
+        if (t.contains("volunteer") || t.contains("worker")) return "🤝";
+        if (t.contains("law") || t.contains("firm")) return "⚖️";
+        if (t.contains("business") || t.contains("marketing")) return "📈";
+        if (t.contains("abstract")) return "🌀";
+        if (t.contains("asset")) return "📁";
+        if (t.contains("fashion")) return "👗";
+        if (t.contains("gradient")) return "🌈";
+        if (t.contains("morning")) return "🌅";
+        if (t.contains("women")) return "👩";
+        if (t.contains("more")) return "➕";
+        return "✨";
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MailER_BgModel model = categories.get(position);
 
-        String originalTitle = model.getCategory_name().replace("\n", " ");
+        String catName = model.getCategory_name();
+        if (catName == null) catName = "";
+        String originalTitle = catName.replace("\n", " ");
         StringBuilder titleCase = new StringBuilder();
         boolean nextTitleCase = true;
         for (char c : originalTitle.toCharArray()) {
@@ -78,42 +152,15 @@ public class MailER_BgCategoryTabAdapter extends RecyclerView.Adapter<MailER_BgC
         String multiLineTitle = titleCase.toString();
         holder.tvText.setText(multiLineTitle);
 
-        int iconRes = R.drawable.spawner_ic_tab_generic;
-        if (originalTitle.contains("Abstract")) {
-            iconRes = R.drawable.spawner_ic_tab_abstract;
-        } else if (originalTitle.contains("Art")) {
-            iconRes = R.drawable.spawner_ic_tab_art;
-        } else if (originalTitle.contains("Assets")) {
-            iconRes = R.drawable.spawner_ic_tab_assets;
-        } else if (originalTitle.contains("Christmas")) {
-            iconRes = R.drawable.spawner_ic_tab_christmas;
-        } else if (originalTitle.contains("Event") || originalTitle.contains("Wedding") || originalTitle.contains("Sale") || originalTitle.contains("Birthday")) {
-            iconRes = R.drawable.spawner_ic_tab_event;
-        } else if (originalTitle.contains("Love") || originalTitle.contains("Valentine") || originalTitle.contains("Anniversary")) {
-            iconRes = R.drawable.spawner_ic_tab_heart;
-        } else if (originalTitle.contains("Sports")) {
-            iconRes = R.drawable.spawner_ic_tab_sports;
-        } else if (originalTitle.contains("Morning") || originalTitle.contains("Day")) {
-            iconRes = R.drawable.spawner_ic_tab_sun;
-        } else if (originalTitle.contains("Education")) {
-            iconRes = R.drawable.spawner_ic_tab_education;
-        } else if (originalTitle.contains("Rakhi") || originalTitle.contains("Raksha")) {
-            iconRes = R.drawable.spawner_ic_tab_rakhi_mono;
-        } else if (originalTitle.contains("More")) {
-            iconRes = R.drawable.spawner_ic_apps;
-        }
-
-        holder.ivIcon.setImageResource(iconRes);
+        holder.tvEmoji.setText(getEmojiForCategory(originalTitle));
 
         boolean isSelected = (position == selectedPosition);
         holder.llRoot.setSelected(isSelected);
 
         if (isSelected) {
             holder.tvText.setTextColor(Color.WHITE);
-            holder.ivIcon.setColorFilter(Color.WHITE);
         } else {
-            holder.tvText.setTextColor(Color.BLACK);
-            holder.ivIcon.clearColorFilter();
+            holder.tvText.setTextColor(Color.parseColor("#21005D"));
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -130,13 +177,13 @@ public class MailER_BgCategoryTabAdapter extends RecyclerView.Adapter<MailER_BgC
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout llRoot;
-        ImageView ivIcon;
+        TextView tvEmoji;
         TextView tvText;
 
         ViewHolder(View itemView) {
             super(itemView);
             llRoot = itemView.findViewById(R.id.ll_tab_root);
-            ivIcon = itemView.findViewById(R.id.iv_tab_icon);
+            tvEmoji = itemView.findViewById(R.id.tv_tab_emoji);
             tvText = itemView.findViewById(R.id.tv_tab_text);
         }
     }

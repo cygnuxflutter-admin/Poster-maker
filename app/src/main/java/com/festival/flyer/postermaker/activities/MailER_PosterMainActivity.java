@@ -62,24 +62,35 @@ import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.view.ViewGroup;
 import androidx.core.content.ContextCompat;
-import com.festival.flyer.postermaker.model.HeroSliderModel;
-import com.festival.flyer.postermaker.adapter.HeroSliderAdapter;
+import com.festival.flyer.postermaker.model.MailER_HeroBannerModel;
+import com.festival.flyer.postermaker.adapter.MailER_DynamicHeroAdapter;
 import java.util.ArrayList;
 import java.util.List;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
+import com.festival.flyer.postermaker.model.MailER_TrendingFestivalModel;
+import com.festival.flyer.postermaker.adapter.MailER_TrendingFestivalAdapter;
 
 import android.widget.HorizontalScrollView;
 public class MailER_PosterMainActivity extends AppCompatActivity {
 
-    private HorizontalScrollView hsvTrending;
-    private Handler autoScrollHandler = new Handler(Looper.getMainLooper());
-    private Runnable autoScrollRunnable;
-    private boolean isScrollingForward = true;
 
     private ViewPager2 heroViewPager;
     private LinearLayout heroIndicatorLayout;
-    private HeroSliderAdapter heroSliderAdapter;
+    private MailER_DynamicHeroAdapter dynamicHeroAdapter;
     private Handler sliderHandler = new Handler(Looper.getMainLooper());
     private Runnable sliderRunnable;
+    
+    private Handler trendingHandler = new Handler(Looper.getMainLooper());
+    private Runnable trendingRunnable;
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
 
@@ -102,8 +113,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         
         setContentView(R.layout.spawner_activity_mainposter);
 
-        hsvTrending = findViewById(R.id.hsv_trending);
-        setupTrendingAutoScroll();
 
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
 
@@ -191,7 +200,8 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         preferenceClass = new MailER_PreferenceClass(this);
 
         findByID();
-        setupHeroSlider();
+        fetchHeroBanners();
+        fetchTrendingFestivals();
 
         findViewById(R.id.lay_poster).setOnClickListener(v -> {
             activityIndex = 1;
@@ -487,49 +497,188 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupHeroSlider() {
+    private void fetchHeroBanners() {
         heroViewPager = findViewById(R.id.hero_viewpager);
         heroIndicatorLayout = findViewById(R.id.hero_indicator_layout);
-
-        List<HeroSliderModel> list = new ArrayList<>();
-        list.add(new HeroSliderModel("Custom\nDesigns", "Create stunning custom posters in minutes", "Start Design", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
-        list.add(new HeroSliderModel("Festival\nPosts", "Explore thousands of readymade festival designs", "Explore Now", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
-        list.add(new HeroSliderModel("Business\nAds", "Grow your business with professional ad templates", "Create Ad", R.drawable.spawner_bg_hero_banner, R.drawable.picture));
-
-        heroSliderAdapter = new HeroSliderAdapter(list, item -> {
-            // No navigation on hero card for now as requested
-        });
-
-        heroViewPager.setAdapter(heroSliderAdapter);
         
-        setupSliderIndicators(list.size());
-        setCurrentIndicator(0);
+        String url = "https://cygnux.in/postermaker/api/v1/poster/hero";
+        Log.e("HERO_API", "Requesting URL: " + url);
 
-        sliderRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (heroViewPager.getAdapter() != null) {
-                    int nextItem = heroViewPager.getCurrentItem() + 1;
-                    if (nextItem >= heroViewPager.getAdapter().getItemCount()) {
-                        nextItem = 0;
+        StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
+            Log.e("HERO_API", "Response SUCCESS: " + response);
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                if (jsonObject.getString("error").equals("1")) {
+                    JSONArray dataArray = jsonObject.getJSONArray("data");
+                    List<MailER_HeroBannerModel> list = new ArrayList<>();
+                    for (int i = 0; i < dataArray.length(); i++) {
+                        JSONObject obj = dataArray.getJSONObject(i);
+                        list.add(new MailER_HeroBannerModel(
+                                obj.getString("id"),
+                                obj.getString("banner_image"),
+                                obj.getString("action_url")
+                        ));
                     }
-                    heroViewPager.setCurrentItem(nextItem, true);
+                    
+                    dynamicHeroAdapter = new MailER_DynamicHeroAdapter(this, list, item -> {
+                        String action = item.getAction_url();
+                        if (action != null && action.startsWith("category/")) {
+                            String catId = action.replace("category/", "");
+                            MyApplication.showInterstitialAd(this, () -> {
+                                Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
+                                intent.putExtra("selected_category", catId);
+                                startActivity(intent);
+                            });
+                        }
+                    });
+                    
+                    heroViewPager.setAdapter(dynamicHeroAdapter);
+                    setupSliderIndicators(list.size());
+                    setCurrentIndicator(0);
+                    
+                    sliderRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (heroViewPager.getAdapter() != null && heroViewPager.getAdapter().getItemCount() > 0) {
+                                int nextItem = heroViewPager.getCurrentItem() + 1;
+                                if (nextItem >= heroViewPager.getAdapter().getItemCount()) {
+                                    nextItem = 0;
+                                }
+                                heroViewPager.setCurrentItem(nextItem, true);
+                            }
+                        }
+                    };
+
+                    heroViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                        @Override
+                        public void onPageSelected(int position) {
+                            super.onPageSelected(position);
+                            setCurrentIndicator(position);
+                            sliderHandler.removeCallbacks(sliderRunnable);
+                            sliderHandler.postDelayed(sliderRunnable, 3000);
+                        }
+                    });
+                    
+                    // Start auto-scroll
+                    sliderHandler.postDelayed(sliderRunnable, 3000);
+                } else {
+                    Log.e("HERO_API", "API Error: " + jsonObject.optString("message"));
                 }
+            } catch (JSONException e) {
+                Log.e("HERO_API", "JSON Parsing Error: " + e.getMessage());
+            }
+        }, error -> {
+            Log.e("HERO_API", "Response ERROR: " + error.getMessage());
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("device", "1");
+                params.put("key", preferenceClass.getDataType("field_0"));
+                return params;
             }
         };
+        Volley.newRequestQueue(this).add(request);
+    }
 
-        heroViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                setCurrentIndicator(position);
-                sliderHandler.removeCallbacks(sliderRunnable);
-                sliderHandler.postDelayed(sliderRunnable, 3000);
+    private void fetchTrendingFestivals() {
+        RecyclerView rvTrending = findViewById(R.id.rv_trending_festivals);
+        rvTrending.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+        
+        String url = "https://cygnux.in/postermaker/api/v1/poster/trending";
+        Log.e("TRENDING_API", "Requesting URL: " + url);
+
+        StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
+            Log.e("TRENDING_API", "Response SUCCESS: " + response);
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                if (jsonObject.getString("error").equals("1")) {
+                    JSONArray dataArray = jsonObject.getJSONArray("data");
+                    List<MailER_TrendingFestivalModel> list = new ArrayList<>();
+                    for (int i = 0; i < dataArray.length(); i++) {
+                        JSONObject obj = dataArray.getJSONObject(i);
+                        list.add(new MailER_TrendingFestivalModel(
+                                obj.getString("cat_id"),
+                                obj.getString("cat_name"),
+                                obj.getString("banner_image")
+                        ));
+                    }
+                    Log.e("TRENDING_API", "Parsed " + list.size() + " items successfully.");
+                    MailER_TrendingFestivalAdapter adapter = new MailER_TrendingFestivalAdapter(this, list, item -> {
+                        MyApplication.showInterstitialAd(this, () -> {
+                            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
+                            intent.putExtra("selected_category", item.getCat_name());
+                            startActivity(intent);
+                        });
+                    });
+                    rvTrending.setAdapter(adapter);
+
+                    if (trendingRunnable != null) {
+                        trendingHandler.removeCallbacks(trendingRunnable);
+                    }
+                    trendingRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (rvTrending.getAdapter() != null && rvTrending.getAdapter().getItemCount() > 0) {
+                                LinearLayoutManager layoutManager = (LinearLayoutManager) rvTrending.getLayoutManager();
+                                if (layoutManager != null) {
+                                    int totalCount = rvTrending.getAdapter().getItemCount();
+                                    
+                                    if (layoutManager.findLastCompletelyVisibleItemPosition() >= totalCount - 1 || 
+                                        layoutManager.findLastVisibleItemPosition() >= totalCount - 1) {
+                                        rvTrending.smoothScrollToPosition(0);
+                                    } else {
+                                        android.view.View firstChild = layoutManager.getChildAt(0);
+                                        if (firstChild != null) {
+                                            rvTrending.smoothScrollBy(firstChild.getWidth(), 0);
+                                        } else {
+                                            rvTrending.smoothScrollToPosition(layoutManager.findFirstVisibleItemPosition() + 1);
+                                        }
+                                    }
+                                }
+                                trendingHandler.postDelayed(this, 3000);
+                            }
+                        }
+                    };
+                    trendingHandler.postDelayed(trendingRunnable, 3000);
+                    
+                    rvTrending.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                            super.onScrollStateChanged(recyclerView, newState);
+                            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                                trendingHandler.removeCallbacks(trendingRunnable);
+                            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                                trendingHandler.removeCallbacks(trendingRunnable);
+                                trendingHandler.postDelayed(trendingRunnable, 3000);
+                            }
+                        }
+                    });
+                } else {
+                    Log.e("TRENDING_API", "API returned error != 1. Message: " + jsonObject.optString("message"));
+                }
+            } catch (JSONException e) {
+                Log.e("TRENDING_API", "JSON Parsing Error: " + e.getMessage());
+                e.printStackTrace();
             }
-        });
+        }, error -> {
+            Log.e("TRENDING_API", "Response ERROR: " + error.getMessage());
+            error.printStackTrace();
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("device", "1");
+                params.put("key", preferenceClass.getDataType("field_0"));
+                Log.e("TRENDING_API", "Params sent: " + params.toString());
+                return params;
+            }
+        };
+        Volley.newRequestQueue(this).add(request);
     }
 
     private void setupSliderIndicators(int count) {
+        heroIndicatorLayout.removeAllViews();
         ImageView[] indicators = new ImageView[count];
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -555,40 +704,10 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupTrendingAutoScroll() {
-        if (hsvTrending == null) return;
-        
-        autoScrollRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (hsvTrending.getChildCount() > 0) {
-                    android.view.ViewGroup innerContainer = (android.view.ViewGroup) hsvTrending.getChildAt(0);
-                    if (innerContainer.getChildCount() > 0) {
-                        int cardTotalWidth = innerContainer.getWidth() / innerContainer.getChildCount();
-                        int maxScrollX = innerContainer.getWidth() - hsvTrending.getWidth();
-                        
-                        if (maxScrollX > 0) {
-                            if (hsvTrending.getScrollX() < maxScrollX - 10) {
-                                hsvTrending.smoothScrollBy(cardTotalWidth, 0);
-                            } else {
-                                hsvTrending.smoothScrollTo(0, 0);
-                            }
-                        }
-                    }
-                }
-                autoScrollHandler.postDelayed(this, 3000);
-            }
-        };
-        
-        // Start scrolling
-        autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
-    }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (autoScrollHandler != null && autoScrollRunnable != null) {
-            autoScrollHandler.removeCallbacks(autoScrollRunnable);
-        }
     }
 }
+

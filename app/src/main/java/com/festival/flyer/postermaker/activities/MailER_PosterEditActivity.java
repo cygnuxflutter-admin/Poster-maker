@@ -154,7 +154,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     private String savePathWithWaterMark = null;
 
     private boolean isRewarded = false;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     private MailER_PreferenceClass prefManager;
     private String effect_name = "", temp_effect_name;
     private boolean premiumPoster = false;

@@ -45,7 +45,7 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     private RelativeLayout remove_wm_ll, rl_ad;
     private LinearLayout ic_print_ll;
     private ImageView preview_image, ic_back, iv_whatsapp, iv_facebook, ic_twitter, iv_instagram, iv_more;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     private MailER_PreferenceClass preferenceClass;
     //    private boolean premiumPoster;
     Boolean rateSubmit = false;
@@ -135,9 +135,8 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void startLoader() {
-        progressDialog = new ProgressDialog(this);
+        progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(this);
         progressDialog.setCancelable(false);
-        progressDialog.setMessage("Loading...");
         progressDialog.show();
     }
 

@@ -46,7 +46,7 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
     private ArrayList<MailER_PosterImage> likedTemplates = new ArrayList<>();
     private MailER_TemplateLikeManager likeManager;
     private MailER_PreferenceClass preferenceClass;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     
     private ArrayList<MailER_TemplateModel> templateModels = new ArrayList<>();
     private ArrayList<MailER_StickerModel> sticker_model = new ArrayList<>();
@@ -71,8 +71,7 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
         likeManager = new MailER_TemplateLikeManager(this);
         preferenceClass = new MailER_PreferenceClass(this);
         
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
+        progressDialog = MailER_MaterialDialogUtils.getInstance().createAnimationDialog(this);
         progressDialog.setCancelable(false);
 
         setupRecyclerView();
@@ -157,7 +156,9 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
 
     private void loadPoster(String key, final int cat_id, final int pos_id) {
         String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL: " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM: " + requestUrl + "\nDATA: " + response);
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 int error = jsonObject.getInt(preferenceClass.getDataType("field_3"));

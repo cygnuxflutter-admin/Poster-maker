@@ -55,7 +55,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private Dialog dialog;
 
     private long startTime;
-    private static final long MIN_SPLASH_TIME = 2500; // 2.5 seconds
+    private static final long MIN_SPLASH_TIME = 4000; // 4.0 seconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +66,18 @@ public class MailER_SplashScreen extends AppCompatActivity {
         setContentView(R.layout.spawner_activity_splash_screen);
 
         TextView tvAppName = findViewById(R.id.tv_splash_app_name);
+
         if (tvAppName != null) {
-            float width = tvAppName.getPaint().measureText(tvAppName.getText().toString());
-            Shader textShader = new LinearGradient(0, 0, width, 0,
-                    new int[]{
-                            getResources().getColor(R.color.hero_start),
-                            getResources().getColor(R.color.hero_end)
-                    }, null, Shader.TileMode.CLAMP);
-            tvAppName.getPaint().setShader(textShader);
+            tvAppName.post(() -> {
+                float width = tvAppName.getPaint().measureText(tvAppName.getText().toString());
+                Shader textShader = new LinearGradient(0, 0, width, 0,
+                        new int[]{
+                                getResources().getColor(R.color.hero_start),
+                                getResources().getColor(R.color.hero_end)
+                        }, null, Shader.TileMode.CLAMP);
+                tvAppName.getPaint().setShader(textShader);
+                tvAppName.invalidate();
+            });
         }
 
         View logoContainer = findViewById(R.id.logo_container);

@@ -56,12 +56,9 @@ public class MailER_TemplateSelectionController {
 
     public void getTemplateThumb(final String key) {
         String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_35");
-        Log.e("---API_DATA---", "--- REQUEST START (Template Thumb) ---");
-        Log.e("---API_DATA---", "URL: " + requestUrl);
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (Template): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
-            Log.e("---API_DATA---", "--- RESPONSE START (Template Thumb) ---");
-            Log.e("---API_DATA---", "URL: " + requestUrl);
-            Log.e("---API_DATA---", "Response: " + response);
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (Template): " + requestUrl + "\nDATA: " + response);
             try {
                 Log.d("xgdgdg", "getTemplateThumb: " + response);
                 JSONObject jsonObject = new JSONObject(response);
@@ -146,6 +143,11 @@ public class MailER_TemplateSelectionController {
 
     public static ArrayList<MailER_PosterModel> allCategoriesData;
 
+    public interface CategorySelectionListener {
+        void onCategorySelected(int index);
+    }
+    public static CategorySelectionListener globalSelectionListener;
+
     public void applyProFilter(boolean isPro) {
         if (allCategoriesData == null) return;
         
@@ -195,7 +197,8 @@ public class MailER_TemplateSelectionController {
 
         if (initialCategoryToSelect != null && !initialCategoryToSelect.isEmpty()) {
             for (int i = 0; i < posterModel.size(); i++) {
-                if (posterModel.get(i).getCat_name().toLowerCase().contains(initialCategoryToSelect.toLowerCase())) {
+                if (posterModel.get(i).getCat_name().toLowerCase().contains(initialCategoryToSelect.toLowerCase()) ||
+                    String.valueOf(posterModel.get(i).getCat_id()).equals(initialCategoryToSelect)) {
                     viewPager.setCurrentItem(i, false);
                     break;
                 }
@@ -238,8 +241,17 @@ public class MailER_TemplateSelectionController {
         
         adapter = new com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter(activity, new ArrayList<>(), false, (position, model) -> {
             if ("More".equalsIgnoreCase(model.getCat_name())) {
-                MailER_TemplateCategoryBottomSheet bottomSheet = new MailER_TemplateCategoryBottomSheet();
-                bottomSheet.show(((androidx.appcompat.app.AppCompatActivity) activity).getSupportFragmentManager(), "TemplateCategoryBottomSheet");
+                globalSelectionListener = new CategorySelectionListener() {
+                    @Override
+                    public void onCategorySelected(int actualIndex) {
+                        viewPager.setCurrentItem(actualIndex);
+                    }
+                };
+                android.content.Intent intent = new android.content.Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
+                if (viewPager != null) {
+                    intent.putExtra("selected_index", viewPager.getCurrentItem());
+                }
+                activity.startActivity(intent);
             } else {
                 // Find the actual index of the clicked model in the original posterModel list
                 int actualIndex = posterModel.indexOf(model);

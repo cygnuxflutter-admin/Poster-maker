@@ -337,7 +337,8 @@
                     android:layout_width="@dimen/_26sdp"
                     android:layout_height="@dimen/_26sdp"
                     android:src="@drawable/spawner_ic_home"
-                    android:contentDescription="Home" />
+                    android:contentDescription="Home"
+                    app:tint="@color/bottom_nav_inactive" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -365,7 +366,8 @@
                     android:layout_width="@dimen/_26sdp"
                     android:layout_height="@dimen/_26sdp"
                     android:src="@drawable/spawner_ic_explore"
-                    android:contentDescription="Explore" />
+                    android:contentDescription="Explore"
+                    app:tint="@color/bottom_nav_inactive" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -391,10 +393,11 @@
                 android:focusable="true">
 
                 <RelativeLayout
-                    android:layout_width="@dimen/_46sdp"
-                    android:layout_height="@dimen/_46sdp"
+                    android:layout_width="@dimen/_52sdp"
+                    android:layout_height="@dimen/_52sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
                     android:background="@drawable/spawner_bg_fab_gradient"
-                    android:elevation="0dp">
+                    android:elevation="@dimen/_8sdp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -424,7 +427,8 @@
                     android:layout_width="@dimen/_26sdp"
                     android:layout_height="@dimen/_26sdp"
                     android:src="@drawable/spawner_ic_creations"
-                    android:contentDescription="My Creations" />
+                    android:contentDescription="My Creations"
+                    app:tint="@color/bottom_nav_inactive" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -452,7 +456,8 @@
                     android:layout_width="@dimen/_26sdp"
                     android:layout_height="@dimen/_26sdp"
                     android:src="@drawable/spawner_ic_settings_gear"
-                    android:contentDescription="Settings" />
+                    android:contentDescription="Settings"
+                    app:tint="@color/bottom_nav_inactive" />
 
                 <TextView
                     android:layout_width="wrap_content"

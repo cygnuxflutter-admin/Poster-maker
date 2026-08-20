@@ -16,11 +16,12 @@
     android:clickable="true"
     android:focusable="true">
 
-    <ImageView
-        android:id="@+id/iv_tab_icon"
-        android:layout_width="@dimen/_16sdp"
-        android:layout_height="@dimen/_16sdp"
-        android:layout_marginEnd="@dimen/_6sdp" />
+    <TextView
+        android:id="@+id/tv_tab_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:textSize="@dimen/_11ssp" />
 
     <TextView
         android:id="@+id/tv_tab_text"

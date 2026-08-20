@@ -63,8 +63,7 @@ public class MailER_AllBackgroundsActivity extends AppCompatActivity {
                 ArrayList<String> strings = new ArrayList<>();
                 strings.add(path);
                 
-                android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
-                pd.setMessage("Loading...");
+                com.afollestad.materialdialogs.MaterialDialog pd = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(MailER_AllBackgroundsActivity.this);
                 pd.setCancelable(false);
                 pd.show();
                 

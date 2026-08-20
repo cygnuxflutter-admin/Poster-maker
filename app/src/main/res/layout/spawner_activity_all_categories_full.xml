@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Header Section -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:paddingHorizontal="@dimen/_12sdp">
+
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/ic_back"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/spawner_ic_chevron_left_new"
+            app:tint="#21005D" />
+
+        <!-- Normal Title View (Visible by default) -->
+        <LinearLayout
+            android:id="@+id/ll_title_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/ic_back"
+            android:layout_toStartOf="@+id/ic_search_toggle"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_12sdp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All Categories"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:textColor="#21005D"
+                android:textSize="@dimen/_16ssp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose a category"
+                android:fontFamily="@font/spawner_visbyroundcf_medium"
+                android:textColor="#888888"
+                android:textSize="@dimen/_10ssp" />
+        </LinearLayout>
+
+        <!-- Search Icon Toggle -->
+        <ImageView
+            android:id="@+id/ic_search_toggle"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:padding="@dimen/_4sdp"
+            android:src="@drawable/spawner_ic_search"
+            app:tint="#21005D" />
+
+        <!-- Search Bar View (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/ll_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/ic_back"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_12sdp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="center_vertical">
+            
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/spawner_bg_search"
+                android:hint="Search categories..."
+                android:textColorHint="@color/text_secondary"
+                android:textColor="@color/text_primary"
+                android:padding="@dimen/_8sdp"
+                android:paddingStart="@dimen/_12sdp"
+                android:fontFamily="@font/spawner_visbyroundcf_medium"
+                android:textSize="@dimen/_11ssp"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+                
+            <ImageView
+                android:id="@+id/ic_close_search"
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:padding="@dimen/_4sdp"
+                android:src="@drawable/spawner_ic_close"
+                app:tint="#888888" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_categories"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:paddingTop="@dimen/_8sdp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

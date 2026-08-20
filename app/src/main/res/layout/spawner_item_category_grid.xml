@@ -4,39 +4,30 @@
     android:id="@+id/ll_tab_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/_4sdp"
+    android:layout_margin="@dimen/_6sdp"
     android:background="@drawable/spawner_tab_pill_selector"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingStart="@dimen/_6sdp"
-    android:paddingEnd="@dimen/_6sdp"
-    android:paddingTop="@dimen/_8sdp"
-    android:paddingBottom="@dimen/_8sdp"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/_14sdp"
     android:clickable="true"
     android:focusable="true">
 
-    <ImageView
-        android:id="@+id/iv_tab_icon"
-        android:layout_width="@dimen/_14sdp"
-        android:layout_height="@dimen/_14sdp"
-        android:layout_marginEnd="@dimen/_4sdp" />
+    <TextView
+        android:id="@+id/tv_tab_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_6sdp"
+        android:textSize="@dimen/_24ssp" />
 
     <TextView
         android:id="@+id/tv_tab_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:fontFamily="@font/spawner_visbyroundcf_bold"
-        android:gravity="center_vertical|start"
-        android:breakStrategy="high_quality"
-        android:hyphenationFrequency="none"
+        android:gravity="center"
+        android:textColor="#21005D"
+        android:textSize="@dimen/_11ssp"
         android:maxLines="2"
         android:minLines="2"
-        android:ellipsize="none"
-        android:textColor="#000000"
-        android:textSize="@dimen/_9ssp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/_7ssp"
-        app:autoSizeMaxTextSize="@dimen/_10ssp"
-        app:autoSizeStepGranularity="1sp" />
+        android:ellipsize="end" />
 </LinearLayout>
