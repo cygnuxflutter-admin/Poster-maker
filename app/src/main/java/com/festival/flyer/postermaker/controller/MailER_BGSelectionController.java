@@ -113,7 +113,7 @@ public class MailER_BGSelectionController {
                     new MailER_GetBgData(preferenceClass, jsonArray, new MailER_GetBgData.OnGetCatDataListener() {
                         @Override
                         public void onGetDataComplete(ArrayList<MailER_BgModel> posterDataLists) {
-                            setPagerAdapter(posterDataLists);
+                            new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 1200);
                         }
 
                         @Override

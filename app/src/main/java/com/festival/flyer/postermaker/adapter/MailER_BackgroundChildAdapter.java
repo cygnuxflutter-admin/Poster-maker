@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ProgressBar;
 import com.festival.flyer.postermaker.utils.MailER_LikeManager;
 
 import androidx.annotation.NonNull;
@@ -80,6 +81,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         if (bgImages.get(position) != null) {
             holder.content_layout.setVisibility(View.VISIBLE);
             holder.ad_layout.setVisibility(View.GONE);
+            holder.progress_bar.setVisibility(View.VISIBLE);
             Glide.with(activity)
                     .load(bgImages.get(position).getThumb_url())
                     .thumbnail(0.1f)
@@ -89,6 +91,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
                     .into(new CustomTarget<Drawable>() {
                         @Override
                         public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            holder.progress_bar.setVisibility(View.GONE);
                             holder.iv_image.setImageDrawable(resource);
                             float aspectRatio = (float) resource.getIntrinsicWidth() / (float) resource.getIntrinsicHeight();
                             if (aspectRatio > 1) {
@@ -100,6 +103,12 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
                                         RelativeLayout.LayoutParams.MATCH_PARENT,
                                         RelativeLayout.LayoutParams.MATCH_PARENT));
                             }
+                        }
+
+                        @Override
+                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                            super.onLoadFailed(errorDrawable);
+                            holder.progress_bar.setVisibility(View.GONE);
                         }
 
                         @Override
@@ -148,11 +157,13 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
         private final ImageView iv_image, iv_like;
         private final TextView iv_lock;
+        private final ProgressBar progress_bar;
 
         MyViewHolder(View itemView) {
             super(itemView);
 
             iv_image = itemView.findViewById(R.id.iv_image);
+            progress_bar = itemView.findViewById(R.id.progress_bar);
             iv_like = itemView.findViewById(R.id.iv_like);
             iv_lock = itemView.findViewById(R.id.iv_lock);
             content_layout = itemView.findViewById(R.id.content_layout);

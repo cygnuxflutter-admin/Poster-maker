@@ -13,8 +13,6 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Window background to prevent black flash during transitions -->
         <item name="android:windowBackground">@color/white</item>
-        <!-- Smooth fade transition for all activities -->
-        <item name="android:windowAnimationStyle">@style/ActivityTransitionAnimation</item>
         <!-- Disable automatic force dark on some devices to prevent black glitches -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->

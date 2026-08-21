@@ -261,7 +261,6 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
                                                 return;
                                             }
                                             MyApplication.showInterstitialAd(MailER_TemplateSelectionActivity.this, MailER_TemplateSelectionActivity.this::startIntent);
-                                            templateSelectionController.dismissMaterialDialog();
                                         } else {
                                             MailER_MaterialDialogUtils.getInstance().errorDialog3(MailER_TemplateSelectionActivity.this, "Make sure you are connected to internet!!");
                                         }

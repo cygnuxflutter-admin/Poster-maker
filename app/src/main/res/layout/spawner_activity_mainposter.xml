@@ -48,19 +48,12 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
 
-                            <androidx.cardview.widget.CardView
-                                android:layout_width="@dimen/_40sdp"
-                                android:layout_height="@dimen/_40sdp"
-                                app:cardCornerRadius="@dimen/_12sdp"
-                                app:cardElevation="0dp"
-                                app:cardBackgroundColor="@color/white"
-                                android:layout_marginEnd="@dimen/_8sdp">
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/spawner_app_logo"
-                                    android:padding="@dimen/_6sdp" />
-                            </androidx.cardview.widget.CardView>
+                            <ImageView
+                                android:layout_width="@dimen/_36sdp"
+                                android:layout_height="@dimen/_36sdp"
+                                android:src="@drawable/spawner_app_logo"
+                                android:layout_marginEnd="@dimen/_8sdp"
+                                android:scaleType="fitCenter" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -356,7 +349,7 @@
                                     app:layout_constraintBottom_toBottomOf="parent"
                                     android:layout_marginStart="@dimen/_8sdp"
                                     android:layout_marginTop="@dimen/_2sdp"
-                                    android:text="10,000+ designs"
+                                    android:text="Beautiful designs"
                                     android:textColor="#8E8E93"
                                     android:textSize="@dimen/_10ssp"
                                     android:maxLines="3"
@@ -551,7 +544,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/_16sdp"
-                        android:layout_marginBottom="@dimen/_20sdp"
+                        android:layout_marginBottom="0dp"
                         android:scrollbars="none"
                         android:overScrollMode="never"
                         android:clipToPadding="false"

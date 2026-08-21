@@ -14,19 +14,9 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Window background to prevent black flash during transitions -->
         <item name="android:windowBackground">@color/white</item>
-        <!-- Smooth fade transition for all activities -->
-        <item name="android:windowAnimationStyle">@style/ActivityTransitionAnimation</item>
         <!-- Disable automatic force dark on some devices to prevent black glitches -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
-    </style>
-
-    <!-- Activity transition animation style -->
-    <style name="ActivityTransitionAnimation" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenEnterAnimation">@anim/spawner_fade_in</item>
-        <item name="android:activityOpenExitAnimation">@anim/spawner_fade_out</item>
-        <item name="android:activityCloseEnterAnimation">@anim/spawner_fade_in</item>
-        <item name="android:activityCloseExitAnimation">@anim/spawner_fade_out</item>
     </style>
     
     <style name="UCropTheme" parent="Theme.AppCompat.Light.NoActionBar">

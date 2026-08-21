@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/custom_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <View
+            android:id="@+id/status_bar_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_48sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="@dimen/_48sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:padding="@dimen/_12sdp"
+                android:src="@drawable/spawner_ic_chevron_left_new"
+                app:tint="#381079"
+                android:contentDescription="Back"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:text="Notifications"
+                android:textColor="#381079"
+                android:textSize="@dimen/_18ssp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_notifications"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/custom_toolbar"
+        android:clipToPadding="false"
+        android:padding="@dimen/_8sdp" />
+
+    <LinearLayout
+        android:id="@+id/ll_no_notifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
+            android:src="@drawable/spawner_ic_notification"
+            app:tint="#BDBDBD"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:text="No Notifications Yet"
+            android:textColor="#9E9E9E"
+            android:textSize="@dimen/_14ssp"
+            android:fontFamily="@font/spawner_visbyroundcf_medium" />
+    </LinearLayout>
+
+</RelativeLayout>

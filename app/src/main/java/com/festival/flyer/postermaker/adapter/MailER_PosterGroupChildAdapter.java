@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,11 +75,25 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         if (posterThumbLists.get(position) != null) {
             holder.content_layout.setVisibility(View.VISIBLE);
             holder.ad_layout.setVisibility(View.GONE);
+            holder.progress_bar.setVisibility(View.VISIBLE);
             Glide.with(activity)
                     .load(posterThumbLists.get(position).getPost_thumb())
                     .thumbnail(0.1f)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .skipMemoryCache(false)
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            holder.progress_bar.setVisibility(View.GONE);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            holder.progress_bar.setVisibility(View.GONE);
+                            return false;
+                        }
+                    })
                     .centerCrop()
                     .into(holder.iv_image);
 
@@ -121,11 +136,13 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
         private final ImageView iv_image, iv_like;
         private final TextView iv_lock;
+        private final ProgressBar progress_bar;
 
         MyViewHolder(View itemView) {
             super(itemView);
 
             iv_image = itemView.findViewById(R.id.iv_image);
+            progress_bar = itemView.findViewById(R.id.progress_bar);
             iv_like = itemView.findViewById(R.id.iv_like);
             iv_lock = itemView.findViewById(R.id.iv_lock);
             content_layout = itemView.findViewById(R.id.content_layout);

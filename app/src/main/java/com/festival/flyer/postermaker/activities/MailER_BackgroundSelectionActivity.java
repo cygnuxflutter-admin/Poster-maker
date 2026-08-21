@@ -297,7 +297,6 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
                             bgSelectionController.startCrop(Uri.fromFile(new File(MailER_FileUtils.getFile(MailER_BackgroundSelectionActivity.this, strings.get(0)))));
                         });
                     }
-
                 }
             }
 

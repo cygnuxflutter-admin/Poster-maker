@@ -20,12 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:indeterminateTint="#6200EE" />
-
             <ImageView
                 android:id="@+id/iv_image"
                 android:layout_width="match_parent"
@@ -33,6 +27,13 @@
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminateTint="#6200EE" />
 
             <ImageView
                 android:id="@+id/iv_rate_us"
@@ -49,8 +50,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginStart="@dimen/_6sdp"
-                android:layout_marginTop="@dimen/_6sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/spawner_tab_pill_background"
                 android:backgroundTint="#FF8C00"
                 android:drawableStart="@drawable/spawner_ic_crown"
@@ -74,8 +75,8 @@
                 android:layout_height="@dimen/_24sdp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/spawner_bg_circle_white"
                 android:padding="@dimen/_5sdp"
                 android:src="@drawable/spawner_ic_heart_outline"

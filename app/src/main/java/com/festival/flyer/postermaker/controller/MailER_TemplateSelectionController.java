@@ -77,7 +77,7 @@ public class MailER_TemplateSelectionController {
                         new MailER_GetTemplateData(preferenceClass, jsonArray, new MailER_GetTemplateData.OnGetCatDataListener() {
                             @Override
                             public void onGetDataComplete(ArrayList<MailER_PosterModel> posterDataLists) {
-                                setPagerAdapter(posterDataLists);
+                                new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 1200);
                             }
 
                             @Override

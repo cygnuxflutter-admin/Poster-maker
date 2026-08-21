@@ -114,7 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/_8sdp"
-            android:paddingBottom="@dimen/_8sdp"
+            android:paddingBottom="@dimen/_2sdp"
             android:paddingStart="@dimen/_12sdp"
             android:paddingEnd="@dimen/_12sdp">
 
@@ -140,9 +140,8 @@
 
     <RelativeLayout
         android:id="@+id/btm"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_above="@+id/bottom_nav_bar"
-        android:layout_marginVertical="@dimen/_5sdp"
         android:visibility="gone"
         android:layout_height="wrap_content">
 

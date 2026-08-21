@@ -31,11 +31,14 @@ public class MailER_MaterialDialogUtils {
     }
 
     public MaterialDialog createAnimationDialog(Context activity) {
-        return new MaterialDialog.Builder(activity)
+        MaterialDialog materialDialog = new MaterialDialog.Builder(activity)
                 .customView(R.layout.spawner_lottie_anim_dialog, false)
-                .contentColor(Color.TRANSPARENT)
-                .backgroundColor(Color.TRANSPARENT)
                 .build();
+        if (materialDialog.getWindow() != null) {
+            materialDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            materialDialog.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
+        return materialDialog;
     }
 
     private static class SingletonHolder {

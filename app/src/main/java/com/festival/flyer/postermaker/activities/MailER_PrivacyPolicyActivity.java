@@ -28,7 +28,7 @@ public class MailER_PrivacyPolicyActivity extends AppCompatActivity {
         }
 
         WebView webView = findViewById(R.id.webview_privacy);
-        webView.loadUrl("https://cygnux.in/application-privacy-policy/festival-adbanao.html");
+        webView.loadUrl("https://cygnux.in/application-privacy-policy/poster-maker-policy.html");
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());
 

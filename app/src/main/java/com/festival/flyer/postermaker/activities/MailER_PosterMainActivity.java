@@ -116,6 +116,9 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
 
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
 
+        findViewById(R.id.btn_notification).setOnClickListener(v -> {
+            nextActivity(MailER_NotificationActivity.class);
+        });
 
         // Set light status bar
         getWindow().setStatusBarColor(getResources().getColor(R.color.home_bg));
@@ -612,48 +615,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                         });
                     });
                     rvTrending.setAdapter(adapter);
-
-                    if (trendingRunnable != null) {
-                        trendingHandler.removeCallbacks(trendingRunnable);
-                    }
-                    trendingRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            if (rvTrending.getAdapter() != null && rvTrending.getAdapter().getItemCount() > 0) {
-                                LinearLayoutManager layoutManager = (LinearLayoutManager) rvTrending.getLayoutManager();
-                                if (layoutManager != null) {
-                                    int totalCount = rvTrending.getAdapter().getItemCount();
-                                    
-                                    if (layoutManager.findLastCompletelyVisibleItemPosition() >= totalCount - 1 || 
-                                        layoutManager.findLastVisibleItemPosition() >= totalCount - 1) {
-                                        rvTrending.smoothScrollToPosition(0);
-                                    } else {
-                                        android.view.View firstChild = layoutManager.getChildAt(0);
-                                        if (firstChild != null) {
-                                            rvTrending.smoothScrollBy(firstChild.getWidth(), 0);
-                                        } else {
-                                            rvTrending.smoothScrollToPosition(layoutManager.findFirstVisibleItemPosition() + 1);
-                                        }
-                                    }
-                                }
-                                trendingHandler.postDelayed(this, 3000);
-                            }
-                        }
-                    };
-                    trendingHandler.postDelayed(trendingRunnable, 3000);
-                    
-                    rvTrending.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                        @Override
-                        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                            super.onScrollStateChanged(recyclerView, newState);
-                            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                                trendingHandler.removeCallbacks(trendingRunnable);
-                            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                                trendingHandler.removeCallbacks(trendingRunnable);
-                                trendingHandler.postDelayed(trendingRunnable, 3000);
-                            }
-                        }
-                    });
                 } else {
                     Log.e("TRENDING_API", "API returned error != 1. Message: " + jsonObject.optString("message"));
                 }

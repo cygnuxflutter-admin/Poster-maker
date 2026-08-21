@@ -91,6 +91,9 @@
             android:name=".activities.MailER_BackgroundSelectionActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.MailER_NotificationActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_PosterMainActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -139,6 +142,9 @@
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
+        <meta-data
+            android:name="com.onesignal.NotificationServiceExtension"
+            android:value="com.festival.flyer.postermaker.utils.MailER_NotificationServiceExtension" />
     </application>
 
 </manifest>
