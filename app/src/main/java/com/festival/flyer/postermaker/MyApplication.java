@@ -2,6 +2,7 @@ package com.festival.flyer.postermaker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,16 +14,13 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.facebook.ads.AudienceNetworkAds;
+import com.festival.flyer.postermaker.activities.MailER_SplashScreen;
 import com.festival.flyer.postermaker.adManager.MailER_AppOpenManager;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.onesignal.OneSignal;
 import com.onesignal.debug.LogLevel;
-//import com.google.android.play.core.review.ReviewInfo;
-//import com.google.android.play.core.review.ReviewManager;
-//import com.google.android.play.core.review.ReviewManagerFactory;
-//import com.google.android.play.core.tasks.Task;
 
 import java.io.File;
 import java.util.Collections;
@@ -30,17 +28,8 @@ import java.util.List;
 
 public class MyApplication extends android.app.Application {
 
-
     public static Context context;
-
     public static MyApplication myApplication;
-
-/*
-    public static void showInterstitialAdWithOutCount(Activity activity, InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showInterstitialAd(activity, onAdLoadInterface);
-    }
-*/
-
 
     public static boolean isShowingAppOpen = true, isAdsSplash = true;
     public MailER_AppOpenManager appOpenManager;
@@ -76,23 +65,29 @@ public class MyApplication extends android.app.Application {
         super.onCreate();
         mInstance = this;
 
-
         myApplication = this;
-
-//        connectivity = new MailER_Connectivity(this);
-//        prefManager = new MailER_PrefManager(this);
-
         context = this;
 
         // OneSignal Initialization
         OneSignal.getDebug().setLogLevel(LogLevel.VERBOSE);
         OneSignal.initWithContext(this, "43959a09-0f52-41be-a5b7-eda74bdbc1b6");
 
+        // OneSignal Notification Click Handler to redirect inside app
+        OneSignal.getNotifications().addClickListener(event -> {
+            if (event.getNotification() != null) {
+                String notifId = event.getNotification().getNotificationId();
+                if (notifId != null) {
+                    com.festival.flyer.postermaker.utils.MailER_NotificationHelper.markNotificationAsRead(context, notifId);
+                }
+            }
+            Intent intent = new Intent(context, MailER_SplashScreen.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(intent);
+        });
+
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
-//        appOpenAdManager = new AppOpenManager(this);
 
         appOpenManager = new MailER_AppOpenManager(this);
-
 
         AudienceNetworkAds.initialize(this);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -139,7 +134,6 @@ public class MyApplication extends android.app.Application {
         return myApp;
     }
 
-
     public interface OnShowAdCompleteListener {
         void onShowAdComplete();
     }
@@ -159,20 +153,6 @@ public class MyApplication extends android.app.Application {
     public boolean isAdAvailable() {
         return appOpenManager.isAdAvailable();
     }
-
-//    public void appReview(Activity activity) {
-//        ReviewManager reviewManager = ReviewManagerFactory.create(activity);
-//        Task<ReviewInfo> request = reviewManager.requestReviewFlow();
-//        request.addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                ReviewInfo reviewInfo = task.getResult();
-//                Task<Void> flow = reviewManager.launchReviewFlow(activity, reviewInfo);
-//                flow.addOnCompleteListener(task1 -> {
-//
-//                });
-//            }
-//        });
-//    }
 
     public String GetMainPath() {
         String folderName = getString(R.string.app_name);
@@ -217,6 +197,5 @@ public class MyApplication extends android.app.Application {
         Display display = wm.getDefaultDisplay();
         return display;
     }
-
 
 }

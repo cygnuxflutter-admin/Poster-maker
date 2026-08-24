@@ -98,6 +98,7 @@
 
                             <!-- Red badge dot -->
                             <View
+                                android:id="@+id/view_notif_badge"
                                 android:layout_width="@dimen/_8sdp"
                                 android:layout_height="@dimen/_8sdp"
                                 android:layout_gravity="top|end"
@@ -108,6 +109,24 @@
 
                     </RelativeLayout>
 
+                    <!-- Hero Slider Shimmer Loader -->
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_hero_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_190sdp"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:paddingHorizontal="@dimen/_16sdp"
+                        android:visibility="visible"
+                        app:shimmer_auto_start="true">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="@dimen/_16sdp"
+                            app:cardElevation="0dp"
+                            app:cardBackgroundColor="#E2E8F0" />
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
                     <!-- ==================== PREMIUM HERO SLIDER ==================== -->
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/hero_viewpager"
@@ -115,7 +134,8 @@
                         android:layout_height="@dimen/_190sdp"
                         android:layout_marginTop="@dimen/_8sdp"
                         android:clipToPadding="false"
-                        android:clipChildren="false"/>
+                        android:clipChildren="false"
+                        android:visibility="gone"/>
                         
                     <!-- Dot Indicators -->
                     <LinearLayout
@@ -538,6 +558,50 @@
 
                     </RelativeLayout>
 
+                    <!-- Trending Festival Shimmer Loader -->
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_trending_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_16sdp"
+                        android:paddingStart="@dimen/_16sdp"
+                        android:paddingEnd="@dimen/_16sdp"
+                        android:visibility="visible"
+                        app:shimmer_auto_start="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Placeholder 1 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                android:layout_marginEnd="@dimen/_12sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+
+                            <!-- Placeholder 2 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                android:layout_marginEnd="@dimen/_12sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+
+                            <!-- Placeholder 3 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
                     <!-- Trending Festival RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_trending_festivals"
@@ -549,7 +613,8 @@
                         android:overScrollMode="never"
                         android:clipToPadding="false"
                         android:paddingStart="@dimen/_16sdp"
-                        android:paddingEnd="@dimen/_16sdp" />
+                        android:paddingEnd="@dimen/_16sdp"
+                        android:visibility="gone" />
 
                     <!-- ==================== AD CONTAINERS (PRESERVED) ==================== -->
                     <RelativeLayout

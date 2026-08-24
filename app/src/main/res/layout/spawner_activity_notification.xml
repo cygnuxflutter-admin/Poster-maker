@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="#F8FAFC">
 
     <LinearLayout
         android:id="@+id/custom_toolbar"
@@ -20,20 +20,19 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_48sdp"
-            android:layout_marginTop="@dimen/_12sdp"
-            android:layout_marginBottom="@dimen/_8sdp">
+            android:layout_marginTop="@dimen/_4sdp">
 
             <ImageView
                 android:id="@+id/btn_back"
                 android:layout_width="@dimen/_48sdp"
                 android:layout_height="@dimen/_48sdp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
                 android:padding="@dimen/_12sdp"
                 android:src="@drawable/spawner_ic_chevron_left_new"
-                app:tint="#381079"
-                android:contentDescription="Back"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                app:tint="#1E1B4B" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -41,7 +40,7 @@
                 android:layout_centerInParent="true"
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:text="Notifications"
-                android:textColor="#381079"
+                android:textColor="#1E1B4B"
                 android:textSize="@dimen/_18ssp"
                 android:textStyle="bold" />
         </RelativeLayout>
@@ -53,7 +52,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/custom_toolbar"
         android:clipToPadding="false"
-        android:padding="@dimen/_8sdp" />
+        android:paddingVertical="@dimen/_8sdp" />
 
     <LinearLayout
         android:id="@+id/ll_no_notifications"
@@ -68,16 +67,16 @@
             android:layout_width="@dimen/_80sdp"
             android:layout_height="@dimen/_80sdp"
             android:src="@drawable/spawner_ic_notification"
-            app:tint="#BDBDBD"/>
+            app:tint="#CBD5E1" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_8sdp"
+            android:fontFamily="@font/spawner_visbyroundcf_medium"
             android:text="No Notifications Yet"
-            android:textColor="#9E9E9E"
-            android:textSize="@dimen/_14ssp"
-            android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            android:textColor="#94A3B8"
+            android:textSize="@dimen/_14ssp" />
     </LinearLayout>
 
 </RelativeLayout>

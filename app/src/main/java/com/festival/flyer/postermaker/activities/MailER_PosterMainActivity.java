@@ -119,6 +119,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         findViewById(R.id.btn_notification).setOnClickListener(v -> {
             nextActivity(MailER_NotificationActivity.class);
         });
+        updateNotificationBadge();
 
         // Set light status bar
         getWindow().setStatusBarColor(getResources().getColor(R.color.home_bg));
@@ -498,17 +499,42 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             sliderHandler.removeCallbacks(sliderRunnable);
             sliderHandler.postDelayed(sliderRunnable, 3000);
         }
+        updateNotificationBadge();
+    }
+
+    private void updateNotificationBadge() {
+        View badgeView = findViewById(R.id.view_notif_badge);
+        if (badgeView != null) {
+            boolean hasUnread = com.festival.flyer.postermaker.utils.MailER_NotificationHelper.hasUnreadNotifications(this);
+            badgeView.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void fetchHeroBanners() {
         heroViewPager = findViewById(R.id.hero_viewpager);
         heroIndicatorLayout = findViewById(R.id.hero_indicator_layout);
+        ShimmerFrameLayout shimmerHero = findViewById(R.id.shimmer_hero_container);
+
+        if (shimmerHero != null) {
+            shimmerHero.startShimmer();
+            shimmerHero.setVisibility(View.VISIBLE);
+        }
+        if (heroViewPager != null) {
+            heroViewPager.setVisibility(View.GONE);
+        }
         
         String url = "https://cygnux.in/postermaker/api/v1/poster/hero";
         Log.e("HERO_API", "Requesting URL: " + url);
 
         StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
             Log.e("HERO_API", "Response SUCCESS: " + response);
+            if (shimmerHero != null) {
+                shimmerHero.stopShimmer();
+                shimmerHero.setVisibility(View.GONE);
+            }
+            if (heroViewPager != null) {
+                heroViewPager.setVisibility(View.VISIBLE);
+            }
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 if (jsonObject.getString("error").equals("1")) {
@@ -572,6 +598,13 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             }
         }, error -> {
             Log.e("HERO_API", "Response ERROR: " + error.getMessage());
+            if (shimmerHero != null) {
+                shimmerHero.stopShimmer();
+                shimmerHero.setVisibility(View.GONE);
+            }
+            if (heroViewPager != null) {
+                heroViewPager.setVisibility(View.VISIBLE);
+            }
         }) {
             @Override
             protected Map<String, String> getParams() {
@@ -586,6 +619,15 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
 
     private void fetchTrendingFestivals() {
         RecyclerView rvTrending = findViewById(R.id.rv_trending_festivals);
+        ShimmerFrameLayout shimmerTrending = findViewById(R.id.shimmer_trending_container);
+
+        if (shimmerTrending != null) {
+            shimmerTrending.startShimmer();
+            shimmerTrending.setVisibility(View.VISIBLE);
+        }
+        if (rvTrending != null) {
+            rvTrending.setVisibility(View.GONE);
+        }
         rvTrending.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         
         String url = "https://cygnux.in/postermaker/api/v1/poster/trending";
@@ -593,6 +635,13 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
 
         StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
             Log.e("TRENDING_API", "Response SUCCESS: " + response);
+            if (shimmerTrending != null) {
+                shimmerTrending.stopShimmer();
+                shimmerTrending.setVisibility(View.GONE);
+            }
+            if (rvTrending != null) {
+                rvTrending.setVisibility(View.VISIBLE);
+            }
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 if (jsonObject.getString("error").equals("1")) {
@@ -624,6 +673,13 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             }
         }, error -> {
             Log.e("TRENDING_API", "Response ERROR: " + error.getMessage());
+            if (shimmerTrending != null) {
+                shimmerTrending.stopShimmer();
+                shimmerTrending.setVisibility(View.GONE);
+            }
+            if (rvTrending != null) {
+                rvTrending.setVisibility(View.VISIBLE);
+            }
             error.printStackTrace();
         }) {
             @Override

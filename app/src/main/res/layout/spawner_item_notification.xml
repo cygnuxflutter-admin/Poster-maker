@@ -3,63 +3,125 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/_8sdp"
-    android:layout_marginVertical="@dimen/_4sdp"
+    android:layout_marginHorizontal="@dimen/_10sdp"
+    android:layout_marginVertical="@dimen/_5sdp"
     app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="@dimen/_10sdp"
-    app:cardElevation="0dp">
+    app:cardCornerRadius="@dimen/_14sdp"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="true">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/_12sdp"
-        android:gravity="center_vertical">
+        android:padding="@dimen/_10sdp">
 
-        <ImageView
-            android:id="@+id/iv_notif_icon"
-            android:layout_width="@dimen/_32sdp"
-            android:layout_height="@dimen/_32sdp"
-            android:src="@drawable/spawner_ic_notification"
-            android:background="@drawable/spawner_circle_bg"
-            android:padding="@dimen/_6sdp"
-            app:tint="@color/hero_start"/>
+        <!-- Unread Purple Dot on Top-Left -->
+        <View
+            android:id="@+id/view_unread_dot"
+            android:layout_width="@dimen/_7sdp"
+            android:layout_height="@dimen/_7sdp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/spawner_bg_notif_unread_dot"
+            android:visibility="visible" />
 
+        <!-- Bell Icon Container -->
+        <FrameLayout
+            android:id="@+id/fl_icon_container"
+            android:layout_width="@dimen/_36sdp"
+            android:layout_height="@dimen/_36sdp"
+            android:layout_toEndOf="@id/view_unread_dot"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_6sdp"
+            android:background="@drawable/spawner_bg_notif_bell_circle">
+
+            <ImageView
+                android:id="@+id/iv_notif_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/_8sdp"
+                android:src="@drawable/spawner_ic_notification"
+                app:tint="#7C3AED" />
+        </FrameLayout>
+
+        <!-- Right Side Notification Thumbnail Image -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_notif_image"
+            android:layout_width="@dimen/_64sdp"
+            android:layout_height="@dimen/_64sdp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            app:cardCornerRadius="@dimen/_10sdp"
+            app:cardElevation="0dp"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/iv_notif_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/spawner_no_image" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Center Notification Content (Title, Message, Time) -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="@dimen/_12sdp">
+            android:layout_toEndOf="@id/fl_icon_container"
+            android:layout_toStartOf="@id/card_notif_image"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_notif_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:maxLines="1"
                 android:text="Notification Title"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/_13ssp"
-                android:fontFamily="@font/spawner_visbyroundcf_bold" />
+                android:textColor="#1E1B4B"
+                android:textSize="@dimen/_13ssp" />
 
             <TextView
                 android:id="@+id/tv_notif_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_3sdp"
+                android:ellipsize="end"
+                android:fontFamily="@font/spawner_visbyroundcf_medium"
+                android:maxLines="2"
+                android:text="Wishing you a joyful and memorable festival filled with love, laughter, and happiness."
+                android:textColor="#64748B"
+                android:textSize="@dimen/_10ssp" />
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:text="This is the notification body message."
-                android:textColor="#757575"
-                android:textSize="@dimen/_11ssp"
-                android:fontFamily="@font/spawner_visbyroundcf_medium" />
-                
-            <TextView
-                android:id="@+id/tv_notif_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:text="Just now"
-                android:textColor="#BDBDBD"
-                android:textSize="@dimen/_9ssp"
-                android:fontFamily="@font/spawner_visbyroundcf_medium" />
+                android:layout_marginTop="@dimen/_5sdp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/_11sdp"
+                    android:layout_height="@dimen/_11sdp"
+                    android:src="@drawable/spawner_ic_clock"
+                    app:tint="#94A3B8" />
+
+                <TextView
+                    android:id="@+id/tv_notif_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium"
+                    android:text="11 minutes ago"
+                    android:textColor="#94A3B8"
+                    android:textSize="@dimen/_9ssp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
