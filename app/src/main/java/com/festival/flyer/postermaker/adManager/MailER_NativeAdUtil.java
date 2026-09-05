@@ -54,27 +54,23 @@ public class MailER_NativeAdUtil {
     }
 
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            nativeAdContainer.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.stopShimmer();
-                shimmer_view_container.setVisibility(View.GONE);
-            }
-            return;
-        }
         shimmerFrameLayout = shimmer_view_container;
-        nativeAdContainer.setVisibility(View.VISIBLE);
+        if (nativeAdContainer != null) {
+            nativeAdContainer.setVisibility(View.VISIBLE);
+        }
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
         nativeAdUtil.fillAdmobNativeAd(nativeAdContainer);
     }
 
     public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer) {
+        if (nativeAdContainer == null) return;
+
         String nativeId = preferenceClass.getAdsId("NativeUnitID");
         Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
         AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
         builder.forNativeAd(nativeAd -> {
-            if (this.nativeAd != null) {
+            if (this.nativeAd != null && this.nativeAd != nativeAd) {
                 this.nativeAd.destroy();
             }
             this.nativeAd = nativeAd;
@@ -83,6 +79,7 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.removeAllViews();
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
+            nativeAdContainer.setVisibility(View.VISIBLE);
         });
 
         VideoOptions videoOptions = new VideoOptions.Builder().setStartMuted(true).build();

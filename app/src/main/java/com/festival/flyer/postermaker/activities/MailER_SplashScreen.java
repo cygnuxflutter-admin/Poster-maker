@@ -3,12 +3,14 @@ package com.festival.flyer.postermaker.activities;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -24,6 +26,7 @@ import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adManager.MailER_AppOpenManager;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
+import com.festival.flyer.postermaker.utils.MailER_NetworkMonitor;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
 import com.google.android.gms.ads.AdError;
@@ -56,6 +59,9 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
     private long startTime;
     private static final long MIN_SPLASH_TIME = 3000; // 3.0 seconds
+    private boolean isDataLoaded = false;
+    private boolean isUpdateClicked = false;
+    private MailER_NetworkMonitor.NetworkStateListener networkListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,32 +115,28 @@ public class MailER_SplashScreen extends AppCompatActivity {
         
         MyApplication.isAdsSplash = true;
 
-//        if (!preferenceClass.isFirstTimeLaunch()) {
-//            getData();
-//        } else {
-//            @SuppressLint("SimpleDateFormat")
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-//            Calendar calender = Calendar.getInstance();
-//            String start_date = preferenceClass.getFirstDate();
-//            String end_date = simpleDateFormat.format(calender.getTime());
-//
-//            if (start_date != null) {
-//                long findDiff = findDifference(start_date, end_date);
-//                if (findDiff >= 2) {
-//                    getData();
-//                } else {
-//                    save_token(false);
-//                }
-//            } else {
-//                getData();
-//            }
-//        }
+        networkListener = isConnected -> {
+            if (isConnected && !isDataLoaded && !isFinishing() && !isDestroyed()) {
+                Log.d("SplashScreen", "Network restored on Splash Screen. Triggering getData()...");
+                getData();
+            }
+        };
+        MailER_NetworkMonitor.getInstance().addListener(networkListener);
+
         if (MailER_NetworkUtils.isNetworkAvailable(MailER_SplashScreen.this)) {
             getData();
         } else {
-            Toast.makeText(this, "Something went wrong!!!", Toast.LENGTH_SHORT).show();
+            MailER_MaterialDialogUtils.getInstance().errorDialog(this, getResources().getString(R.string.internet_error));
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (networkListener != null) {
+            MailER_NetworkMonitor.getInstance().removeListener(networkListener);
+        }
+        super.onDestroy();
     }
 
     private long findDifference(String start_date, String end_date) {
@@ -163,7 +165,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private int getSnapshotInt(DataSnapshot snapshot, String key, int defaultValue) {
         if (snapshot != null && snapshot.hasChild(key) && snapshot.child(key).getValue() != null) {
             try {
-                return Integer.parseInt(String.valueOf(snapshot.child(key).getValue()).trim());
+                String val = String.valueOf(snapshot.child(key).getValue()).trim();
+                return (int) Double.parseDouble(val);
             } catch (Exception e) {
                 return defaultValue;
             }
@@ -282,6 +285,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
     }
 
     private void save_token(boolean update) {
+        isDataLoaded = true;
         if (update) {
             @SuppressLint("SimpleDateFormat")
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -305,7 +309,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
             isUpdateRequired = !preferenceClass.getDataType("UpdateVersionName").equals(BuildConfig.VERSION_NAME);
         }
 
-        if (preferenceClass.getInt("UpdateAvailable") == 1 && isUpdateRequired) {
+        int updateAvailable = preferenceClass.getInt("UpdateAvailable");
+        if (updateAvailable > 0 && isUpdateRequired) {
 
             dialog = new Dialog(MailER_SplashScreen.this);
             dialog.setContentView(R.layout.spawner_dialog_app_info);
@@ -320,20 +325,49 @@ public class MailER_SplashScreen extends AppCompatActivity {
             okBtn.setText("Update");
             cancelBtn.setText("Cancel");
 
-            cancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                    startIntent();
-                }
-            });
+            if (updateAvailable == 2) {
+                // Force Update: Hide Cancel button, disable dismiss & block BACK key
+                cancelBtn.setVisibility(View.GONE);
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setOnKeyListener((dialogInterface, keyCode, event) -> {
+                    return keyCode == KeyEvent.KEYCODE_BACK;
+                });
+            } else {
+                // Optional Update (1): Show Cancel button & handle BACK button / dismiss to proceed to Home Screen
+                cancelBtn.setVisibility(View.VISIBLE);
+                dialog.setCancelable(true);
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                        startIntent();
+                    }
+                });
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        startIntent();
+                    }
+                });
+            }
+
             okBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    isUpdateClicked = true;
+                    final String appPackageName = getPackageName();
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
-                    } catch (Exception e) {
-                        e.getMessage();
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                    } catch (android.content.ActivityNotFoundException e) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        } catch (Exception ex) {
+                            Log.e("SPLASH", "Error opening Play Store: " + ex.getMessage());
+                        }
+                    }
+                    if (updateAvailable == 1) {
+                        dialog.dismiss();
                     }
                 }
             });
@@ -399,18 +433,10 @@ public class MailER_SplashScreen extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        /*if (appUpdateManager != null) {
-            appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                    try {
-                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, this, 0x11);
-                    } catch (IntentSender.SendIntentException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            appUpdateManager.getAppUpdateInfo().addOnFailureListener(e -> startIntent());
-        }*/
+        if (isUpdateClicked && preferenceClass != null && preferenceClass.getInt("UpdateAvailable") == 1) {
+            isUpdateClicked = false;
+            startIntent();
+        }
     }
 
 }

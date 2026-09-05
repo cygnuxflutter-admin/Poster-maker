@@ -37,6 +37,7 @@ import com.festival.flyer.postermaker.utils.MailER_FileUtils;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -136,6 +137,21 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
                 if (bgSelectionController != null) {
                     bgSelectionController.applyProFilter(isProModeActive);
                 }
+            });
+        }
+
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.accent_purple));
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                if (MailER_NetworkUtils.isNetworkAvailable(this)) {
+                    if (bgSelectionController != null) {
+                        bgSelectionController.loadBgImages();
+                    }
+                } else {
+                    MyApplication.getInstance().showNoInternetDialog(this);
+                }
+                swipeRefreshLayout.setRefreshing(false);
             });
         }
     }

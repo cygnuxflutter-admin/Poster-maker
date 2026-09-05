@@ -49,7 +49,7 @@ public class MailER_TemplateSelectionController {
         loadTemplates();
     }
 
-    private void loadTemplates() {
+    public void loadTemplates() {
         startMaterialDialog();
         getTemplateThumb(preferenceClass.getDataType("field_0"));
     }

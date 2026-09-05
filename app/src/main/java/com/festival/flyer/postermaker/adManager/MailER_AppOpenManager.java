@@ -45,21 +45,21 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
+    private static boolean isLoadingAd = false;
+
     /**
      * Request an ad
      */
     public void fetchAd() {
-        if (AppOpenAdShow == 0) {
+        if (AppOpenAdShow == 0 || isAdAvailable() || isLoadingAd) {
             return;
         }
-        // Have unused ad, no need to fetch another.
-        if (isAdAvailable()) {
-            return;
-        }
+        isLoadingAd = true;
 
         loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(AppOpenAd ad) {
+                isLoadingAd = false;
                 Log.d("AdTracker", "AppOpen Ad (AdMob) Loaded Successfully using ID: " + AD_UNIT_ID1);
                 MailER_AppOpenManager.this.appOpenAd = ad;
                 MailER_AppOpenManager.this.loadTime = (new Date()).getTime();
@@ -67,6 +67,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
 
             @Override
             public void onAdFailedToLoad(LoadAdError loadAdError) {
+                isLoadingAd = false;
                 Log.d("AdTracker", "AppOpen Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 // fetchAdX();
             }
@@ -171,10 +172,6 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     }
 
     public void showAdIfSplashAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (BuildConfig.DEBUG) {
-            onShowAdCompleteListener.onShowAdComplete();
-            return;
-        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
@@ -199,55 +196,12 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
             appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
             appOpenAd.show(activity);
         } else {
-            loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
-                @Override
-                public void onAdLoaded(AppOpenAd ad) {
-                    MailER_AppOpenManager.this.appOpenAd = ad;
-                    MailER_AppOpenManager.this.loadTime = (new Date()).getTime();
-
-                    FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
-                        @Override
-                        public void onAdDismissedFullScreenContent() {
-                            MailER_AppOpenManager.this.appOpenAd = null;
-                            isShowingAd = false;
-                            fetchAd();
-                            onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdFailedToShowFullScreenContent(AdError adError) {
-                            onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdShowedFullScreenContent() {
-                            isShowingAd = true;
-                        }
-                    };
-                    appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
-                    appOpenAd.show(currentActivity);
-                }
-
-                @Override
-                public void onAdFailedToLoad(LoadAdError loadAdError) {
-                    onShowAdCompleteListener.onShowAdComplete();
-                }
-            };
-            if (preferenceClass == null) {
-                preferenceClass = new MailER_PreferenceClass(myApplication);
-            }
-            AD_UNIT_ID1 = preferenceClass.getAdsId("AppOpenID");
-            AD_UNIT_ID2 = preferenceClass.getAdsId("AdxAppOpenID");
-            AdRequest request = getAdRequest();
-            AppOpenAd.load(myApplication, AD_UNIT_ID1, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
+            fetchAd();
+            onShowAdCompleteListener.onShowAdComplete();
         }
     }
 
     public void showAdIfAvailable(@NonNull final Activity activity, @NonNull MyApplication.OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (BuildConfig.DEBUG) {
-            onShowAdCompleteListener.onShowAdComplete();
-            return;
-        }
         if (!isShowingAd && isAdAvailable()) {
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override

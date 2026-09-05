@@ -39,6 +39,7 @@ import com.festival.flyer.postermaker.threadTask.MailER_GetPosDetail;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -116,6 +117,21 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         }
         
         deleteFromExternalStorage();
+
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeColors(androidx.core.content.ContextCompat.getColor(this, R.color.accent_purple));
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                if (MailER_NetworkUtils.isNetworkAvailable(this)) {
+                    if (templateSelectionController != null) {
+                        templateSelectionController.loadTemplates();
+                    }
+                } else {
+                    MyApplication.getInstance().showNoInternetDialog(this);
+                }
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }
 
     }
 

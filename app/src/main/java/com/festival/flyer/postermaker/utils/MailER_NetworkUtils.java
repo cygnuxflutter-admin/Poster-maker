@@ -2,26 +2,28 @@ package com.festival.flyer.postermaker.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.os.Build;
 
 public class MailER_NetworkUtils {
 
+    public static boolean isNetworkAvailable(Context context) {
+        if (context == null) return false;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null) return false;
 
-
-    public static boolean isNetworkAvailable(Context activity) {
-        ConnectivityManager connectivity = (ConnectivityManager) activity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivity == null) {
-            return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            android.net.Network network = connectivityManager.getActiveNetwork();
+            if (network == null) return false;
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+            return capabilities != null && (
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
         } else {
-            NetworkInfo[] info = connectivity.getAllNetworkInfo();
-            for (NetworkInfo networkInfo : info) {
-                if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
-                    return true;
-                }
-            }
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnected();
         }
-        return false;
     }
-
 }

@@ -12,15 +12,14 @@
         android:background="@color/white"
         android:orientation="vertical">
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/_250sdp"
-            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_200sdp"
             android:layout_margin="@dimen/_10sdp">
 
             <RelativeLayout
                 android:id="@+id/native_banner_ad_containers"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_250sdp"
+                android:layout_height="@dimen/_200sdp"
                 android:visibility="visible" />
 
             <com.facebook.shimmer.ShimmerFrameLayout

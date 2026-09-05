@@ -30,18 +30,24 @@ public class MailER_LoadAds {
 
     public static ShimmerFrameLayout shimmerFrameLayout;
 
-    public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            mainLayout.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.stopShimmer();
-                shimmer_view_container.setVisibility(View.GONE);
+    private static void destroyExistingBannerView(android.view.ViewGroup container) {
+        if (container == null) return;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View child = container.getChildAt(i);
+            if (child instanceof AdView) {
+                try {
+                    ((AdView) child).destroy();
+                } catch (Exception ignored) {
+                }
             }
-            return;
         }
+    }
+
+    public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
         String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
 
         shimmerFrameLayout = shimmer_view_container;
+        destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String bannerAdunitID = CollapsiblebannerID ;
         if (bannerAdunitID != null) {
@@ -109,15 +115,8 @@ public class MailER_LoadAds {
     }
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
-        if (BuildConfig.DEBUG) {
-            mainLayout.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.stopShimmer();
-                shimmer_view_container.setVisibility(View.GONE);
-            }
-            return;
-        }
         shimmerFrameLayout = shimmer_view_container;
+        destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String bannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
         if (bannerAdunitID != null) {
@@ -166,6 +165,7 @@ public class MailER_LoadAds {
     }
 
     private static void loadADXBannerAd(Activity activity, RelativeLayout mainLayout) {
+        destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String AdxBannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("AdxBannerAdunitID");
         if (AdxBannerAdunitID != null) {

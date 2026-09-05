@@ -60,6 +60,9 @@ public class MyApplication extends android.app.Application {
             interstitialAdManager = new MailER_InterstitialAdManager(MyApplication.this);
     }
 
+    private Activity currentActivity;
+    private android.app.Dialog noInternetDialog;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -87,9 +90,24 @@ public class MyApplication extends android.app.Application {
 
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
 
+        com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.preloadRewardVideoAd(this);
+
         appOpenManager = new MailER_AppOpenManager(this);
 
         AudienceNetworkAds.initialize(this);
+
+        // Global Network Monitor Registration
+        com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().startMonitoring(this);
+        com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().addListener(isConnected -> {
+            if (currentActivity != null && !currentActivity.isFinishing() && !currentActivity.isDestroyed()) {
+                if (!isConnected) {
+                    showNoInternetDialog(currentActivity);
+                } else {
+                    dismissNoInternetDialog();
+                }
+            }
+        });
+
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
@@ -106,12 +124,39 @@ public class MyApplication extends android.app.Application {
                     });
                 }
             }
-            @Override public void onActivityStarted(@NonNull Activity activity) {}
-            @Override public void onActivityResumed(@NonNull Activity activity) {}
-            @Override public void onActivityPaused(@NonNull Activity activity) {}
-            @Override public void onActivityStopped(@NonNull Activity activity) {}
+            @Override
+            public void onActivityStarted(@NonNull Activity activity) {
+                currentActivity = activity;
+            }
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+                currentActivity = activity;
+                if (!com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(activity)) {
+                    showNoInternetDialog(activity);
+                } else {
+                    dismissNoInternetDialog();
+                }
+            }
+            @Override
+            public void onActivityPaused(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    dismissNoInternetDialog();
+                }
+            }
+            @Override
+            public void onActivityStopped(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    currentActivity = null;
+                }
+            }
             @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
-            @Override public void onActivityDestroyed(@NonNull Activity activity) {}
+            @Override
+            public void onActivityDestroyed(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    currentActivity = null;
+                    dismissNoInternetDialog();
+                }
+            }
         });
 
         // Debug ma tamara phone ne Test Device banave → Account Safe
@@ -122,8 +167,41 @@ public class MyApplication extends android.app.Application {
             MobileAds.setRequestConfiguration(configuration);
         }
 
-        MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
+    }
 
+    public synchronized void showNoInternetDialog(@NonNull Activity activity) {
+        if (activity.isFinishing() || activity.isDestroyed()) return;
+        if (noInternetDialog != null && noInternetDialog.isShowing()) return;
+
+        try {
+            noInternetDialog = new android.app.Dialog(activity);
+            noInternetDialog.setContentView(R.layout.spawner_dialog_no_internet);
+            noInternetDialog.setCancelable(false);
+            noInternetDialog.setCanceledOnTouchOutside(false);
+
+            if (noInternetDialog.getWindow() != null) {
+                int width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90);
+                noInternetDialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+                noInternetDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+            noInternetDialog.show();
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error showing No-Internet dialog: " + e.getMessage());
+        }
+    }
+
+    public synchronized void dismissNoInternetDialog() {
+        if (noInternetDialog != null) {
+            try {
+                if (noInternetDialog.isShowing()) {
+                    noInternetDialog.dismiss();
+                }
+            } catch (Exception e) {
+                Log.e("MyApplication", "Error dismissing No-Internet dialog: " + e.getMessage());
+            } finally {
+                noInternetDialog = null;
+            }
+        }
     }
 
     public static synchronized MyApplication getInstance() {

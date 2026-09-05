@@ -79,6 +79,7 @@ import java.util.Map;
 import com.festival.flyer.postermaker.model.MailER_TrendingFestivalModel;
 import com.festival.flyer.postermaker.adapter.MailER_TrendingFestivalAdapter;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.widget.HorizontalScrollView;
 public class MailER_PosterMainActivity extends AppCompatActivity {
 
@@ -204,6 +205,21 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         preferenceClass = new MailER_PreferenceClass(this);
 
         findByID();
+
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(this, R.color.accent_purple));
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                if (MailER_NetworkUtils.isNetworkAvailable(this)) {
+                    fetchHeroBanners();
+                    fetchTrendingFestivals();
+                } else {
+                    MyApplication.getInstance().showNoInternetDialog(this);
+                }
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }
+
         fetchHeroBanners();
         fetchTrendingFestivals();
 
