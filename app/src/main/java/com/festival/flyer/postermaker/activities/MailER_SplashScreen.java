@@ -126,7 +126,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
         if (MailER_NetworkUtils.isNetworkAvailable(MailER_SplashScreen.this)) {
             getData();
         } else {
-            MailER_MaterialDialogUtils.getInstance().errorDialog(this, getResources().getString(R.string.internet_error));
+            startIntent();
         }
 
     }
@@ -199,12 +199,30 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                     Log.e("snapshot", String.valueOf(snapshot));
 
                                     // ----------------------------------------------- All Ads from Firebase
-                                    preferenceClass.setDataType("BannerAdunitID", getSnapshotString(snapshot, "BannerAdunitID", ""));
-                                    preferenceClass.setDataType("CollapsibleBannerID", getSnapshotString(snapshot, "CollapsibleBannerID", ""));
-                                    preferenceClass.setDataType("InterstitalAdunitID", getSnapshotString(snapshot, "InterstitalAdunitID", ""));
-                                    preferenceClass.setDataType("RewardVideoUnitID", getSnapshotString(snapshot, "RewardVideoUnitID", ""));
-                                    preferenceClass.setDataType("NativeUnitID", getSnapshotString(snapshot, "NativeUnitID", ""));
-                                    preferenceClass.setDataType("AppOpenID", getSnapshotString(snapshot, "AppOpenID", ""));
+                                    String bannerId = getSnapshotString(snapshot, "BannerAdunitID", "");
+                                    String collapsibleId = getSnapshotString(snapshot, "CollapsibleBannerID", "");
+                                    String interstitialId = getSnapshotString(snapshot, "InterstitalAdunitID", "");
+                                    String rewardId = getSnapshotString(snapshot, "RewardVideoUnitID", "");
+                                    String nativeId = getSnapshotString(snapshot, "NativeUnitID", "");
+                                    String appOpenId = getSnapshotString(snapshot, "AppOpenID", "");
+
+                                    preferenceClass.setDataType("BannerAdunitID", bannerId);
+                                    preferenceClass.setAdsId("BannerAdunitID", bannerId);
+
+                                    preferenceClass.setDataType("CollapsibleBannerID", collapsibleId);
+                                    preferenceClass.setAdsId("CollapsibleBannerID", collapsibleId);
+
+                                    preferenceClass.setDataType("InterstitalAdunitID", interstitialId);
+                                    preferenceClass.setAdsId("InterstitalAdunitID", interstitialId);
+
+                                    preferenceClass.setDataType("RewardVideoUnitID", rewardId);
+                                    preferenceClass.setAdsId("RewardVideoUnitID", rewardId);
+
+                                    preferenceClass.setDataType("NativeUnitID", nativeId);
+                                    preferenceClass.setAdsId("NativeUnitID", nativeId);
+
+                                    preferenceClass.setDataType("AppOpenID", appOpenId);
+                                    preferenceClass.setAdsId("AppOpenID", appOpenId);
 
                                     // AdX IDs
                                     if (snapshot.hasChild("AdxAppOpenID")) preferenceClass.setAdsId("AdxAppOpenID", getSnapshotString(snapshot, "AdxAppOpenID", ""));
@@ -231,19 +249,34 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                     // DEBUG MODE PROTECTION: Override with AdMob Test IDs when running from Android Studio
                                     if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
                                         preferenceClass.setDataType("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
+                                        preferenceClass.setAdsId("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
                                         preferenceClass.setDataType("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setAdsId("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
                                         preferenceClass.setDataType("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setAdsId("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
                                         preferenceClass.setDataType("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
+                                        preferenceClass.setAdsId("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
                                         preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
+                                        preferenceClass.setAdsId("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
                                         preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
+                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
                                         preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5354046379");
                                     }
 
                                     MailER_AppOpenManager.AppOpenAdShow = getSnapshotInt(snapshot, "AppOpenAdShow", 0);
                                     MailER_InterstitialAdManager.InterAdTimer = getSnapshotInt(snapshot, "InterAdTimer", 0);
 
-                                    preferenceClass.setInt("UpdateAvailable", getSnapshotInt(snapshot, "UpdateAvailable", 0));
-                                    preferenceClass.setDataType("UpdateVersionName", getSnapshotString(snapshot, "UpdateVersionName", "1.0"));
+                                    int rawUpdateVal = getSnapshotInt(snapshot, "UpdateAvailable", 0);
+                                    int rawForceUpdateVal = getSnapshotInt(snapshot, "ForceUpdate", 0);
+                                    String rawUpdateVer = getSnapshotString(snapshot, "UpdateVersionName", "1.0");
+
+                                    Log.e("FirebaseUpdateVal", "==================================================");
+                                    Log.e("FirebaseUpdateVal", ">>> FIREBASE RAW READ: UpdateAvailable = " + rawUpdateVal + " | ForceUpdate = " + rawForceUpdateVal + " | UpdateVersionName = " + rawUpdateVer + " <<<");
+                                    Log.e("FirebaseUpdateVal", "==================================================");
+
+                                    preferenceClass.setInt("UpdateAvailable", rawUpdateVal);
+                                    preferenceClass.setInt("ForceUpdate", rawForceUpdateVal);
+                                    preferenceClass.setDataType("UpdateVersionName", rawUpdateVer);
 
                                     preferenceClass.setInt("download", getSnapshotInt(snapshot, "download", 0));
                                     preferenceClass.setInt("splashscreen", getSnapshotInt(snapshot, "splashscreen", 0));
@@ -276,11 +309,11 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_SplashScreen.this, getResources().getString(R.string.something_went_wrong));
+                    startIntent();
                 }
             });
         } else {
-            MailER_MaterialDialogUtils.getInstance().errorDialog(this, getResources().getString(R.string.internet_error));
+            startIntent();
         }
     }
 
@@ -298,22 +331,39 @@ public class MailER_SplashScreen extends AppCompatActivity {
             preferenceClass.setFirstTimeLaunch(false);
         }
         boolean isUpdateRequired = false;
+        String firebaseVerStr = preferenceClass.getDataType("UpdateVersionName", "0");
         try {
-            String firebaseVerStr = preferenceClass.getDataType("UpdateVersionName", "0");
             double firebaseVer = Double.parseDouble(firebaseVerStr);
             double currentAppVer = Double.parseDouble(BuildConfig.VERSION_NAME);
             if (firebaseVer > currentAppVer) {
                 isUpdateRequired = true;
             }
         } catch (Exception e) {
-            isUpdateRequired = !preferenceClass.getDataType("UpdateVersionName").equals(BuildConfig.VERSION_NAME);
+            isUpdateRequired = !firebaseVerStr.equals(BuildConfig.VERSION_NAME);
         }
 
         int updateAvailable = preferenceClass.getInt("UpdateAvailable");
-        if (updateAvailable > 0 && isUpdateRequired) {
+        int forceUpdate = preferenceClass.getInt("ForceUpdate");
+
+        boolean isForce = (forceUpdate == 1) || (updateAvailable == 2);
+        boolean shouldShowUpdateDialog = isForce || (updateAvailable == 1 && isUpdateRequired);
+
+        Log.e("FirebaseUpdateVal", "==================================================");
+        Log.e("FirebaseUpdateVal", "READ PREF UpdateAvailable: " + updateAvailable + " | ForceUpdate: " + forceUpdate);
+        Log.e("FirebaseUpdateVal", "Firebase UpdateVersionName: " + firebaseVerStr + " | App BuildConfig.VERSION_NAME: " + BuildConfig.VERSION_NAME);
+        Log.e("FirebaseUpdateVal", "isUpdateRequired: " + isUpdateRequired + " | isForce: " + isForce);
+        Log.e("FirebaseUpdateVal", "Will show update dialog: " + shouldShowUpdateDialog);
+        Log.e("FirebaseUpdateVal", "==================================================");
+
+        if (shouldShowUpdateDialog) {
+            if (isFinishing() || isDestroyed()) return;
 
             dialog = new Dialog(MailER_SplashScreen.this);
             dialog.setContentView(R.layout.spawner_dialog_app_info);
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
             TextView descriptionTextView = dialog.findViewById(R.id.descriptionTextView);
             Button cancelBtn = dialog.findViewById(R.id.dialogCancelButton);
             TextView msgTextView = dialog.findViewById(R.id.titleTextView);
@@ -325,12 +375,15 @@ public class MailER_SplashScreen extends AppCompatActivity {
             okBtn.setText("Update");
             cancelBtn.setText("Cancel");
 
-            if (updateAvailable == 2) {
+            if (isForce) {
                 // Force Update: Hide Cancel button, disable dismiss & block BACK key
                 cancelBtn.setVisibility(View.GONE);
                 dialog.setCancelable(false);
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.setOnKeyListener((dialogInterface, keyCode, event) -> {
+                    if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+                        finishAffinity();
+                    }
                     return keyCode == KeyEvent.KEYCODE_BACK;
                 });
             } else {
@@ -347,7 +400,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialogInterface) {
-                        startIntent();
+                        finishAffinity();
                     }
                 });
             }
@@ -366,7 +419,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
                             Log.e("SPLASH", "Error opening Play Store: " + ex.getMessage());
                         }
                     }
-                    if (updateAvailable == 1) {
+                    if (!isForce) {
                         dialog.dismiss();
                     }
                 }
@@ -433,7 +486,9 @@ public class MailER_SplashScreen extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isUpdateClicked && preferenceClass != null && preferenceClass.getInt("UpdateAvailable") == 1) {
+        int forceUpdate = preferenceClass != null ? preferenceClass.getInt("ForceUpdate") : 0;
+        int updateAvailable = preferenceClass != null ? preferenceClass.getInt("UpdateAvailable") : 0;
+        if (isUpdateClicked && forceUpdate == 0 && updateAvailable != 2) {
             isUpdateClicked = false;
             startIntent();
         }

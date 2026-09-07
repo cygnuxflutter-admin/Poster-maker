@@ -89,15 +89,22 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
                 // fillAdXNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
+                Log.d("[ADS_LOG]", "🟢 AdMob Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdMob Native Ad Loaded Successfully!");
                 Log.e("AdMob_Error", "AdMob Native Ad Loaded Successfully!");
                 super.onAdLoaded();
+            }
+            @Override
+            public void onAdImpression() {
+                super.onAdImpression();
+                Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdMob) IMPRESSION Logged!");
             }
         }).build();
 
@@ -136,15 +143,22 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.d("[ADS_LOG]", "🔴 Native Ad (AdX) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdX Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
                 // fbNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
+                Log.d("[ADS_LOG]", "🟢 AdX Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdX Native Ad Loaded Successfully!");
                 Log.e("AdMob_Error", "AdX Native Ad Loaded Successfully!");
                 super.onAdLoaded();
+            }
+            @Override
+            public void onAdImpression() {
+                super.onAdImpression();
+                Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdX) IMPRESSION Logged!");
             }
         }).build();
 

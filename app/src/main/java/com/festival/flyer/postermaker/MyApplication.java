@@ -100,6 +100,9 @@ public class MyApplication extends android.app.Application {
         com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().startMonitoring(this);
         com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().addListener(isConnected -> {
             if (currentActivity != null && !currentActivity.isFinishing() && !currentActivity.isDestroyed()) {
+                if (currentActivity.getClass().getSimpleName().contains("Splash")) {
+                    return;
+                }
                 if (!isConnected) {
                     showNoInternetDialog(currentActivity);
                 } else {
@@ -131,6 +134,9 @@ public class MyApplication extends android.app.Application {
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
                 currentActivity = activity;
+                if (activity.getClass().getSimpleName().contains("Splash")) {
+                    return;
+                }
                 if (!com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(activity)) {
                     showNoInternetDialog(activity);
                 } else {
@@ -171,6 +177,7 @@ public class MyApplication extends android.app.Application {
 
     public synchronized void showNoInternetDialog(@NonNull Activity activity) {
         if (activity.isFinishing() || activity.isDestroyed()) return;
+        if (activity.getClass().getSimpleName().contains("Splash")) return;
         if (noInternetDialog != null && noInternetDialog.isShowing()) return;
 
         try {

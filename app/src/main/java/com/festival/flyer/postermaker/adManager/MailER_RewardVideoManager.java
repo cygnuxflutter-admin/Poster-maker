@@ -22,6 +22,8 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 
+import android.widget.Toast;
+
 public class MailER_RewardVideoManager {
     private static MailER_PreferenceClass preferenceClass;
     private static String AD_google_Rw;
@@ -61,13 +63,18 @@ public class MailER_RewardVideoManager {
 
     public static void showRewardVideoAd(final Activity context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
         if (mRewardedAd != null) {
+            final boolean[] isEarned = new boolean[]{false};
             mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
                     super.onAdDismissedFullScreenContent();
                     mRewardedAd = null;
                     preloadRewardVideoAd(context); // Preload next
-                    onAdLoadInterface.onAdClose();
+                    if (isEarned[0]) {
+                        if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                    } else {
+                        Toast.makeText(context, "You must watch the full ad to unlock feature!", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -75,10 +82,12 @@ public class MailER_RewardVideoManager {
                     super.onAdFailedToShowFullScreenContent(adError);
                     mRewardedAd = null;
                     preloadRewardVideoAd(context); // Preload next
-                    onAdLoadInterface.onAdClose();
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                 }
             });
-            mRewardedAd.show(context, rewardItem -> {});
+            mRewardedAd.show(context, rewardItem -> {
+                isEarned[0] = true;
+            });
             return;
         }
 
@@ -115,13 +124,18 @@ public class MailER_RewardVideoManager {
                     alertDialog.dismiss();
                 }
                 if (mRewardedAd != null) {
+                    final boolean[] isEarned = new boolean[]{false};
                     mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                         @Override
                         public void onAdDismissedFullScreenContent() {
                             super.onAdDismissedFullScreenContent();
                             mRewardedAd = null;
                             preloadRewardVideoAd(context); // Preload next
-                            onAdLoadInterface.onAdClose();
+                            if (isEarned[0]) {
+                                if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                            } else {
+                                Toast.makeText(context, "You must watch the full ad to unlock feature!", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                         @Override
@@ -129,10 +143,12 @@ public class MailER_RewardVideoManager {
                             super.onAdFailedToShowFullScreenContent(adError);
                             mRewardedAd = null;
                             preloadRewardVideoAd(context);
-                            onAdLoadInterface.onAdClose();
+                            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                         }
                     });
-                    mRewardedAd.show(context, rewardItem -> {});
+                    mRewardedAd.show(context, rewardItem -> {
+                        isEarned[0] = true;
+                    });
                 }
             }
 

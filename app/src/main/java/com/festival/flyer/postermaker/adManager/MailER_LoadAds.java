@@ -43,10 +43,26 @@ public class MailER_LoadAds {
         }
     }
 
+    private static boolean hasLoadedAdView(android.view.ViewGroup container) {
+        if (container == null) return false;
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View child = container.getChildAt(i);
+            if (child instanceof AdView) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
         String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
 
         shimmerFrameLayout = shimmer_view_container;
+        // Skip reload if banner already loaded in this container
+        if (hasLoadedAdView(mainLayout)) {
+            Log.d("[ADS_LOG]", "♻️ Collapsible Banner already loaded in container. Skipping reload.");
+            return;
+        }
         destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String bannerAdunitID = CollapsiblebannerID ;
@@ -72,6 +88,7 @@ public class MailER_LoadAds {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
+                    Log.d("[ADS_LOG]", "🔴 Collapsible Banner Ad Failed to Load: " + loadAdError.getMessage());
                     Log.d("AdTracker", "Collapsible Banner (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                     mainLayout.setVisibility(View.GONE);
                     // loadADXBannerAd(activity, relativeLayout);
@@ -79,6 +96,7 @@ public class MailER_LoadAds {
                 }
                 @Override
                 public void onAdLoaded() {
+                    Log.d("[ADS_LOG]", "🟢 Collapsible Banner Ad Loaded & Displayed Successfully!");
                     Log.d("AdTracker", "AdMob Collapsible Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
                     if (shimmerFrameLayout!= null) {
@@ -87,7 +105,11 @@ public class MailER_LoadAds {
                         shimmerFrameLayout.hideShimmer();
                     }
                 }
-
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: Collapsible Banner Ad IMPRESSION Logged!");
+                }
             });
 
             mainLayout.addView(adView);
@@ -116,6 +138,11 @@ public class MailER_LoadAds {
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
         shimmerFrameLayout = shimmer_view_container;
+        // Skip reload if banner already loaded in this container
+        if (hasLoadedAdView(mainLayout)) {
+            Log.d("[ADS_LOG]", "♻️ Banner Ad already loaded in container. Skipping reload.");
+            return;
+        }
         destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String bannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
@@ -139,12 +166,11 @@ public class MailER_LoadAds {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    Log.d("AdTracker", "Banner Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                    // loadADXBannerAd(activity, mainLayout);
+                    Log.d("[ADS_LOG]", "🔴 Banner Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 }
                 @Override
                 public void onAdLoaded() {
-                    Log.d("AdTracker", "AdMob Banner Ad Loaded Successfully!");
+                    Log.d("[ADS_LOG]", "🟢 AdMob Banner Ad Loaded & Displayed Successfully!");
                     super.onAdLoaded();
                     if (shimmerFrameLayout!= null) {
                         shimmerFrameLayout.stopShimmer();
@@ -152,7 +178,11 @@ public class MailER_LoadAds {
                         shimmerFrameLayout.hideShimmer();
                     }
                 }
-
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: Banner Ad IMPRESSION Logged!");
+                }
             });
 
             RelativeLayout.LayoutParams bannerParameters =
