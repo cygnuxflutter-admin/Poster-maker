@@ -55,7 +55,7 @@ public class MailER_TemplateSelectionController {
     }
 
     public void getTemplateThumb(final String key) {
-        String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_35");
+        String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_35");
         android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (Template): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
             android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (Template): " + requestUrl + "\nDATA: " + response);

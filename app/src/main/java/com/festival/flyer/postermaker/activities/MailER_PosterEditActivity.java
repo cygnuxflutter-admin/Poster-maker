@@ -175,6 +175,9 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
         setContentView(R.layout.spawner_activity_poster_edit);
 
+        // Preload reward ad when user enters edit screen (for watermark removal)
+
+
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {

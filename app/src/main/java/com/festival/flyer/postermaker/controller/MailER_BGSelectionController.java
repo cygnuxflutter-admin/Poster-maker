@@ -88,7 +88,7 @@ public class MailER_BGSelectionController {
     }
 
     private void getBgThumb(String key) {
-        String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
+        String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
         android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (BG): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
             android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (BG): " + requestUrl + "\nDATA: " + response);

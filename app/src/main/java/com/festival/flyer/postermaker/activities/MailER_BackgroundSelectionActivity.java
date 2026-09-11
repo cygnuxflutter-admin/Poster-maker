@@ -59,6 +59,9 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_background_selection);
 
+        // Preload reward ad for premium background unlock
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }

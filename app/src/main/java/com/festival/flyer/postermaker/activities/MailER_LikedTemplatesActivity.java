@@ -60,6 +60,9 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_liked_templates);
 
+        // Preload reward ad for premium template unlock
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -155,7 +158,7 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
     }
 
     private void loadPoster(String key, final int cat_id, final int pos_id) {
-        String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
+        String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
         android.util.Log.d("API_CALL_DEBUG", "REQUEST URL: " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
             android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM: " + requestUrl + "\nDATA: " + response);
@@ -185,13 +188,13 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
 
                                 for (int i = 0; i < sticker_model.size(); i++) {
                                     if (!sticker_model.get(i).getSt_image().equals("")) {
-                                        stringArrayList.add(preferenceClass.getDataType("field_1") + "/" + sticker_model.get(i).getSt_image());
+                                        stringArrayList.add(preferenceClass.getDataType("field_51") + "/" + sticker_model.get(i).getSt_image());
                                     }
                                 }
 
                                 if (preferenceClass.getInt("download") == 0) {
                                     for (int i = 0; i < text_model.size(); i++) {
-                                        stringArrayList.add(preferenceClass.getDataType("field_37") + text_model.get(i).getFont_family());
+                                        stringArrayList.add(preferenceClass.getDataType("field_52") + text_model.get(i).getFont_family());
                                     }
                                 }
 

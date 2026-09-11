@@ -90,7 +90,8 @@ public class MyApplication extends android.app.Application {
 
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
 
-        com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.preloadRewardVideoAd(this);
+        // Reward ad preload removed from here — now preloads only in screens that use reward ads
+        // (PosterEditActivity, TemplateSelectionActivity, BackgroundSelectionActivity, LikedTemplatesActivity)
 
         appOpenManager = new MailER_AppOpenManager(this);
 

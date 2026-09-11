@@ -39,6 +39,9 @@ public class MailER_NativeAdUtil {
     private NativeAdView adView;
     private NativeAd nativeAd;
     public static ShimmerFrameLayout shimmerFrameLayout;
+    private boolean isLoadingAdMob = false;
+    private boolean isLoadingAdx = false;
+    private boolean isLoadingFb = false;
     public MailER_NativeAdUtil(Context context, int width, int height) {
         this.context = context;
         this.width = width;
@@ -65,11 +68,27 @@ public class MailER_NativeAdUtil {
     public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer) {
         if (nativeAdContainer == null) return;
 
+        // Reuse existing loaded ad instead of requesting a new one
+        if (this.nativeAd != null && this.adView != null) {
+            nativeAdContainer.removeAllViews();
+            if (adView.getParent() != null) {
+                ((android.view.ViewGroup) adView.getParent()).removeView(adView);
+            }
+            nativeAdContainer.addView(adView);
+            nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
+            nativeAdContainer.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (isLoadingAdMob) return;
+        isLoadingAdMob = true;
+
         String nativeId = preferenceClass.getAdsId("NativeUnitID");
         Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
         AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
         builder.forNativeAd(nativeAd -> {
+            isLoadingAdMob = false;
             if (this.nativeAd != null && this.nativeAd != nativeAd) {
                 this.nativeAd.destroy();
             }
@@ -89,6 +108,7 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                isLoadingAdMob = false;
                 Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
