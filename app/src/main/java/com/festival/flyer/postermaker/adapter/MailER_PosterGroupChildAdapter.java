@@ -118,7 +118,7 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
             holder.content_layout.setVisibility(View.GONE);
             holder.ad_layout.setVisibility(View.VISIBLE);
             holder.iv_lock.setVisibility(View.GONE);
-            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container);
+            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position);
         }
     }
 

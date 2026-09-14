@@ -370,7 +370,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
             TextView msgTextView = dialog.findViewById(R.id.titleTextView);
             Button okBtn = dialog.findViewById(R.id.dialogOkButton);
             descriptionTextView.setTextColor(getResources().getColor(R.color.black));
-            descriptionTextView.setText("There is a newer version of app available please update it now.");
+            String updateMsg = "A huge new update (Version " + firebaseVerStr + ") is available!\n\nPlease update the app immediately to unlock New Posters, Backgrounds, and all latest features. The old version will no longer receive new data.";
+            descriptionTextView.setText(updateMsg);
             msgTextView.setTextColor(getResources().getColor(R.color.black));
             msgTextView.setText("Update Available");
             okBtn.setText("Update");

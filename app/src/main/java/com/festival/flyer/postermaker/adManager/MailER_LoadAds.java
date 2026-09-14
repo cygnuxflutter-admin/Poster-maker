@@ -99,10 +99,10 @@ public class MailER_LoadAds {
                     Log.d("[ADS_LOG]", "🟢 Collapsible Banner Ad Loaded & Displayed Successfully!");
                     Log.d("AdTracker", "AdMob Collapsible Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
-                    if (shimmerFrameLayout!= null) {
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        shimmerFrameLayout.hideShimmer();
+                    if (shimmer_view_container!= null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                        shimmer_view_container.hideShimmer();
                     }
                 }
                 @Override
@@ -172,10 +172,10 @@ public class MailER_LoadAds {
                 public void onAdLoaded() {
                     Log.d("[ADS_LOG]", "🟢 AdMob Banner Ad Loaded & Displayed Successfully!");
                     super.onAdLoaded();
-                    if (shimmerFrameLayout!= null) {
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        shimmerFrameLayout.hideShimmer();
+                    if (shimmer_view_container!= null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                        shimmer_view_container.hideShimmer();
                     }
                 }
                 @Override

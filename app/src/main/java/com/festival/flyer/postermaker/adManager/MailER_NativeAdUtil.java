@@ -1,6 +1,8 @@
 package com.festival.flyer.postermaker.adManager;
 
 import android.app.Activity;
+import java.util.HashMap;
+import java.util.HashSet;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -36,12 +38,13 @@ public class MailER_NativeAdUtil {
     private final MailER_PreferenceClass preferenceClass;
     private final int width;
     private final int height;
-    private NativeAdView adView;
-    private NativeAd nativeAd;
     public static ShimmerFrameLayout shimmerFrameLayout;
+    private NativeAd nativeAd;
+    private NativeAdView adView;
     private boolean isLoadingAdMob = false;
-    private boolean isLoadingAdx = false;
-    private boolean isLoadingFb = false;
+    private final HashMap<Integer, NativeAd> nativeAdCache = new HashMap<>();
+    private final HashMap<Integer, NativeAdView> nativeAdViewCache = new HashMap<>();
+    private final HashSet<Integer> loadingPositions = new HashSet<>();
     public MailER_NativeAdUtil(Context context, int width, int height) {
         this.context = context;
         this.width = width;
@@ -62,38 +65,38 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.setVisibility(View.VISIBLE);
         }
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
-        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer);
+        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1);
     }
 
-    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer) {
+    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer, final int position) {
         if (nativeAdContainer == null) return;
 
-        // Reuse existing loaded ad instead of requesting a new one
-        if (this.nativeAd != null && this.adView != null) {
+        if (nativeAdCache.containsKey(position) && nativeAdViewCache.containsKey(position)) {
+            NativeAdView cachedView = nativeAdViewCache.get(position);
             nativeAdContainer.removeAllViews();
-            if (adView.getParent() != null) {
-                ((android.view.ViewGroup) adView.getParent()).removeView(adView);
+            if (cachedView.getParent() != null) {
+                ((android.view.ViewGroup) cachedView.getParent()).removeView(cachedView);
             }
-            nativeAdContainer.addView(adView);
+            nativeAdContainer.addView(cachedView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
             nativeAdContainer.setVisibility(View.VISIBLE);
             return;
         }
 
-        if (isLoadingAdMob) return;
-        isLoadingAdMob = true;
+        if (loadingPositions.contains(position)) return;
+        loadingPositions.add(position);
 
         String nativeId = preferenceClass.getAdsId("NativeUnitID");
         Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
         AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
         builder.forNativeAd(nativeAd -> {
-            isLoadingAdMob = false;
-            if (this.nativeAd != null && this.nativeAd != nativeAd) {
-                this.nativeAd.destroy();
-            }
-            this.nativeAd = nativeAd;
-            adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_native_ad_layout, null);
+            loadingPositions.remove(position);
+            
+            nativeAdCache.put(position, nativeAd);
+            NativeAdView adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_native_ad_layout, null);
+            nativeAdViewCache.put(position, adView);
+            
             populateUnifiedNativeAdView(nativeAd, adView);
             nativeAdContainer.removeAllViews();
             nativeAdContainer.addView(adView);
