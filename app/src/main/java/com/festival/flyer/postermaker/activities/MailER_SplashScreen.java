@@ -267,13 +267,19 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                         preferenceClass.setAdsId("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
                                         preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
                                         preferenceClass.setAdsId("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
-                                        preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
-                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
-                                        preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5354046379");
+                                        preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
+                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
+                                        preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5224354917");
                                     }
 
                                     MailER_AppOpenManager.AppOpenAdShow = getSnapshotInt(snapshot, "AppOpenAdShow", 0);
                                     MailER_InterstitialAdManager.InterAdTimer = getSnapshotInt(snapshot, "InterAdTimer", 0);
+
+                                    // Connect Firebase keys to App Open Ad timers
+                                    MailER_AppOpenManager.APPOPEN_COOLDOWN_MS = getSnapshotInt(snapshot, "splashAdTimer", 20000);
+                                    MailER_AppOpenManager.INTERSTITIAL_CLASH_MS = getSnapshotInt(snapshot, "InterAdTimer", 30000);
+                                    
+                                    preferenceClass.setInt("FreeDownloadsAllowed", getSnapshotInt(snapshot, "FreeDownloadsAllowed", 2));
 
                                     int rawUpdateVal = getSnapshotInt(snapshot, "UpdateAvailable", 0);
                                     int rawForceUpdateVal = getSnapshotInt(snapshot, "ForceUpdate", 0);
@@ -455,7 +461,6 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private void performNavigation() {
         MyApplication.isAdsSplash = false;
         ((MyApplication) getApplicationContext()).sendRequest();
-        ((MyApplication) getApplicationContext()).loadInterstitialAd();
 
         Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
         startActivity(intent);

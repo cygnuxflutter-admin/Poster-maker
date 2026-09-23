@@ -37,8 +37,8 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     private String AD_UNIT_ID1, AD_UNIT_ID2;
     private static long lastAppOpenShowTime = 0;
     public static long lastInterstitialShowTime = 0;
-    private static final long APPOPEN_COOLDOWN_MS = 60000; // 60 seconds
-    private static final long INTERSTITIAL_CLASH_MS = 30000; // 30 seconds
+    public static long APPOPEN_COOLDOWN_MS = 60000; // Default 60 sec, overridden by Firebase "splashAdTimer"
+    public static long INTERSTITIAL_CLASH_MS = 30000; // Default 30 sec, overridden by Firebase "InterAdTimer"
 
     /**
      * Constructor
@@ -170,6 +170,9 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
                     @Override
                     public void onAdFailedToShowFullScreenContent(AdError adError) {
                         Log.d("[ADS_LOG]", "🔴 AppOpen Ad Failed to Show: " + adError.getMessage());
+                        MailER_AppOpenManager.this.appOpenAd = null;
+                        isShowingAd = false;
+                        fetchAd();
                     }
 
                     @Override
@@ -209,6 +212,9 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
                 @Override
                 public void onAdFailedToShowFullScreenContent(AdError adError) {
                     Log.d("[ADS_LOG]", "🔴 Splash AppOpen Ad Failed to Show: " + adError.getMessage());
+                    MailER_AppOpenManager.this.appOpenAd = null;
+                    isShowingAd = false;
+                    fetchAd();
                     onShowAdCompleteListener.onShowAdComplete();
                 }
 
@@ -247,6 +253,9 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
                 @Override
                 public void onAdFailedToShowFullScreenContent(AdError adError) {
                     Log.d("[ADS_LOG]", "🔴 AppOpen Ad (Overload) Failed to Show: " + adError.getMessage());
+                    MailER_AppOpenManager.this.appOpenAd = null;
+                    isShowingAd = false;
+                    fetchAd();
                     onShowAdCompleteListener.onShowAdComplete();
                 }
 

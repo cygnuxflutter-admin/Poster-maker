@@ -15,14 +15,14 @@
         android:background="@color/home_bg">
 
             <!-- Pull to Refresh Container -->
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            <com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout
                 android:id="@+id/swipe_refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@+id/bottom_nav_bar">
 
                 <!-- Scrollable Content -->
-                <ScrollView
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="none"
@@ -726,8 +726,8 @@
 
                 </LinearLayout>
 
-            </ScrollView>
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            </androidx.core.widget.NestedScrollView>
+            </com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout>
 
             <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->
             <RelativeLayout

@@ -38,7 +38,7 @@ public class MailER_InterstitialAdManager {
         admobInterstitialAdId = preferenceClass.getAdsId("InterstitalAdunitID");
         adXInterstitialAdId = preferenceClass.getAdsId("AdxInterstitalAdunitID");
         fbInterstitialAdId = preferenceClass.getAdsId("fbInterstitalAdunitID");
-        fetchAdMobAd();
+        // Ad will now load only when click count is close to target (Just-in-Time Pre-loading)
     }
 
     private void fetchFbAd() {
@@ -180,9 +180,16 @@ public class MailER_InterstitialAdManager {
         int interstitalAdStatus = preferenceClass.getAdsStatus("interstitalAdStatus");
         int getClickCount = preferenceClass.getInt("getClickCount");
         
-        if (getClickCount < interstitalAdStatus) {
+        if (getClickCount + 1 < interstitalAdStatus) {
             int currentClick = getClickCount + 1;
             preferenceClass.setInt("getClickCount", currentClick);
+
+            // Just-in-Time Pre-loading: Load ad one click before target so it's ready when needed
+            if (currentClick == interstitalAdStatus - 1 && !isAdmobAdAvailable()) {
+                Log.d("[ADS_LOG]", "🔄 Pre-loading Interstitial Ad at Click " + currentClick + " / " + interstitalAdStatus + " (Target)");
+                fetchAdMobAd();
+            }
+
             Log.d("[ADS_LOG]", "▶️ Click Count: " + currentClick + " / " + interstitalAdStatus + " (Required). Skipping Ad Show.");
             onAdLoadInterface.onAdClose();
             return;
@@ -292,9 +299,8 @@ public class MailER_InterstitialAdManager {
                 @Override
                 public void onAdDismissedFullScreenContent() {
                     super.onAdDismissedFullScreenContent();
-                    Log.d("[ADS_LOG]", "❌ Direct Interstitial Ad Dismissed by User. Pre-fetching next Ad...");
+                    Log.d("[ADS_LOG]", "❌ Direct Interstitial Ad Dismissed by User.");
                     admobInterstitialAd = null;
-                    fetchAdMobAd();
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
@@ -312,6 +318,8 @@ public class MailER_InterstitialAdManager {
         } else if (isFbAdAvailable()) {
             fbInterstitialAd.show();
         } else {
+            // No ad available, load one for next time
+            fetchAdMobAd();
             onAdLoadInterface.onAdClose();
         }
     }
@@ -328,7 +336,15 @@ public class MailER_InterstitialAdManager {
         int getClickCount = preferenceClass.getInt("getEDitClickCount");
         
         if (getClickCount < interstitalAdStatus) {
-            preferenceClass.setInt("getEDitClickCount", getClickCount + 1);
+            int currentClick = getClickCount + 1;
+            preferenceClass.setInt("getEDitClickCount", currentClick);
+
+            // Just-in-Time Pre-loading: Load ad one click before target so it's ready when needed
+            if (currentClick >= interstitalAdStatus - 1 && !isAdmobAdAvailable()) {
+                Log.d("[ADS_LOG]", "🔄 Pre-loading EditScreen Ad at Click " + currentClick + " / " + interstitalAdStatus + " (Target)");
+                fetchAdMobAd();
+            }
+
             onAdLoadInterface.onAdClose();
             return;
         }
@@ -365,9 +381,8 @@ public class MailER_InterstitialAdManager {
                 @Override
                 public void onAdDismissedFullScreenContent() {
                     super.onAdDismissedFullScreenContent();
-                    Log.d("[ADS_LOG]", "❌ EditScreen Interstitial Ad Dismissed by User. Pre-fetching next Ad...");
+                    Log.d("[ADS_LOG]", "❌ EditScreen Interstitial Ad Dismissed by User.");
                     admobInterstitialAd = null;
-                    fetchAdMobAd();
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }

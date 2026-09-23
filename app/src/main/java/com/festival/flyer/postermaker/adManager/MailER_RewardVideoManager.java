@@ -59,12 +59,13 @@ public class MailER_RewardVideoManager {
         }
 
         isLoading = true;
-        Log.d("AdTracker", "Requesting Reward Video ON DEMAND with ID: " + AD_google_Rw);
+        Log.d("[ADS_LOG]", "🎁 Requesting Reward Video ON DEMAND...");
         AdRequest adRequest = new AdRequest.Builder().build();
         RewardedAd.load(context, AD_google_Rw, adRequest, new RewardedAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull RewardedAd ad) {
                 isLoading = false;
+                Log.d("[ADS_LOG]", "🟢 Reward Video Ad Loaded Successfully!");
                 if (alertDialog != null && alertDialog.isShowing()) {
                     alertDialog.dismiss();
                 }
@@ -73,9 +74,12 @@ public class MailER_RewardVideoManager {
                     @Override
                     public void onAdDismissedFullScreenContent() {
                         super.onAdDismissedFullScreenContent();
+                        Log.d("[ADS_LOG]", "❌ Reward Video Ad Closed by User.");
                         if (isEarned[0]) {
+                            Log.d("[ADS_LOG]", "✅ User earned reward! Proceeding...");
                             if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                         } else {
+                            Log.d("[ADS_LOG]", "⚠️ User skipped Ad! Reward not given.");
                             Toast.makeText(context, "You must watch the full ad to unlock feature!", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -83,7 +87,14 @@ public class MailER_RewardVideoManager {
                     @Override
                     public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                         super.onAdFailedToShowFullScreenContent(adError);
+                        Log.d("[ADS_LOG]", "🔴 Reward Video Failed to Show: " + adError.getMessage());
                         if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                    }
+
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        super.onAdShowedFullScreenContent();
+                        Log.d("[ADS_LOG]", "📺 Reward Video Displayed on Screen!");
                     }
                 });
                 ad.show(context, rewardItem -> {
@@ -94,7 +105,7 @@ public class MailER_RewardVideoManager {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 isLoading = false;
-                Log.d("AdTracker", "Reward Video Failed to Load! Error: " + loadAdError.getMessage());
+                Log.d("[ADS_LOG]", "🔴 Reward Video Failed to Load: " + loadAdError.getMessage() + ". Executing Fallback (Free Access).");
                 if (alertDialog != null && alertDialog.isShowing()) {
                     alertDialog.dismiss();
                 }

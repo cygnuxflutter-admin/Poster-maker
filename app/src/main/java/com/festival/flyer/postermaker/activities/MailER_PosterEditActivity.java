@@ -892,43 +892,15 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-
-//            if (SDK_INT >= Build.VERSION_CODES.M) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PERMISSION_GRANTED
-//                        || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, READ_EXTERNAL_STORAGE)) {
-                        permission_type = "template";
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
             btn_watermark_remove.setVisibility(View.GONE);
-            new saveTemplateAsync(false).execute();
+            checkDownloadAdAndSave(false);
         } else if (id == R.id.btn_save_poster) {
             hideAllControls();
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-
-//            if (SDK_INT >= Build.VERSION_CODES.M) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PERMISSION_GRANTED
-//                        || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, READ_EXTERNAL_STORAGE)) {
-                        permission_type = "poster";
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
             btn_watermark_remove.setVisibility(View.GONE);
-            new saveTemplateAsync(true).execute();
+            checkDownloadAdAndSave(true);
         } else if (id == R.id.btn_reset) {
             MyApplication.showEditInterstitialAd(this, () -> {
                 MailER_MaterialDialogUtils.getInstance().resetDialog(this, materialDialog -> {
@@ -986,6 +958,32 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         hideAllControls();
         hideStickerControl();
         hideEffectControl();
+    }
+
+    private void checkDownloadAdAndSave(boolean isPoster) {
+        com.festival.flyer.postermaker.utils.MailER_PreferenceClass prefManager = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+        int freeAllowed = prefManager.getInt("FreeDownloadsAllowed", 2);
+        int totalDownloads = prefManager.getInt("TotalDownloadsCount", 0);
+
+        if (totalDownloads < freeAllowed) {
+            prefManager.setInt("TotalDownloadsCount", totalDownloads + 1);
+            new saveTemplateAsync(isPoster).execute();
+        } else {
+            // Show custom pop-up dialog
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Premium Quality Download")
+                    .setMessage("Watch a short video to download your poster in High Quality!")
+                    .setCancelable(false)
+                    .setPositiveButton("Watch Ad", (dialog, which) -> {
+                        com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.showRewardVideoAd(this, () -> {
+                            new saveTemplateAsync(isPoster).execute();
+                        });
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        dialog.dismiss();
+                    })
+                    .show();
+        }
     }
 
     private void showUserDialog() {

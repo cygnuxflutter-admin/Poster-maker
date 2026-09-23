@@ -93,6 +93,9 @@ public class MailER_NativeAdUtil {
         builder.forNativeAd(nativeAd -> {
             loadingPositions.remove(position);
             
+            if (nativeAdCache.containsKey(position)) {
+                nativeAdCache.get(position).destroy();
+            }
             nativeAdCache.put(position, nativeAd);
             NativeAdView adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_native_ad_layout, null);
             nativeAdViewCache.put(position, adView);
@@ -111,14 +114,26 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                loadingPositions.remove(position);
                 isLoadingAdMob = false;
                 Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                if (nativeAdContainer != null) {
+                    nativeAdContainer.setVisibility(View.GONE);
+                }
                 // fillAdXNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
                 Log.d("[ADS_LOG]", "🟢 AdMob Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdMob Native Ad Loaded Successfully!");
                 Log.e("AdMob_Error", "AdMob Native Ad Loaded Successfully!");
