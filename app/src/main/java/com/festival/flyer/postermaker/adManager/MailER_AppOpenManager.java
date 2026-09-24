@@ -35,6 +35,10 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
     public static Integer AppOpenAdShow = 0;
     private static MailER_PreferenceClass preferenceClass;
     private String AD_UNIT_ID1, AD_UNIT_ID2;
+    private static long lastAppOpenShowTime = 0;
+    public static long lastInterstitialShowTime = 0;
+    public static long APPOPEN_COOLDOWN_MS = 60000; // Default 60 sec, overridden by Firebase "splashAdTimer"
+    public static long INTERSTITIAL_CLASH_MS = 30000; // Default 30 sec, overridden by Firebase "InterAdTimer"
 
     /**
      * Constructor
@@ -45,21 +49,21 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
+    private static boolean isLoadingAd = false;
+
     /**
      * Request an ad
      */
     public void fetchAd() {
-        if (AppOpenAdShow == 0) {
+        if (AppOpenAdShow == 0 || isAdAvailable() || isLoadingAd) {
             return;
         }
-        // Have unused ad, no need to fetch another.
-        if (isAdAvailable()) {
-            return;
-        }
+        isLoadingAd = true;
 
         loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(AppOpenAd ad) {
+                isLoadingAd = false;
                 Log.d("AdTracker", "AppOpen Ad (AdMob) Loaded Successfully using ID: " + AD_UNIT_ID1);
                 MailER_AppOpenManager.this.appOpenAd = ad;
                 MailER_AppOpenManager.this.loadTime = (new Date()).getTime();
@@ -67,6 +71,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
 
             @Override
             public void onAdFailedToLoad(LoadAdError loadAdError) {
+                isLoadingAd = false;
                 Log.d("AdTracker", "AppOpen Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 // fetchAdX();
             }
@@ -139,14 +144,24 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
      * Shows the ad if one isn't already showing.
      */
     public void showAdIfAvailable() {
-        // Only show ad if there is not already an app open ad currently showing
-        // and an ad is available.
         if (!isShowingAd && isAdAvailable()) {
             if (MyApplication.isShowingAppOpen) {
+                // Cooldown check - don't show if last AppOpen was less than 60 sec ago
+                long timeSinceLastAppOpen = System.currentTimeMillis() - lastAppOpenShowTime;
+                if (lastAppOpenShowTime > 0 && timeSinceLastAppOpen < APPOPEN_COOLDOWN_MS) {
+                    Log.d("[ADS_LOG]", "⏳ AppOpen Ad Skipped! Cooldown active (" + (timeSinceLastAppOpen / 1000) + "s / " + (APPOPEN_COOLDOWN_MS / 1000) + "s)");
+                    return;
+                }
+                // Clash check - don't show if Interstitial was shown in last 30 sec
+                long timeSinceInterstitial = System.currentTimeMillis() - lastInterstitialShowTime;
+                if (lastInterstitialShowTime > 0 && timeSinceInterstitial < INTERSTITIAL_CLASH_MS) {
+                    Log.d("[ADS_LOG]", "⏳ AppOpen Ad Skipped! Interstitial shown " + (timeSinceInterstitial / 1000) + "s ago (need " + (INTERSTITIAL_CLASH_MS / 1000) + "s gap)");
+                    return;
+                }
                 FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                     @Override
                     public void onAdDismissedFullScreenContent() {
-                        // Set the reference to null so isAdAvailable() returns false.
+                        Log.d("[ADS_LOG]", "❌ AppOpen Ad Dismissed by User.");
                         MailER_AppOpenManager.this.appOpenAd = null;
                         isShowingAd = false;
                         fetchAd();
@@ -154,11 +169,23 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
 
                     @Override
                     public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        Log.d("[ADS_LOG]", "🔴 AppOpen Ad Failed to Show: " + adError.getMessage());
+                        MailER_AppOpenManager.this.appOpenAd = null;
+                        isShowingAd = false;
+                        fetchAd();
                     }
 
                     @Override
                     public void onAdShowedFullScreenContent() {
+                        Log.d("[ADS_LOG]", "📺 AppOpen Ad Displayed on Screen!");
                         isShowingAd = true;
+                        lastAppOpenShowTime = System.currentTimeMillis();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        super.onAdImpression();
+                        Log.d("[ADS_LOG]", "🟢 SUCCESS: AppOpen Ad IMPRESSION Logged!");
                     }
                 };
 
@@ -175,7 +202,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
-                    // Set the reference to null so isAdAvailable() returns false.
+                    Log.d("[ADS_LOG]", "❌ Splash AppOpen Ad Dismissed by User.");
                     MailER_AppOpenManager.this.appOpenAd = null;
                     isShowingAd = false;
                     fetchAd();
@@ -184,58 +211,31 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
 
                 @Override
                 public void onAdFailedToShowFullScreenContent(AdError adError) {
+                    Log.d("[ADS_LOG]", "🔴 Splash AppOpen Ad Failed to Show: " + adError.getMessage());
+                    MailER_AppOpenManager.this.appOpenAd = null;
+                    isShowingAd = false;
+                    fetchAd();
                     onShowAdCompleteListener.onShowAdComplete();
                 }
 
                 @Override
                 public void onAdShowedFullScreenContent() {
+                    Log.d("[ADS_LOG]", "📺 Splash AppOpen Ad Displayed on Screen!");
                     isShowingAd = true;
+                    lastAppOpenShowTime = System.currentTimeMillis();
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: Splash AppOpen Ad IMPRESSION Logged!");
                 }
             };
             appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
             appOpenAd.show(activity);
         } else {
-            loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
-                @Override
-                public void onAdLoaded(AppOpenAd ad) {
-                    MailER_AppOpenManager.this.appOpenAd = ad;
-                    MailER_AppOpenManager.this.loadTime = (new Date()).getTime();
-
-                    FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
-                        @Override
-                        public void onAdDismissedFullScreenContent() {
-                            MailER_AppOpenManager.this.appOpenAd = null;
-                            isShowingAd = false;
-                            fetchAd();
-                            onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdFailedToShowFullScreenContent(AdError adError) {
-                            onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdShowedFullScreenContent() {
-                            isShowingAd = true;
-                        }
-                    };
-                    appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);
-                    appOpenAd.show(currentActivity);
-                }
-
-                @Override
-                public void onAdFailedToLoad(LoadAdError loadAdError) {
-                    onShowAdCompleteListener.onShowAdComplete();
-                }
-            };
-            if (preferenceClass == null) {
-                preferenceClass = new MailER_PreferenceClass(myApplication);
-            }
-            AD_UNIT_ID1 = preferenceClass.getAdsId("AppOpenID");
-            AD_UNIT_ID2 = preferenceClass.getAdsId("AdxAppOpenID");
-            AdRequest request = getAdRequest();
-            AppOpenAd.load(myApplication, AD_UNIT_ID1, request, AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
+            fetchAd();
+            onShowAdCompleteListener.onShowAdComplete();
         }
     }
 
@@ -244,7 +244,7 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
                 public void onAdDismissedFullScreenContent() {
-                    // Set the reference to null so isAdAvailable() returns false.
+                    Log.d("[ADS_LOG]", "❌ AppOpen Ad (Overload) Dismissed by User.");
                     MailER_AppOpenManager.this.appOpenAd = null;
                     isShowingAd = false;
                     onShowAdCompleteListener.onShowAdComplete();
@@ -252,12 +252,24 @@ public class MailER_AppOpenManager implements LifecycleObserver, Application.Act
 
                 @Override
                 public void onAdFailedToShowFullScreenContent(AdError adError) {
+                    Log.d("[ADS_LOG]", "🔴 AppOpen Ad (Overload) Failed to Show: " + adError.getMessage());
+                    MailER_AppOpenManager.this.appOpenAd = null;
+                    isShowingAd = false;
+                    fetchAd();
                     onShowAdCompleteListener.onShowAdComplete();
                 }
 
                 @Override
                 public void onAdShowedFullScreenContent() {
+                    Log.d("[ADS_LOG]", "📺 AppOpen Ad (Overload) Displayed on Screen!");
                     isShowingAd = true;
+                    lastAppOpenShowTime = System.currentTimeMillis();
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: AppOpen Ad (Overload) IMPRESSION Logged!");
                 }
             };
             appOpenAd.setFullScreenContentCallback(fullScreenContentCallback);

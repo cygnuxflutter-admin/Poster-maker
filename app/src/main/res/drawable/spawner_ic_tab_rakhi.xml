@@ -1,0 +1,52 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Thread/String Left -->
+    <path
+        android:fillColor="#FFB74D"
+        android:pathData="M12,25 C8,28 4,22 0,26 L1,28 C5,24 9,30 14,27 Z" />
+        
+    <!-- Thread/String Right -->
+    <path
+        android:fillColor="#FFB74D"
+        android:pathData="M36,25 C40,28 44,22 48,26 L47,28 C43,24 39,30 34,27 Z" />
+
+    <!-- Outer Decorative Red/Orange Flower/Sunburst -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M24,4 L27,10 L33.5,8.5 L34.5,15 L40.5,17.5 L36.5,22.5 L39.5,28 L33.5,30 L31.5,36 L25.5,34 L21.5,40 L18,34 L12,35.5 L13,29 L7,26 L11.5,21.5 L8.5,16 L15,14 L17,8 L22.5,10 Z" />
+
+    <!-- Inner Gold Starburst -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M24,8 L26,12 L30,11 L29,15 L33,18 L29,21 L31,25 L27,25 L27,29 L23,26 L20,30 L19,25 L15,24 L18,21 L15,17 L19,16 L20,12 L23,15 Z" />
+
+    <!-- Core Red Circle -->
+    <path
+        android:fillColor="#D32F2F"
+        android:pathData="M24,14 A8,8 0 1,0 24,30 A8,8 0 1,0 24,14 Z" />
+
+    <!-- Center Gem/Diamond (White/Silver) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,18 L27,22 L24,26 L21,22 Z" />
+
+    <!-- Accent Dots around the core -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,11 A1.5,1.5 0 1,0 24,14 A1.5,1.5 0 1,0 24,11 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,31 A1.5,1.5 0 1,0 24,34 A1.5,1.5 0 1,0 24,31 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13,22 A1.5,1.5 0 1,0 13,25 A1.5,1.5 0 1,0 13,22 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,22 A1.5,1.5 0 1,0 34,25 A1.5,1.5 0 1,0 34,22 Z" />
+
+</vector>

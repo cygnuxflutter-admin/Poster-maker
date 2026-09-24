@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/_60sdp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/new_selected">
+    android:background="@color/white">
 
     <LinearLayout
         android:id="@+id/item_layout"
@@ -60,7 +60,7 @@
                             android:layout_marginEnd="3.0dip"
                             android:layout_marginBottom="3.0dip"
                             android:gravity="center"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_primary"
                             android:textSize="@dimen/_13sdp" />
                     </RelativeLayout>
 
@@ -75,6 +75,7 @@
                             android:layout_height="match_parent"
                             android:layout_centerVertical="true"
                             android:padding="@dimen/_5sdp"
+                            app:tint="@color/new_selected"
                             android:src="@drawable/spawner_ic_unlock" />
 
                     </RelativeLayout>
@@ -92,7 +93,7 @@
                             android:layout_centerVertical="true"
                             android:padding="@dimen/_7sdp"
                             android:src="@drawable/spawner_layeradjust"
-                            app:tint="@color/white" />
+                            app:tint="@color/new_selected" />
 
                     </RelativeLayout>
 
@@ -106,7 +107,7 @@
     <View
         android:id="@+id/underline_view"
         android:layout_width="wrap_content"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/_1sdp"
         android:layout_alignBottom="@+id/item_layout"
-        android:background="@color/white"/>
+        android:background="@color/divider_light"/>
 </com.woxthebox.draglistview.swipe.ListSwipeItem>

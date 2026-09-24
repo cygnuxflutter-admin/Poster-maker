@@ -7,11 +7,21 @@ public class MailER_BgImage implements Serializable {
     private int id;
     private String thumb_url;
     private String image_url;
+    private boolean isPremium;
 
-    public MailER_BgImage(int id, String thumb_url, String image_url) {
+    public MailER_BgImage(int id, String thumb_url, String image_url, boolean isPremium) {
         this.id = id;
         this.thumb_url = thumb_url;
         this.image_url = image_url;
+        this.isPremium = isPremium;
+    }
+
+    public boolean isPremium() {
+        return isPremium;
+    }
+
+    public void setPremium(boolean premium) {
+        isPremium = premium;
     }
 
     public int getId() {

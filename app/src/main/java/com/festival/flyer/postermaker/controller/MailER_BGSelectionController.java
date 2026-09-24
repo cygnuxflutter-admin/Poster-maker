@@ -13,6 +13,7 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -34,6 +35,7 @@ import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adapter.MailER_ColorPelleteAdapter;
 import com.festival.flyer.postermaker.fragment.MailER_BackgroundFragment;
 import com.festival.flyer.postermaker.fragment.MailER_BackgroundPagerAdapter;
+import com.festival.flyer.postermaker.model.MailER_BgImage;
 import com.festival.flyer.postermaker.model.MailER_BgModel;
 import com.festival.flyer.postermaker.threadTask.MailER_GetBgData;
 import com.festival.flyer.postermaker.threadTask.MailER_SaveBitmapTask;
@@ -60,6 +62,12 @@ public class MailER_BGSelectionController {
     public final int GALLERY_INTENT = 907;
     public String mode;
     public File camera_file;
+    public static ArrayList<MailER_BgModel> allCategoriesData = new ArrayList<>();
+
+    public interface CategorySelectionListener {
+        void onCategorySelected(int index);
+    }
+    public static CategorySelectionListener globalSelectionListener;
 
     private final Activity activity;
     private final FragmentManager supportFragmentManager;
@@ -80,13 +88,10 @@ public class MailER_BGSelectionController {
     }
 
     private void getBgThumb(String key) {
-        String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
-        Log.e("---API_DATA---", "--- REQUEST START (BG Thumb) ---");
-        Log.e("---API_DATA---", "URL: " + requestUrl);
+        String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (BG): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
-            Log.e("---API_DATA---", "--- RESPONSE START (BG Thumb) ---");
-            Log.e("---API_DATA---", "URL: " + requestUrl);
-            Log.e("---API_DATA---", "Response: " + response);
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (BG): " + requestUrl + "\nDATA: " + response);
             String text1 = null;
 
             Log.d("qwertyu", "getBgThumb: " + response);
@@ -108,7 +113,7 @@ public class MailER_BGSelectionController {
                     new MailER_GetBgData(preferenceClass, jsonArray, new MailER_GetBgData.OnGetCatDataListener() {
                         @Override
                         public void onGetDataComplete(ArrayList<MailER_BgModel> posterDataLists) {
-                            setPagerAdapter(posterDataLists);
+                            new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 1200);
                         }
 
                         @Override
@@ -143,14 +148,129 @@ public class MailER_BGSelectionController {
         Volley.newRequestQueue(activity).add(stringRequest);
     }
 
+    public void applyProFilter(boolean isPro) {
+        if (allCategoriesData == null) return;
+        
+        ArrayList<MailER_BgModel> filteredCategories = new ArrayList<>();
+        for (MailER_BgModel category : allCategoriesData) {
+            if ("More".equalsIgnoreCase(category.getCategory_name())) continue;
+            
+            ArrayList<MailER_BgImage> proPosters = new ArrayList<>();
+            for (MailER_BgImage poster : category.getCategory_list()) {
+                if (!isPro || poster.isPremium()) {
+                    proPosters.add(poster);
+                }
+            }
+            
+            MailER_BgModel clonedCategory = new MailER_BgModel(
+                    String.valueOf(category.getCategory_id()), 
+                    category.getCategory_name(), 
+                    proPosters);
+            filteredCategories.add(clonedCategory);
+        }
+        
+        // Re-inject More tab
+        MailER_BgModel moreModel = new MailER_BgModel("0", "More", new ArrayList<>());
+        int insertIndex = Math.min(3, filteredCategories.size());
+        filteredCategories.add(insertIndex, moreModel);
+        
+        ViewPager viewPager = activity.findViewById(R.id.viewPager);
+        androidx.recyclerview.widget.RecyclerView rvCategories = activity.findViewById(R.id.rv_category_tabs);
+        if (viewPager != null && rvCategories != null) {
+            int currentItem = viewPager.getCurrentItem();
+            viewPager.setAdapter(new MailER_BackgroundPagerAdapter(supportFragmentManager, filteredCategories));
+            setupTabsIcons(rvCategories, viewPager, filteredCategories);
+            if (currentItem < filteredCategories.size()) {
+                viewPager.setCurrentItem(currentItem, false);
+            } else {
+                viewPager.setCurrentItem(0, false);
+            }
+        }
+    }
+
     private void setPagerAdapter(ArrayList<MailER_BgModel> posterDataLists) {
+        allCategoriesData = new ArrayList<>(posterDataLists); // Save original for More bottom sheet
+
         MailER_BackgroundFragment.TempisFirstShow = false;
-        MailER_PagerSlidingTabStrip tabs = activity.findViewById(R.id.pagerSlidingTabStrip);
+        androidx.recyclerview.widget.RecyclerView rvCategories = activity.findViewById(R.id.rv_category_tabs);
         ViewPager viewPager = activity.findViewById(R.id.viewPager);
         viewPager.setAdapter(new MailER_BackgroundPagerAdapter(supportFragmentManager, posterDataLists));
-        viewPager.setCurrentItem(0);
-        tabs.setViewPager(viewPager);
+
+        setupTabsIcons(rvCategories, viewPager, posterDataLists);
         dismissMaterialDialog();
+    }
+
+    private void updateTabsData(com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter adapter, ArrayList<MailER_BgModel> allCategories, int selectedIndex) {
+        ArrayList<MailER_BgModel> visibleTabs = new ArrayList<>();
+        
+        // Add up to first 3 categories
+        for (int i = 0; i < Math.min(3, allCategories.size()); i++) {
+            visibleTabs.add(allCategories.get(i));
+        }
+        
+        // Handle hidden selected category and More tab
+        if (allCategories.size() > 3) {
+            if (selectedIndex > 2) {
+                // User wants: 3 fixed + Selected Hidden + More (More is not removed)
+                visibleTabs.add(allCategories.get(selectedIndex));
+            }
+            
+            // Always add More tab at the end
+            MailER_BgModel moreModel = new MailER_BgModel("0", "More", new ArrayList<>());
+            visibleTabs.add(moreModel);
+        }
+        
+        adapter.updateData(visibleTabs);
+        
+        // The selected index in the RecyclerView is either the actual index (0, 1, 2) or the 4th slot (3) if > 2
+        int rvSelectedIndex = (selectedIndex > 2) ? 3 : selectedIndex;
+        adapter.setSelectedPosition(rvSelectedIndex);
+    }
+    
+    private void setupTabsIcons(androidx.recyclerview.widget.RecyclerView rvCategories, ViewPager viewPager, ArrayList<MailER_BgModel> posterModel) {
+        com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter adapter = new com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter(activity, new ArrayList<>(), false, null);
+        
+        adapter = new com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter(activity, new ArrayList<>(), false, (position, model) -> {
+            if ("More".equalsIgnoreCase(model.getCategory_name())) {
+                globalSelectionListener = new CategorySelectionListener() {
+                    @Override
+                    public void onCategorySelected(int actualIndex) {
+                        viewPager.setCurrentItem(actualIndex);
+                    }
+                };
+                android.content.Intent intent = new android.content.Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllBgCategoriesActivity.class);
+                if (viewPager != null) {
+                    intent.putExtra("selected_index", viewPager.getCurrentItem());
+                }
+                activity.startActivity(intent);
+            } else {
+                // Find the actual index of the clicked model in the original posterModel list
+                int actualIndex = posterModel.indexOf(model);
+                if (actualIndex != -1) {
+                    viewPager.setCurrentItem(actualIndex);
+                }
+            }
+        });
+        rvCategories.setAdapter(adapter);
+
+        // Initial setup
+        updateTabsData(adapter, posterModel, viewPager.getCurrentItem());
+        
+        com.festival.flyer.postermaker.adapter.MailER_BgCategoryTabAdapter finalAdapter = adapter;
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+            @Override
+            public void onPageSelected(int position) {
+                updateTabsData(finalAdapter, posterModel, position);
+                int rvSelectedIndex = (position > 2) ? 3 : position;
+                rvCategories.smoothScrollToPosition(rvSelectedIndex);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
     }
 
     public void openPhotoGallery() {
@@ -361,10 +481,14 @@ public class MailER_BGSelectionController {
 
     private UCrop advancedConfig(@NonNull UCrop uCrop) {
         UCrop.Options options = new UCrop.Options();
-        options.setToolbarColor(ContextCompat.getColor(activity, R.color.purple_700));
-        options.setStatusBarColor(ContextCompat.getColor(activity, R.color.purple_700));
+        options.setToolbarColor(Color.parseColor("#7B2FF7")); // Primary Purple
+        options.setStatusBarColor(Color.parseColor("#5A18C9")); // Darker Purple
         options.setToolbarWidgetColor(Color.WHITE);
-        options.setRootViewBackgroundColor(ContextCompat.getColor(activity, R.color.purple_200));
+        options.setActiveControlsWidgetColor(Color.parseColor("#7B2FF7")); // Replaces Orange with Purple
+        options.setRootViewBackgroundColor(Color.WHITE); // Cleaner background
+        options.setCropFrameColor(Color.WHITE); // White crop frame
+        options.setCropGridColor(Color.WHITE); // White grid
+        
         options.setAspectRatioOptions(1,
                 new AspectRatio("1:1", 1, 1),
                 new AspectRatio("3:2", 3, 2),

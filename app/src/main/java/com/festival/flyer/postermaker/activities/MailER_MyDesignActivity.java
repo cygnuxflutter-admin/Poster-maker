@@ -39,9 +39,24 @@ public class MailER_MyDesignActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+        
         setContentView(R.layout.spawner_activity_my_design);
+        
+        // Use modern approach for fullscreen to avoid black flash on transition
+        // This must be called AFTER setContentView so the DecorView exists
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            
+            if (getWindow().getInsetsController() != null) {
+                getWindow().getInsetsController().hide(android.view.WindowInsets.Type.statusBars());
+                getWindow().getInsetsController().setSystemBarsBehavior(
+                        android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
 
         findByID();
 

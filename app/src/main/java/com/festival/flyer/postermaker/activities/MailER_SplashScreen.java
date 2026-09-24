@@ -3,10 +3,14 @@ package com.festival.flyer.postermaker.activities;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -22,6 +26,7 @@ import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adManager.MailER_AppOpenManager;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
+import com.festival.flyer.postermaker.utils.MailER_NetworkMonitor;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
 import com.google.android.gms.ads.AdError;
@@ -52,40 +57,86 @@ public class MailER_SplashScreen extends AppCompatActivity {
 //    private AppUpdateManager appUpdateManager;
     private Dialog dialog;
 
+    private long startTime;
+    private static final long MIN_SPLASH_TIME = 3000; // 3.0 seconds
+    private boolean isDataLoaded = false;
+    private boolean isUpdateClicked = false;
+    private MailER_NetworkMonitor.NetworkStateListener networkListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startTime = System.currentTimeMillis();
         preferenceClass = new MailER_PreferenceClass(this);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
         setContentView(R.layout.spawner_activity_splash_screen);
+
+        TextView tvAppName = findViewById(R.id.tv_splash_app_name);
+
+        if (tvAppName != null) {
+            tvAppName.post(() -> {
+                float width = tvAppName.getPaint().measureText(tvAppName.getText().toString());
+                Shader textShader = new LinearGradient(0, 0, width, 0,
+                        new int[]{
+                                getResources().getColor(R.color.hero_start),
+                                getResources().getColor(R.color.hero_end)
+                        }, null, Shader.TileMode.CLAMP);
+                tvAppName.getPaint().setShader(textShader);
+                tvAppName.invalidate();
+            });
+        }
+
+        View logoContainer = findViewById(R.id.logo_container);
+        if (logoContainer != null) {
+            logoContainer.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(1000)
+                    .setStartDelay(200)
+                    .start();
+        }
+        
+        // Use modern approach for fullscreen to avoid black flash on transition
+        // This must be called AFTER setContentView so the DecorView exists
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+            if (getWindow().getInsetsController() != null) {
+                getWindow().getInsetsController().hide(android.view.WindowInsets.Type.statusBars());
+                getWindow().getInsetsController().setSystemBarsBehavior(
+                        android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
+        
         MyApplication.isAdsSplash = true;
 
-//        if (!preferenceClass.isFirstTimeLaunch()) {
-//            getData();
-//        } else {
-//            @SuppressLint("SimpleDateFormat")
-//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-//            Calendar calender = Calendar.getInstance();
-//            String start_date = preferenceClass.getFirstDate();
-//            String end_date = simpleDateFormat.format(calender.getTime());
-//
-//            if (start_date != null) {
-//                long findDiff = findDifference(start_date, end_date);
-//                if (findDiff >= 2) {
-//                    getData();
-//                } else {
-//                    save_token(false);
-//                }
-//            } else {
-//                getData();
-//            }
-//        }
+        networkListener = isConnected -> {
+            if (isConnected && !isDataLoaded && !isFinishing() && !isDestroyed()) {
+                Log.d("SplashScreen", "Network restored on Splash Screen. Triggering getData()...");
+                getData();
+            }
+        };
+        MailER_NetworkMonitor.getInstance().addListener(networkListener);
+
         if (MailER_NetworkUtils.isNetworkAvailable(MailER_SplashScreen.this)) {
             getData();
         } else {
-            Toast.makeText(this, "Something went wrong!!!", Toast.LENGTH_SHORT).show();
+            startIntent();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (networkListener != null) {
+            MailER_NetworkMonitor.getInstance().removeListener(networkListener);
+        }
+        super.onDestroy();
     }
 
     private long findDifference(String start_date, String end_date) {
@@ -104,6 +155,25 @@ public class MailER_SplashScreen extends AppCompatActivity {
         }
     }
 
+    private String getSnapshotString(DataSnapshot snapshot, String key, String defaultValue) {
+        if (snapshot != null && snapshot.hasChild(key) && snapshot.child(key).getValue() != null) {
+            return String.valueOf(snapshot.child(key).getValue());
+        }
+        return defaultValue;
+    }
+
+    private int getSnapshotInt(DataSnapshot snapshot, String key, int defaultValue) {
+        if (snapshot != null && snapshot.hasChild(key) && snapshot.child(key).getValue() != null) {
+            try {
+                String val = String.valueOf(snapshot.child(key).getValue()).trim();
+                return (int) Double.parseDouble(val);
+            } catch (Exception e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
     private void getData() {
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             database = FirebaseDatabase.getInstance();
@@ -111,157 +181,159 @@ public class MailER_SplashScreen extends AppCompatActivity {
             project_data.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    Log.e("---API_DATA---", "Firebase onDataChange called. Data: " + snapshot.toString());
-                    preferenceClass.setDataType("field_0", Objects.requireNonNull(snapshot.child("field_0").getValue()).toString());
-                    preferenceClass.setDataType("field_1", Objects.requireNonNull(snapshot.child("field_1").getValue()).toString());
-                    preferenceClass.setDataType("field_2", Objects.requireNonNull(snapshot.child("field_2").getValue()).toString());
-                    preferenceClass.setDataType("field_3", Objects.requireNonNull(snapshot.child("field_3").getValue()).toString());
-                    preferenceClass.setDataType("field_4", Objects.requireNonNull(snapshot.child("field_4").getValue()).toString());
-                    preferenceClass.setDataType("field_5", Objects.requireNonNull(snapshot.child("field_5").getValue()).toString());
-                    preferenceClass.setDataType("field_6", Objects.requireNonNull(snapshot.child("field_6").getValue()).toString());
-                    preferenceClass.setDataType("field_7", Objects.requireNonNull(snapshot.child("field_7").getValue()).toString());
-                    preferenceClass.setDataType("field_8", Objects.requireNonNull(snapshot.child("field_8").getValue()).toString());
-                    preferenceClass.setDataType("field_9", Objects.requireNonNull(snapshot.child("field_9").getValue()).toString());
-                    preferenceClass.setDataType("field_10", Objects.requireNonNull(snapshot.child("field_10").getValue()).toString());
-                    preferenceClass.setDataType("field_11", Objects.requireNonNull(snapshot.child("field_11").getValue()).toString());
-                    preferenceClass.setDataType("field_12", Objects.requireNonNull(snapshot.child("field_12").getValue()).toString());
-                    preferenceClass.setDataType("field_13", Objects.requireNonNull(snapshot.child("field_13").getValue()).toString());
-                    preferenceClass.setDataType("field_14", Objects.requireNonNull(snapshot.child("field_14").getValue()).toString());
-                    preferenceClass.setDataType("field_15", Objects.requireNonNull(snapshot.child("field_15").getValue()).toString());
-                    preferenceClass.setDataType("field_16", Objects.requireNonNull(snapshot.child("field_16").getValue()).toString());
-                    preferenceClass.setDataType("field_17", Objects.requireNonNull(snapshot.child("field_17").getValue()).toString());
-                    preferenceClass.setDataType("field_18", Objects.requireNonNull(snapshot.child("field_18").getValue()).toString());
-                    preferenceClass.setDataType("field_19", Objects.requireNonNull(snapshot.child("field_19").getValue()).toString());
-                    preferenceClass.setDataType("field_20", Objects.requireNonNull(snapshot.child("field_20").getValue()).toString());
-                    preferenceClass.setDataType("field_21", Objects.requireNonNull(snapshot.child("field_21").getValue()).toString());
-                    preferenceClass.setDataType("field_22", Objects.requireNonNull(snapshot.child("field_22").getValue()).toString());
-                    preferenceClass.setDataType("field_23", Objects.requireNonNull(snapshot.child("field_23").getValue()).toString());
-                    preferenceClass.setDataType("field_24", Objects.requireNonNull(snapshot.child("field_24").getValue()).toString());
-                    preferenceClass.setDataType("field_25", Objects.requireNonNull(snapshot.child("field_25").getValue()).toString());
-                    preferenceClass.setDataType("field_26", Objects.requireNonNull(snapshot.child("field_26").getValue()).toString());
-                    preferenceClass.setDataType("field_27", Objects.requireNonNull(snapshot.child("field_27").getValue()).toString());
-                    preferenceClass.setDataType("field_28", Objects.requireNonNull(snapshot.child("field_28").getValue()).toString());
-                    preferenceClass.setDataType("field_29", Objects.requireNonNull(snapshot.child("field_29").getValue()).toString());
-                    preferenceClass.setDataType("field_30", Objects.requireNonNull(snapshot.child("field_30").getValue()).toString());
-                    preferenceClass.setDataType("field_31", Objects.requireNonNull(snapshot.child("field_31").getValue()).toString());
-                    preferenceClass.setDataType("field_32", Objects.requireNonNull(snapshot.child("field_32").getValue()).toString());
-                    preferenceClass.setDataType("field_33", Objects.requireNonNull(snapshot.child("field_33").getValue()).toString());
-                    preferenceClass.setDataType("field_34", Objects.requireNonNull(snapshot.child("field_34").getValue()).toString());
-                    preferenceClass.setDataType("field_35", Objects.requireNonNull(snapshot.child("field_35").getValue()).toString());
-                    preferenceClass.setDataType("field_36", Objects.requireNonNull(snapshot.child("field_36").getValue()).toString());
-                    preferenceClass.setDataType("field_37", Objects.requireNonNull(snapshot.child("field_37").getValue()).toString());
-                    preferenceClass.setDataType("field_38", Objects.requireNonNull(snapshot.child("field_38").getValue()).toString());
-                    preferenceClass.setDataType("field_39", Objects.requireNonNull(snapshot.child("field_39").getValue()).toString());
-                    preferenceClass.setDataType("field_40", Objects.requireNonNull(snapshot.child("field_40").getValue()).toString());
-                    preferenceClass.setDataType("field_41", Objects.requireNonNull(snapshot.child("field_41").getValue()).toString());
-                    preferenceClass.setDataType("field_42", Objects.requireNonNull(snapshot.child("field_42").getValue()).toString());
-                    preferenceClass.setDataType("field_43", Objects.requireNonNull(snapshot.child("field_43").getValue()).toString());
-                    preferenceClass.setDataType("field_44", Objects.requireNonNull(snapshot.child("field_44").getValue()).toString());
-                    preferenceClass.setDataType("field_45", Objects.requireNonNull(snapshot.child("field_45").getValue()).toString());
-                    preferenceClass.setDataType("field_46", Objects.requireNonNull(snapshot.child("field_46").getValue()).toString());
-                    preferenceClass.setDataType("field_47", Objects.requireNonNull(snapshot.child("field_47").getValue()).toString());
-                    preferenceClass.setDataType("field_48", Objects.requireNonNull(snapshot.child("field_48").getValue()).toString());
+                    try {
+                        Log.e("---API_DATA---", "Firebase onDataChange called. Data: " + snapshot.toString());
+                        for (int i = 0; i <= 60; i++) {
+                            String key = "field_" + i;
+                            preferenceClass.setDataType(key, getSnapshotString(snapshot, key, ""));
+                        }
 
-                    Log.e("---API_DATA---", "Base URL (field_1): " + preferenceClass.getDataType("field_1"));
-                    Log.e("---API_DATA---", "API Path (field_34): " + preferenceClass.getDataType("field_34"));
+                        Log.e("---API_DATA---", "Base URL (field_1): " + preferenceClass.getDataType("field_51"));
+                        Log.e("---API_DATA---", "API Path (field_34): " + preferenceClass.getDataType("field_34"));
 
-                    project_data2 = database.getReference("all_data").child("ad_data");
-                    project_data2.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        project_data2 = database.getReference("all_data").child("ad_data");
+                        project_data2.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                try {
+                                    Log.e("snapshot", String.valueOf(snapshot));
 
-                            Log.e("snapshot", String.valueOf(snapshot));
+                                    // ----------------------------------------------- All Ads from Firebase
+                                    String bannerId = getSnapshotString(snapshot, "BannerAdunitID", "");
+                                    String collapsibleId = getSnapshotString(snapshot, "CollapsibleBannerID", "");
+                                    String interstitialId = getSnapshotString(snapshot, "InterstitalAdunitID", "");
+                                    String rewardId = getSnapshotString(snapshot, "RewardVideoUnitID", "");
+                                    String nativeId = getSnapshotString(snapshot, "NativeUnitID", "");
+                                    String appOpenId = getSnapshotString(snapshot, "AppOpenID", "");
 
-                            // ----------------------------------------------- All Ads from Firebase
-                                preferenceClass.setDataType("BannerAdunitID", Objects.requireNonNull(snapshot.child("BannerAdunitID").getValue()).toString());
-                                Log.e("AD_CONFIG", "Banner Ad ID from Firebase: " + preferenceClass.getDataType("BannerAdunitID"));
-                                preferenceClass.setDataType("CollapsibleBannerID", Objects.requireNonNull(snapshot.child("CollapsibleBannerID").getValue()).toString());
-                                Log.e("AD_CONFIG", "Collapsible Banner ID from Firebase: " + preferenceClass.getDataType("CollapsibleBannerID"));
-                                preferenceClass.setDataType("InterstitalAdunitID", Objects.requireNonNull(snapshot.child("InterstitalAdunitID").getValue()).toString());
-                                Log.e("AD_CONFIG", "Interstitial Ad ID from Firebase: " + preferenceClass.getDataType("InterstitalAdunitID"));
-                                preferenceClass.setDataType("RewardVideoUnitID", Objects.requireNonNull(snapshot.child("RewardVideoUnitID").getValue()).toString());
-                                Log.e("AD_CONFIG", "Reward Video ID from Firebase: " + preferenceClass.getDataType("RewardVideoUnitID"));
-                                preferenceClass.setDataType("NativeUnitID", Objects.requireNonNull(snapshot.child("NativeUnitID").getValue()).toString());
-                                Log.e("AD_CONFIG", "Native Ad ID from Firebase: " + preferenceClass.getDataType("NativeUnitID"));
-                                preferenceClass.setDataType("AppOpenID", Objects.requireNonNull(snapshot.child("AppOpenID").getValue()).toString());
-                                Log.e("AD_CONFIG", "App Open Ad ID from Firebase: " + preferenceClass.getDataType("AppOpenID"));
+                                    preferenceClass.setDataType("BannerAdunitID", bannerId);
+                                    preferenceClass.setAdsId("BannerAdunitID", bannerId);
 
-                                // AdX IDs
-                                if (snapshot.hasChild("AdxAppOpenID")) preferenceClass.setAdsId("AdxAppOpenID", snapshot.child("AdxAppOpenID").getValue().toString());
-                                if (snapshot.hasChild("AdxBannerAdunitID")) preferenceClass.setAdsId("AdxBannerAdunitID", snapshot.child("AdxBannerAdunitID").getValue().toString());
-                                if (snapshot.hasChild("AdxInterstitalAdunitID")) preferenceClass.setAdsId("AdxInterstitalAdunitID", snapshot.child("AdxInterstitalAdunitID").getValue().toString());
-                                if (snapshot.hasChild("AdxNativeUnitID")) preferenceClass.setAdsId("AdxNativeUnitID", snapshot.child("AdxNativeUnitID").getValue().toString());
-                                if (snapshot.hasChild("AdxRewardVideoUnitID")) preferenceClass.setAdsId("AdxRewardVideoUnitID", snapshot.child("AdxRewardVideoUnitID").getValue().toString());
-                                
-                                // Facebook IDs
-                                if (snapshot.hasChild("fbBannerAdunitID")) preferenceClass.setAdsId("fbBannerAdunitID", snapshot.child("fbBannerAdunitID").getValue().toString());
-                                if (snapshot.hasChild("fbInterstitalAdunitID")) preferenceClass.setAdsId("fbInterstitalAdunitID", snapshot.child("fbInterstitalAdunitID").getValue().toString());
-                                if (snapshot.hasChild("fbNativeUnitID")) preferenceClass.setAdsId("fbNativeUnitID", snapshot.child("fbNativeUnitID").getValue().toString());
+                                    preferenceClass.setDataType("CollapsibleBannerID", collapsibleId);
+                                    preferenceClass.setAdsId("CollapsibleBannerID", collapsibleId);
 
-                                preferenceClass.setAdsStatus("bannerAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("bannerAdStatus").getValue()).toString()));
-                                preferenceClass.setAdsStatus("interstitalAdStatus", Integer.parseInt(Objects.requireNonNull(snapshot.child("interstitalAdStatus").getValue()).toString()));
-                                preferenceClass.setAdsStatus("EditScreenAdCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("EditScreenAdCount").getValue()).toString()));
-                                preferenceClass.setAdsStatus("BGSelectScreen_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("BGSelectScreen_BannerAD").getValue()).toString()));
-                                preferenceClass.setAdsStatus("ReadymadePoste_BannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("ReadymadePoste_BannerAD").getValue()).toString()));
-                                preferenceClass.setInt("MainScreen_Native", Integer.parseInt(Objects.requireNonNull(snapshot.child("MainScreen_Native").getValue()).toString()));
+                                    preferenceClass.setDataType("InterstitalAdunitID", interstitialId);
+                                    preferenceClass.setAdsId("InterstitalAdunitID", interstitialId);
 
-                                preferenceClass.setAdsId("google_Rw_ID", Objects.requireNonNull(snapshot.child("google_Rw_ID").getValue()).toString());
-                                preferenceClass.setAdsId("PremiumAdType", Objects.requireNonNull(snapshot.child("PremiumAdType").getValue()).toString());
+                                    preferenceClass.setDataType("RewardVideoUnitID", rewardId);
+                                    preferenceClass.setAdsId("RewardVideoUnitID", rewardId);
 
-                                // DEBUG MODE PROTECTION: Override with AdMob Test IDs when running from Android Studio
-                                // This ensures the developer's live AdMob account is never blocked due to self-testing.
-                                if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
-                                    preferenceClass.setDataType("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
-                                    preferenceClass.setDataType("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
-                                    preferenceClass.setDataType("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
-                                    preferenceClass.setDataType("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
-                                    preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
-                                    preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
-                                    preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5354046379");
-                                    Log.e("AD_CONFIG", "DEBUG MODE ACTIVE: Automatically using AdMob Test IDs to protect your account.");
+                                    preferenceClass.setDataType("NativeUnitID", nativeId);
+                                    preferenceClass.setAdsId("NativeUnitID", nativeId);
+
+                                    preferenceClass.setDataType("AppOpenID", appOpenId);
+                                    preferenceClass.setAdsId("AppOpenID", appOpenId);
+
+                                    // AdX IDs
+                                    if (snapshot.hasChild("AdxAppOpenID")) preferenceClass.setAdsId("AdxAppOpenID", getSnapshotString(snapshot, "AdxAppOpenID", ""));
+                                    if (snapshot.hasChild("AdxBannerAdunitID")) preferenceClass.setAdsId("AdxBannerAdunitID", getSnapshotString(snapshot, "AdxBannerAdunitID", ""));
+                                    if (snapshot.hasChild("AdxInterstitalAdunitID")) preferenceClass.setAdsId("AdxInterstitalAdunitID", getSnapshotString(snapshot, "AdxInterstitalAdunitID", ""));
+                                    if (snapshot.hasChild("AdxNativeUnitID")) preferenceClass.setAdsId("AdxNativeUnitID", getSnapshotString(snapshot, "AdxNativeUnitID", ""));
+                                    if (snapshot.hasChild("AdxRewardVideoUnitID")) preferenceClass.setAdsId("AdxRewardVideoUnitID", getSnapshotString(snapshot, "AdxRewardVideoUnitID", ""));
+                                    
+                                    // Facebook IDs
+                                    if (snapshot.hasChild("fbBannerAdunitID")) preferenceClass.setAdsId("fbBannerAdunitID", getSnapshotString(snapshot, "fbBannerAdunitID", ""));
+                                    if (snapshot.hasChild("fbInterstitalAdunitID")) preferenceClass.setAdsId("fbInterstitalAdunitID", getSnapshotString(snapshot, "fbInterstitalAdunitID", ""));
+                                    if (snapshot.hasChild("fbNativeUnitID")) preferenceClass.setAdsId("fbNativeUnitID", getSnapshotString(snapshot, "fbNativeUnitID", ""));
+
+                                    preferenceClass.setAdsStatus("bannerAdStatus", getSnapshotInt(snapshot, "bannerAdStatus", 0));
+                                    preferenceClass.setAdsStatus("interstitalAdStatus", getSnapshotInt(snapshot, "interstitalAdStatus", 0));
+                                    preferenceClass.setAdsStatus("EditScreenAdCount", getSnapshotInt(snapshot, "EditScreenAdCount", 0));
+                                    preferenceClass.setAdsStatus("BGSelectScreen_BannerAD", getSnapshotInt(snapshot, "BGSelectScreen_BannerAD", 0));
+                                    preferenceClass.setAdsStatus("ReadymadePoste_BannerAD", getSnapshotInt(snapshot, "ReadymadePoste_BannerAD", 0));
+                                    preferenceClass.setInt("MainScreen_Native", getSnapshotInt(snapshot, "MainScreen_Native", 0));
+
+                                    preferenceClass.setAdsId("google_Rw_ID", getSnapshotString(snapshot, "google_Rw_ID", ""));
+                                    preferenceClass.setAdsId("PremiumAdType", getSnapshotString(snapshot, "PremiumAdType", ""));
+
+                                    Log.d("AdTracker", "--- ORIGINAL FIREBASE AD IDs ---");
+                                    Log.d("AdTracker", "Original AppOpenID: " + appOpenId);
+                                    Log.d("AdTracker", "Original BannerID: " + bannerId);
+                                    Log.d("AdTracker", "Original InterstitialID: " + interstitialId);
+                                    Log.d("AdTracker", "Original NativeID: " + nativeId);
+                                    Log.d("AdTracker", "Original RewardVideoID: " + rewardId);
+                                    Log.d("AdTracker", "----------------------------------");
+
+                                    // DEBUG MODE PROTECTION: Override with AdMob Test IDs when running from Android Studio
+                                    if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
+                                        Log.d("AdTracker", "⚠️ DEBUG MODE DETECTED: Using Google Test Ad IDs for Safety!");
+                                        preferenceClass.setDataType("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
+                                        preferenceClass.setAdsId("AppOpenID", "ca-app-pub-3940256099942544/9257395921");
+                                        preferenceClass.setDataType("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setAdsId("BannerAdunitID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setDataType("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setAdsId("CollapsibleBannerID", "ca-app-pub-3940256099942544/6300978111");
+                                        preferenceClass.setDataType("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
+                                        preferenceClass.setAdsId("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
+                                        preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
+                                        preferenceClass.setAdsId("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
+                                        preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
+                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
+                                        preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5224354917");
+                                    }
+
+                                    MailER_AppOpenManager.AppOpenAdShow = getSnapshotInt(snapshot, "AppOpenAdShow", 0);
+                                    MailER_InterstitialAdManager.InterAdTimer = getSnapshotInt(snapshot, "InterAdTimer", 0);
+
+                                    // Connect Firebase keys to App Open Ad timers
+                                    MailER_AppOpenManager.APPOPEN_COOLDOWN_MS = getSnapshotInt(snapshot, "splashAdTimer", 20000);
+                                    MailER_AppOpenManager.INTERSTITIAL_CLASH_MS = getSnapshotInt(snapshot, "InterAdTimer", 30000);
+                                    
+                                    preferenceClass.setInt("FreeDownloadsAllowed", getSnapshotInt(snapshot, "FreeDownloadsAllowed", 2));
+
+                                    int rawUpdateVal = getSnapshotInt(snapshot, "UpdateAvailable", 0);
+                                    int rawForceUpdateVal = getSnapshotInt(snapshot, "ForceUpdate", 0);
+                                    String rawUpdateVer = getSnapshotString(snapshot, "UpdateVersionName", "1.0");
+
+                                    Log.e("FirebaseUpdateVal", "==================================================");
+                                    Log.e("FirebaseUpdateVal", ">>> FIREBASE RAW READ: UpdateAvailable = " + rawUpdateVal + " | ForceUpdate = " + rawForceUpdateVal + " | UpdateVersionName = " + rawUpdateVer + " <<<");
+                                    Log.e("FirebaseUpdateVal", "==================================================");
+
+                                    preferenceClass.setInt("UpdateAvailable", rawUpdateVal);
+                                    preferenceClass.setInt("ForceUpdate", rawForceUpdateVal);
+                                    preferenceClass.setDataType("UpdateVersionName", rawUpdateVer);
+
+                                    preferenceClass.setInt("download", getSnapshotInt(snapshot, "download", 0));
+                                    preferenceClass.setInt("splashscreen", getSnapshotInt(snapshot, "splashscreen", 0));
+
+                                    preferenceClass.setInt("IsEditScreenBannerAD", getSnapshotInt(snapshot, "IsEditScreenBannerAD", 0));
+                                    preferenceClass.setInt("rv_count", getSnapshotInt(snapshot, "rv_count", 0));
+                                    preferenceClass.setInt("First_rv_count", getSnapshotInt(snapshot, "First_rv_count", 0));
+                                    preferenceClass.setInt("PremiumPostCount", getSnapshotInt(snapshot, "PremiumPostCount", 0));
+
+                                    preferenceClass.setDataType("main_key", getSnapshotString(snapshot, "main_key", ""));
+                                    preferenceClass.setDecryptionType(getSnapshotInt(snapshot, "decryptionType", 0));
+
+                                    save_token(true);
+                                } catch (Exception e) {
+                                    Log.e("FIREBASE_PARSING_ERROR", "Error parsing ad_data: " + e.getMessage());
+                                    save_token(true);
                                 }
+                            }
 
-//                            -------------------------------------------------------
-                            MailER_AppOpenManager.AppOpenAdShow = Integer.parseInt(snapshot.child("AppOpenAdShow").getValue().toString());
-                            MailER_InterstitialAdManager.InterAdTimer = Integer.parseInt(snapshot.child("InterAdTimer").getValue().toString());
-
-                            preferenceClass.setInt("UpdateAvailable", Integer.parseInt(snapshot.child("UpdateAvailable").getValue().toString()));
-                            preferenceClass.setDataType("UpdateVersionName", Objects.requireNonNull(snapshot.child("UpdateVersionName").getValue()).toString());
-
-                            preferenceClass.setInt("download", Integer.parseInt(Objects.requireNonNull(snapshot.child("download").getValue()).toString()));
-                            preferenceClass.setInt("splashscreen", Integer.parseInt(Objects.requireNonNull(snapshot.child("splashscreen").getValue()).toString()));
-
-                            preferenceClass.setInt("IsEditScreenBannerAD", Integer.parseInt(Objects.requireNonNull(snapshot.child("IsEditScreenBannerAD").getValue()).toString()));
-                            preferenceClass.setInt("rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("rv_count").getValue()).toString()));
-                            preferenceClass.setInt("First_rv_count", Integer.parseInt(Objects.requireNonNull(snapshot.child("First_rv_count").getValue()).toString()));
-                            preferenceClass.setInt("PremiumPostCount", Integer.parseInt(Objects.requireNonNull(snapshot.child("PremiumPostCount").getValue()).toString()));
-
-                            preferenceClass.setDataType("main_key", Objects.requireNonNull(snapshot.child("main_key").getValue()).toString());
-                            preferenceClass.setDecryptionType(Integer.parseInt(Objects.requireNonNull(snapshot.child("decryptionType").getValue()).toString()));
-
-                            Log.e("TAG", "onDataChange:MainScreen_Native "+ preferenceClass.getInt("MainScreen_Native", 0));
-//                            AppOpenManager.loadGoogleRewardVideoAd(SplashScreen.this);
-                            save_token(true);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_SplashScreen.this, getResources().getString(R.string.something_went_wrong));
-                        }
-                    });
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                save_token(true);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("FIREBASE_PARSING_ERROR", "Error parsing datas: " + e.getMessage());
+                        save_token(true);
+                    }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_SplashScreen.this, getResources().getString(R.string.something_went_wrong));
+                    startIntent();
                 }
             });
         } else {
-            MailER_MaterialDialogUtils.getInstance().errorDialog(this, getResources().getString(R.string.internet_error));
+            startIntent();
         }
     }
 
     private void save_token(boolean update) {
+        isDataLoaded = true;
         if (update) {
             @SuppressLint("SimpleDateFormat")
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
@@ -273,35 +345,93 @@ public class MailER_SplashScreen extends AppCompatActivity {
         if (preferenceClass.isFirstTimeLaunch()) {
             preferenceClass.setFirstTimeLaunch(false);
         }
-        if (preferenceClass.getInt("UpdateAvailable") == 1 && !preferenceClass.getAdsId("UpdateVersionName").equals(BuildConfig.VERSION_NAME)) {
+        String firebaseVerStr = preferenceClass.getDataType("UpdateVersionName", "0");
+        boolean isUpdateRequired = isVersionHigher(firebaseVerStr, BuildConfig.VERSION_NAME);
+
+        int updateAvailable = preferenceClass.getInt("UpdateAvailable");
+        int forceUpdate = preferenceClass.getInt("ForceUpdate");
+
+        boolean isUpdateEnabled = (updateAvailable == 1);
+        boolean isForce = (forceUpdate == 1);
+        boolean shouldShowUpdateDialog = isUpdateRequired && isUpdateEnabled;
+
+        Log.e("FirebaseUpdateVal", "==================================================");
+        Log.e("FirebaseUpdateVal", "READ PREF UpdateAvailable: " + updateAvailable + " | ForceUpdate: " + forceUpdate);
+        Log.e("FirebaseUpdateVal", "Firebase UpdateVersionName: " + firebaseVerStr + " | App BuildConfig.VERSION_NAME: " + BuildConfig.VERSION_NAME);
+        Log.e("FirebaseUpdateVal", "isUpdateRequired: " + isUpdateRequired + " | isForce: " + isForce);
+        Log.e("FirebaseUpdateVal", "Will show update dialog: " + shouldShowUpdateDialog);
+        Log.e("FirebaseUpdateVal", "==================================================");
+
+        if (shouldShowUpdateDialog) {
+            if (isFinishing() || isDestroyed() || (dialog != null && dialog.isShowing())) return;
 
             dialog = new Dialog(MailER_SplashScreen.this);
             dialog.setContentView(R.layout.spawner_dialog_app_info);
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
             TextView descriptionTextView = dialog.findViewById(R.id.descriptionTextView);
             Button cancelBtn = dialog.findViewById(R.id.dialogCancelButton);
             TextView msgTextView = dialog.findViewById(R.id.titleTextView);
             Button okBtn = dialog.findViewById(R.id.dialogOkButton);
             descriptionTextView.setTextColor(getResources().getColor(R.color.black));
-            descriptionTextView.setText("There is a newer version of app available please update it now.");
+            String updateMsg = "A huge new update (Version " + firebaseVerStr + ") is available!\n\nPlease update the app immediately to unlock New Posters, Backgrounds, and all latest features. The old version will no longer receive new data.";
+            descriptionTextView.setText(updateMsg);
             msgTextView.setTextColor(getResources().getColor(R.color.black));
             msgTextView.setText("Update Available");
             okBtn.setText("Update");
             cancelBtn.setText("Cancel");
 
-            cancelBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dialog.cancel();
-                    startIntent();
-                }
-            });
+            if (isForce) {
+                // Force Update: Hide Cancel button, disable touch outside, exit app on BACK press
+                cancelBtn.setVisibility(View.GONE);
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setOnKeyListener((dialogInterface, keyCode, event) -> {
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        if (event.getAction() == KeyEvent.ACTION_UP) {
+                            finishAffinity();
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+            } else {
+                // Optional Update (1): Show Cancel button & handle BACK button / dismiss to proceed to Home Screen
+                cancelBtn.setVisibility(View.VISIBLE);
+                dialog.setCancelable(true);
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                        startIntent();
+                    }
+                });
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        startIntent();
+                    }
+                });
+            }
+
             okBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    isUpdateClicked = true;
+                    final String appPackageName = getPackageName();
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
-                    } catch (Exception e) {
-                        e.getMessage();
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                    } catch (android.content.ActivityNotFoundException e) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        } catch (Exception ex) {
+                            Log.e("SPLASH", "Error opening Play Store: " + ex.getMessage());
+                        }
+                    }
+                    if (!isForce) {
+                        dialog.dismiss();
                     }
                 }
             });
@@ -318,9 +448,19 @@ public class MailER_SplashScreen extends AppCompatActivity {
     }
 
     public void callMainActivity() {
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - startTime;
+
+        if (elapsedTime < MIN_SPLASH_TIME) {
+            new android.os.Handler().postDelayed(this::performNavigation, MIN_SPLASH_TIME - elapsedTime);
+        } else {
+            performNavigation();
+        }
+    }
+
+    private void performNavigation() {
         MyApplication.isAdsSplash = false;
         ((MyApplication) getApplicationContext()).sendRequest();
-        ((MyApplication) getApplicationContext()).loadInterstitialAd();
 
         Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
         startActivity(intent);
@@ -356,18 +496,33 @@ public class MailER_SplashScreen extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        /*if (appUpdateManager != null) {
-            appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                    try {
-                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, this, 0x11);
-                    } catch (IntentSender.SendIntentException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            appUpdateManager.getAppUpdateInfo().addOnFailureListener(e -> startIntent());
-        }*/
+        int forceUpdate = preferenceClass != null ? preferenceClass.getInt("ForceUpdate") : 0;
+        if (isUpdateClicked && forceUpdate == 0) {
+            isUpdateClicked = false;
+            startIntent();
+        }
+    }
+
+    private boolean isVersionHigher(String newVersion, String currentVersion) {
+        if (newVersion == null || currentVersion == null) return false;
+        String[] newParts = newVersion.trim().split("\\.");
+        String[] currentParts = currentVersion.trim().split("\\.");
+        int length = Math.max(newParts.length, currentParts.length);
+        for (int i = 0; i < length; i++) {
+            int newPart = i < newParts.length ? parseVersionPart(newParts[i]) : 0;
+            int currentPart = i < currentParts.length ? parseVersionPart(currentParts[i]) : 0;
+            if (newPart > currentPart) return true;
+            if (newPart < currentPart) return false;
+        }
+        return false;
+    }
+
+    private int parseVersionPart(String part) {
+        try {
+            return Integer.parseInt(part.replaceAll("[^0-9]", ""));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
 }

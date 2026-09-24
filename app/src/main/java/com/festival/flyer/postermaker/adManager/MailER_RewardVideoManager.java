@@ -19,22 +19,29 @@ import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+
+import android.widget.Toast;
 
 public class MailER_RewardVideoManager {
     private static MailER_PreferenceClass preferenceClass;
     private static String AD_google_Rw;
     private static AlertDialog alertDialog;
-    public static RewardedInterstitialAd mRewardedAd;
     public static com.facebook.ads.InterstitialAd interstitialFB;
-
+    private static boolean isLoading = false;
 
     public static void showRewardVideoAd(final Activity context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
         if (preferenceClass == null) {
             preferenceClass = new MailER_PreferenceClass(context);
         }
         AD_google_Rw = preferenceClass.getAdsId("RewardVideoUnitID");
+
+        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
+
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View dialogView = inflater.inflate(R.layout.spawner_lottie_anim_dialog, null);
@@ -51,340 +58,100 @@ public class MailER_RewardVideoManager {
             }
         }
 
+        isLoading = true;
+        Log.d("[ADS_LOG]", "🎁 Requesting Reward Video ON DEMAND...");
         AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedInterstitialAd.load(context, AD_google_Rw, adRequest, new RewardedInterstitialAdLoadCallback() {
+        RewardedAd.load(context, AD_google_Rw, adRequest, new RewardedAdLoadCallback() {
             @Override
-            public void onAdLoaded(RewardedInterstitialAd ad) {
-                mRewardedAd = ad;
-                if (alertDialog != null) {
-                    if (alertDialog.isShowing()) {
-                        alertDialog.dismiss();
+            public void onAdLoaded(@NonNull RewardedAd ad) {
+                isLoading = false;
+                Log.d("[ADS_LOG]", "🟢 Reward Video Ad Loaded Successfully!");
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
+                }
+                final boolean[] isEarned = new boolean[]{false};
+                ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        super.onAdDismissedFullScreenContent();
+                        Log.d("[ADS_LOG]", "❌ Reward Video Ad Closed by User.");
+                        if (isEarned[0]) {
+                            Log.d("[ADS_LOG]", "✅ User earned reward! Proceeding...");
+                            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                        } else {
+                            Log.d("[ADS_LOG]", "⚠️ User skipped Ad! Reward not given.");
+                            Toast.makeText(context, "You must watch the full ad to unlock feature!", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-                if (mRewardedAd != null) {
-                    mRewardedAd.show(context, rewardItem -> {
-                    });
-                    mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                        @Override
-                        public void onAdDismissedFullScreenContent() {
-                            super.onAdDismissedFullScreenContent();
-                            onAdLoadInterface.onAdClose();
-                        }
 
-                        @Override
-                        public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                            super.onAdFailedToShowFullScreenContent(adError);
-                            onAdLoadInterface.onAdClose();
-                        }
-                    });
-                }
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                        super.onAdFailedToShowFullScreenContent(adError);
+                        Log.d("[ADS_LOG]", "🔴 Reward Video Failed to Show: " + adError.getMessage());
+                        if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                    }
+
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        super.onAdShowedFullScreenContent();
+                        Log.d("[ADS_LOG]", "📺 Reward Video Displayed on Screen!");
+                    }
+                });
+                ad.show(context, rewardItem -> {
+                    isEarned[0] = true;
+                });
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                super.onAdFailedToLoad(loadAdError);
-                Log.d("AdTracker", "Reward Video (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                if (alertDialog != null) {
-                    if (alertDialog.isShowing()) {
-                        alertDialog.dismiss();
-                    }
+                isLoading = false;
+                Log.d("[ADS_LOG]", "🔴 Reward Video Failed to Load: " + loadAdError.getMessage() + ". Executing Fallback (Free Access).");
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
                 }
-//                fbInterstitial(context, onAdLoadInterface);
-                onAdLoadInterface.onAdClose();
+                // FAIL OPEN: Grant reward if ad fails to load
+                if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
             }
         });
-
-
-//        if (preferenceClass == null) {
-//            preferenceClass = new PreferenceClass(context);
-//        }
-//        AD_google_Rw = preferenceClass.getAdsId("google_Rw_ID");//"ca-app-pub-3940256099942544/5224354917" test key
-//        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-//        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//        View dialogView = inflater.inflate(R.layout.lottie_anim_dialog, null);
-//        dialogBuilder.setView(dialogView);
-//        alertDialog = dialogBuilder.create();
-//        alertDialog.setCancelable(false);
-//        alertDialog.setCanceledOnTouchOutside(false);
-//        if (!((Activity) context).isFinishing()) {
-//            try {
-//                alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//                alertDialog.show();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        AdRequest.Builder builder = new AdRequest.Builder();
-//
-//        RewardedAd.load(context, AD_google_Rw, builder.build(), new RewardedAdLoadCallback() {
-//            @Override
-//            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-//                mRewardedAd = null;
-//                if (alertDialog != null) {
-//                    if (alertDialog.isShowing()) {
-//                        alertDialog.dismiss();
-//                    }
-//                }
-//                onAdLoadInterface.onAdFail();
-////                faceBookReward(context,onAdLoadInterface);
-//            }
-//
-//            @Override
-//            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-//                mRewardedAd = rewardedAd;
-//                if (alertDialog != null) {
-//                    if (alertDialog.isShowing()) {
-//                        alertDialog.dismiss();
-//                    }
-//                }
-//
-//                mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-//                    @Override
-//                    public void onAdShowedFullScreenContent() {
-//                        super.onAdShowedFullScreenContent();
-//                        mRewardedAd = null;
-//                    }
-//
-//                    @Override
-//                    public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-//                        super.onAdFailedToShowFullScreenContent(adError);
-//                        if (alertDialog != null) {
-//                            if (alertDialog.isShowing()) {
-//                                alertDialog.dismiss();
-//                            }
-//                        }
-//                        onAdLoadInterface.onAdFail();
-//                    }
-//
-//                    @Override
-//                    public void onAdDismissedFullScreenContent() {
-//                        super.onAdDismissedFullScreenContent();
-//                        if (alertDialog != null) {
-//                            if (alertDialog.isShowing()) {
-//                                alertDialog.dismiss();
-//                            }
-//                        }
-//                        onAdLoadInterface.onAdClose();
-//                    }
-//                });
-//
-//                if (mRewardedAd != null) {
-//                    mRewardedAd.show(context, new OnUserEarnedRewardListener() {
-//                        @Override
-//                        public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-//
-//                        }
-//                    });
-//                } else {
-//                    if (alertDialog != null) {
-//                        if (alertDialog.isShowing()) {
-//                            alertDialog.dismiss();
-//                        }
-//                    }
-//                    onAdLoadInterface.onAdFail();
-//                    Log.d("TAG", "The rewarded ad wasn't ready yet.");
-//                }
-//            }
-//        });
     }
-
 
     public static void fbInterstitial(Context context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
         interstitialFB = new com.facebook.ads.InterstitialAd(context, preferenceClass.getAdsId("fbInterstitalAdunitID"));
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
-            public void onInterstitialDisplayed(Ad ad) {
-//                    Log.e("#1", "" + ad.toString());
-                // Interstitial ad displayed callback
-            }
+            public void onInterstitialDisplayed(Ad ad) {}
 
             @Override
             public void onInterstitialDismissed(Ad ad) {
-//                    Log.e("#2", "" + ad.toString());
-                // Interstitial dismissed callback
-                if (alertDialog != null) {
-                    if (alertDialog.isShowing()) {
-                        alertDialog.dismiss();
-                    }
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
                 }
                 onAdLoadInterface.onAdClose();
             }
 
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                Log.d("AdTracker", "Reward Video (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
-                Log.e("#3", "" + adError.getErrorMessage());
-                Log.e("#3_1", "" + adError.getErrorCode());
-                // Ad error callback
-                if (alertDialog != null) {
-                    if (alertDialog.isShowing()) {
-                        alertDialog.dismiss();
-                    }
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
                 }
                 onAdLoadInterface.onAdClose();
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
-                // Interstitial ad is loaded and ready to be displayed
-                // Show the ad
-//                    Log.e("#2", "" + ad.toString());
-                if (alertDialog != null) {
-                    if (alertDialog.isShowing()) {
-                        alertDialog.dismiss();
-                    }
+                if (alertDialog != null && alertDialog.isShowing()) {
+                    alertDialog.dismiss();
                 }
                 interstitialFB.show();
-
             }
 
             @Override
-            public void onAdClicked(Ad ad) {
-                // Ad clicked callback
-            }
+            public void onAdClicked(Ad ad) {}
 
             @Override
-            public void onLoggingImpression(Ad ad) {
-                // Ad impression logged callback
-            }
+            public void onLoggingImpression(Ad ad) {}
         };
         com.facebook.ads.InterstitialAd interstitialAd = interstitialFB;
         interstitialAd.loadAd(interstitialAd.buildLoadAdConfig().withAdListener(interstitialAdListener).build());
     }
-
-
-
-//    public static void faceBookReward(final Activity context , InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
-//        interstitialFB = new com.facebook.ads.InterstitialAd(context, AD_Facebook_Rw);
-//        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
-//            @Override
-//            public void onInterstitialDisplayed(Ad ad) {
-//                // Interstitial ad displayed callback
-//            }
-//
-//            @Override
-//            public void onInterstitialDismissed(Ad ad) {
-//                if (alertDialog != null) {
-//                    if (alertDialog.isShowing()) {
-//                        alertDialog.dismiss();
-//                    }
-//                }
-//                onAdLoadInterface.onAdClose();
-//            }
-//
-//            @Override
-//            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-//                if (alertDialog != null) {
-//                    if (alertDialog.isShowing()) {
-//                        alertDialog.dismiss();
-//                    }
-//                }
-//                onAdLoadInterface.onAdFail();
-//            }
-//
-//            @Override
-//            public void onAdLoaded(Ad ad) {
-//                interstitialFB.show();
-//            }
-//
-//            @Override
-//            public void onAdClicked(Ad ad) {
-//                // Ad clicked callback
-//            }
-//
-//            @Override
-//            public void onLoggingImpression(Ad ad) {
-//                // Ad impression logged callback
-//            }
-//        };
-//        interstitialFB.loadAd(interstitialFB.buildLoadAdConfig().withAdListener(interstitialAdListener).build());
-//    }
-
-//    public static void showRewardVideoAd(final Activity context, InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface){
-//        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-//        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//        View dialogView = inflater.inflate(R.layout.lottie_anim_dialog, null);
-//        dialogBuilder.setView(dialogView);
-//        alertDialog = dialogBuilder.create();
-//        alertDialog.setCancelable(false);
-//        alertDialog.setCanceledOnTouchOutside(false);
-//
-//        if (mRewardedAd!=null){
-//
-//            mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-//                @Override
-//                public void onAdShowedFullScreenContent() {
-//                    super.onAdShowedFullScreenContent();
-//                    if (alertDialog != null) {
-//                        if (alertDialog.isShowing()) {
-//                            alertDialog.dismiss();
-//                        }
-//                    }
-//                    mRewardedAd = null;
-//                }
-//
-//                @Override
-//                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-//                    super.onAdFailedToShowFullScreenContent(adError);
-//                    if (alertDialog != null) {
-//                        if (alertDialog.isShowing()) {
-//                            alertDialog.dismiss();
-//                        }
-//                    }
-//                    onAdLoadInterface.onAdFail();
-//                }
-//
-//                @Override
-//                public void onAdDismissedFullScreenContent() {
-//                    super.onAdDismissedFullScreenContent();
-//                    if (alertDialog != null) {
-//                        if (alertDialog.isShowing()) {
-//                            alertDialog.dismiss();
-//                        }
-//                    }
-//                    loadGoogleRewardVideoAd(context);
-//                    onAdLoadInterface.onAdClose();
-//                }
-//            });
-//
-//                mRewardedAd.show(context, new OnUserEarnedRewardListener() {
-//                    @Override
-//                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-//
-//                    }
-//                });
-//
-//        } else {
-//            if (alertDialog != null) {
-//                if (alertDialog.isShowing()) {
-//                    alertDialog.dismiss();
-//                }
-//            }
-//            loadGoogleRewardVideoAd(context);
-//            onAdLoadInterface.onAdFail();
-//            Log.d("TAG", "The rewarded ad wasn't ready yet.");
-//        }
-//    }
-//    public static void loadGoogleRewardVideoAd(final Activity context) {
-//        if (preferenceClass == null) {
-//            preferenceClass = new PreferenceClass(context);
-//        }
-//        AD_google_Rw = preferenceClass.getAdsId("google_Rw_ID");
-//        AD_Facebook_Rw = preferenceClass.getAdsId("AD_FB_Rw_ID");
-//
-//        AdRequest.Builder builder = new AdRequest.Builder();
-//
-//        RewardedAd.load(context, AD_google_Rw, builder.build(), new RewardedAdLoadCallback() {
-//            @Override
-//            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-//                mRewardedAd = null;
-//            }
-//
-//            @Override
-//            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-//                mRewardedAd = rewardedAd;
-//            }
-//        });
-//    }
 }

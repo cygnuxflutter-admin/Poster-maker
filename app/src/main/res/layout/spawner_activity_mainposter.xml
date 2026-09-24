@@ -4,206 +4,897 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/home_bg"
     android:keepScreenOn="true"
-    android:fitsSystemWindows="true"
     tools:context=".activities.MailER_PosterMainActivity">
 
-    <androidx.drawerlayout.widget.DrawerLayout
-        android:id="@+id/my_drawer_layout"
+    <!-- Main Content -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:ignore="HardcodedText">
+        android:background="@color/home_bg">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-
-            <RelativeLayout
+            <!-- Pull to Refresh Container -->
+            <com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_5sdp">
+                android:layout_height="match_parent"
+                android:layout_above="@+id/bottom_nav_bar">
 
-                <LinearLayout
-                    android:id="@+id/layView"
+                <!-- Scrollable Content -->
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/_10sdp"
-                    android:visibility="visible">
-
+                    android:layout_height="match_parent"
+                    android:scrollbars="none"
+                    android:overScrollMode="never"
+                    android:clipToPadding="false"
+                    android:fillViewport="true">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingBottom="@dimen/_16sdp">
 
-                        <ImageView
-                            android:id="@+id/lay_poster"
+                    <!-- ==================== CUSTOM TOOLBAR ==================== -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="@dimen/_16sdp"
+                        android:paddingTop="@dimen/_12sdp"
+                        android:paddingBottom="@dimen/_8sdp">
+
+                        <!-- App Logo and Title -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:layout_width="@dimen/_36sdp"
+                                android:layout_height="@dimen/_36sdp"
+                                android:src="@drawable/spawner_app_logo"
+                                android:layout_marginEnd="@dimen/_8sdp"
+                                android:scaleType="fitCenter" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Poster Maker"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/_18ssp"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Create. Design. Impress."
+                                    android:textColor="#9E9E9E"
+                                    android:textSize="@dimen/_10ssp"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Notification Bell -->
+                        <FrameLayout
+                            android:id="@+id/btn_notification"
+                            android:layout_width="@dimen/_40sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <ImageView
+                                android:layout_width="@dimen/_24sdp"
+                                android:layout_height="@dimen/_24sdp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/spawner_ic_notification"
+                                android:contentDescription="Notifications" />
+
+                            <!-- Red badge dot -->
+                            <View
+                                android:id="@+id/view_notif_badge"
+                                android:layout_width="@dimen/_8sdp"
+                                android:layout_height="@dimen/_8sdp"
+                                android:layout_gravity="top|end"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:layout_marginEnd="@dimen/_6sdp"
+                                android:background="@drawable/spawner_notification_badge" />
+                        </FrameLayout>
+
+                    </RelativeLayout>
+
+                    <!-- Hero Slider Shimmer Loader -->
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_hero_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_190sdp"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:paddingHorizontal="@dimen/_16sdp"
+                        android:visibility="visible"
+                        app:shimmer_auto_start="true">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="@dimen/_16sdp"
+                            app:cardElevation="0dp"
+                            app:cardBackgroundColor="#E2E8F0" />
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
+                    <!-- ==================== PREMIUM HERO SLIDER ==================== -->
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/hero_viewpager"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_190sdp"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:clipToPadding="false"
+                        android:clipChildren="false"
+                        android:visibility="gone"/>
+                        
+                    <!-- Dot Indicators -->
+                    <LinearLayout
+                        android:id="@+id/hero_indicator_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:gravity="center"
+                        android:orientation="horizontal"/>
+
+                    <!-- ==================== SEARCH / HASHTAG CHIPS ==================== -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_16sdp"
+                        android:scrollbars="none"
+                        android:overScrollMode="never"
+                        android:clipToPadding="false"
+                        android:paddingStart="@dimen/_16sdp"
+                        android:paddingEnd="@dimen/_16sdp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/chip_festival"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🎉 Festival"
+                                android:textColor="#8E24AA"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_purple"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
+
+                            <TextView
+                                android:id="@+id/chip_wedding"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💍 Wedding"
+                                android:textColor="#E53935"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_pink"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
+
+                            <TextView
+                                android:id="@+id/chip_sale"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🛍️ Sale"
+                                android:textColor="#43A047"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_green"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
+
+                            <TextView
+                                android:id="@+id/chip_birthday"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🎂 Birthday"
+                                android:textColor="#FB8C00"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_yellow"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
+
+                            <TextView
+                                android:id="@+id/chip_business"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📢 Business"
+                                android:textColor="#1E88E5"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_blue"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"/>
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                    <!-- ==================== PREMIUM 2x2 FEATURE GRID ==================== -->
+                    <LinearLayout
+                        android:id="@+id/layView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginHorizontal="@dimen/_16sdp"
+                        android:layout_marginTop="@dimen/_24sdp"
+                        android:visibility="visible">
+
+                        <!-- Row 1: Create Poster + My Creation -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:adjustViewBounds="true"
-                            android:src="@drawable/spawner_btn_createposter" />
+                            android:baselineAligned="false"
+                            android:orientation="horizontal">
 
+                            <!-- Create Poster Card -->
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/lay_poster"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="@dimen/_8sdp"
+                                android:background="@drawable/spawner_bg_card_white_ripple"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:elevation="0dp"
+                                android:padding="@dimen/_12sdp">
 
-                        <ImageView
-                            android:id="@+id/lay_design"
+                                <ImageView
+                                    android:id="@+id/icon_poster"
+                                    android:layout_width="@dimen/_36sdp"
+                                    android:layout_height="@dimen/_36sdp"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:background="@drawable/spawner_bg_icon_purple"
+                                    android:padding="@dimen/_8sdp"
+                                    android:src="@drawable/spawner_ic_poster_create"
+                                    android:scaleType="fitCenter"
+                                    app:tint="#FFFFFF"
+                                    android:contentDescription="Create Poster" />
+
+                                <TextView
+                                    android:id="@+id/title_poster"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_poster"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toTopOf="@+id/desc_poster"
+                                    app:layout_constraintVertical_chainStyle="packed"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:text="Posters"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/_13ssp"
+                                    android:maxLines="1"
+                                    app:autoSizeTextType="uniform"
+                                    app:autoSizeMinTextSize="8sp"
+                                    app:autoSizeMaxTextSize="14sp"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                                <TextView
+                                    android:id="@+id/desc_poster"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_poster"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/title_poster"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:layout_marginTop="@dimen/_2sdp"
+                                    android:text="Create Poster"
+                                    android:textColor="#8E8E93"
+                                    android:textSize="@dimen/_10ssp"
+                                    android:maxLines="3"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <!-- Readymade Templates Card -->
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/lay_template"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_marginStart="@dimen/_8sdp"
+                                android:background="@drawable/spawner_bg_card_white_ripple"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:elevation="0dp"
+                                android:padding="@dimen/_12sdp">
+
+                                <ImageView
+                                    android:id="@+id/icon_readymade"
+                                    android:layout_width="@dimen/_36sdp"
+                                    android:layout_height="@dimen/_36sdp"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:background="@drawable/spawner_bg_icon_red"
+                                    android:padding="@dimen/_8sdp"
+                                    android:src="@drawable/spawner_ic_readymade"
+                                    android:scaleType="fitCenter"
+                                    app:tint="#FFFFFF"
+                                    android:contentDescription="Readymade Templates" />
+
+                                <TextView
+                                    android:id="@+id/title_readymade"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_readymade"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toTopOf="@+id/desc_readymade"
+                                    app:layout_constraintVertical_chainStyle="packed"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:text="Templates"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/_13ssp"
+                                    android:maxLines="1"
+                                    app:autoSizeTextType="uniform"
+                                    app:autoSizeMinTextSize="8sp"
+                                    app:autoSizeMaxTextSize="14sp"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                                <TextView
+                                    android:id="@+id/desc_readymade"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_readymade"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/title_readymade"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:layout_marginTop="@dimen/_2sdp"
+                                    android:text="Beautiful designs"
+                                    android:textColor="#8E8E93"
+                                    android:textSize="@dimen/_10ssp"
+                                    android:maxLines="3"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        </LinearLayout>
+
+                        <!-- Row 2: My Creation + Rate Us -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:adjustViewBounds="true"
-                            android:src="@drawable/spawner_btn_n_mydesign" />
+                            android:layout_marginTop="@dimen/_16sdp"
+                            android:baselineAligned="false"
+                            android:orientation="horizontal">
+
+                            <!-- My Creation Card -->
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/lay_creation"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="@dimen/_8sdp"
+                                android:background="@drawable/spawner_bg_card_white_ripple"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:elevation="0dp"
+                                android:padding="@dimen/_12sdp">
+
+                                <ImageView
+                                    android:id="@+id/icon_creation"
+                                    android:layout_width="@dimen/_36sdp"
+                                    android:layout_height="@dimen/_36sdp"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:background="@drawable/spawner_bg_icon_green"
+                                    android:padding="@dimen/_8sdp"
+                                    android:src="@drawable/spawner_ic_my_creation"
+                                    android:scaleType="fitCenter"
+                                    app:tint="#FFFFFF"
+                                    android:contentDescription="My Creation" />
+
+                                <TextView
+                                    android:id="@+id/title_creation"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_creation"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toTopOf="@+id/desc_creation"
+                                    app:layout_constraintVertical_chainStyle="packed"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:text="Creations"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/_13ssp"
+                                    android:maxLines="1"
+                                    app:autoSizeTextType="uniform"
+                                    app:autoSizeMinTextSize="8sp"
+                                    app:autoSizeMaxTextSize="14sp"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                                <TextView
+                                    android:id="@+id/desc_creation"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_creation"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/title_creation"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:layout_marginTop="@dimen/_2sdp"
+                                    android:text="Your saved work"
+                                    android:textColor="#8E8E93"
+                                    android:textSize="@dimen/_10ssp"
+                                    android:maxLines="3"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <!-- Rate Us Card -->
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/lay_design"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_marginStart="@dimen/_8sdp"
+                                android:background="@drawable/spawner_bg_card_white_ripple"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:elevation="0dp"
+                                android:padding="@dimen/_12sdp">
+
+                                <ImageView
+                                    android:id="@+id/icon_rateus"
+                                    android:layout_width="@dimen/_36sdp"
+                                    android:layout_height="@dimen/_36sdp"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:background="@drawable/spawner_bg_icon_amber"
+                                    android:padding="@dimen/_8sdp"
+                                    android:src="@drawable/spawner_ic_rate_us"
+                                    android:scaleType="fitCenter"
+                                    app:tint="#FFFFFF"
+                                    android:contentDescription="Rate Us" />
+
+                                <TextView
+                                    android:id="@+id/title_rateus"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_rateus"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintBottom_toTopOf="@+id/desc_rateus"
+                                    app:layout_constraintVertical_chainStyle="packed"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:text="Rate Us"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/_13ssp"
+                                    android:maxLines="1"
+                                    app:autoSizeTextType="uniform"
+                                    app:autoSizeMinTextSize="8sp"
+                                    app:autoSizeMaxTextSize="14sp"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                                <TextView
+                                    android:id="@+id/desc_rateus"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/icon_rateus"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/title_rateus"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    android:layout_marginStart="@dimen/_8sdp"
+                                    android:layout_marginTop="@dimen/_2sdp"
+                                    android:text="Show your support"
+                                    android:textColor="#8E8E93"
+                                    android:textSize="@dimen/_10ssp"
+                                    android:maxLines="3"
+                                    android:ellipsize="end"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <LinearLayout
+
+                    <!-- ==================== PREMIUM TRENDING FESTIVAL ==================== -->
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="@dimen/_32sdp"
+                        android:paddingHorizontal="@dimen/_16sdp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="🔥 Trending Festival"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/_18ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+                        <TextView
+                            android:id="@+id/btn_view_all"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="View All"
+                            android:textColor="@color/accent_purple"
+                            android:textSize="@dimen/_14ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                    </RelativeLayout>
+
+                    <!-- Trending Festival Shimmer Loader -->
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer_trending_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_16sdp"
+                        android:paddingStart="@dimen/_16sdp"
+                        android:paddingEnd="@dimen/_16sdp"
+                        android:visibility="visible"
+                        app:shimmer_auto_start="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Placeholder 1 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                android:layout_marginEnd="@dimen/_12sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+
+                            <!-- Placeholder 2 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                android:layout_marginEnd="@dimen/_12sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+
+                            <!-- Placeholder 3 -->
+                            <androidx.cardview.widget.CardView
+                                android:layout_width="@dimen/_140sdp"
+                                android:layout_height="@dimen/_160sdp"
+                                app:cardCornerRadius="@dimen/_12sdp"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E2E8F0" />
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
+                    <!-- Trending Festival RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_trending_festivals"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_16sdp"
+                        android:layout_marginBottom="0dp"
+                        android:scrollbars="none"
+                        android:overScrollMode="never"
+                        android:clipToPadding="false"
+                        android:paddingStart="@dimen/_16sdp"
+                        android:paddingEnd="@dimen/_16sdp"
+                        android:visibility="gone" />
+
+                    <!-- ==================== AD CONTAINERS (PRESERVED) ==================== -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/_20sdp"
+                        android:visibility="visible">
+
+                        <RelativeLayout
+                            android:id="@+id/rl_native_ad"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/_16sdp"
+                            android:visibility="gone">
+
+                            <RelativeLayout
+                                android:id="@+id/native_banner_ad_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="@dimen/_100sdp"
+                                android:visibility="visible" />
+
+                            <com.facebook.shimmer.ShimmerFrameLayout
+                                android:id="@+id/shimmer_view_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="@dimen/_100sdp"
+                                app:shimmer_auto_start="true">
+
+                                <include layout="@layout/spawner_native_ad_layout" />
+
+                            </com.facebook.shimmer.ShimmerFrameLayout>
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/rl_banner_ad"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/_16sdp"
+                            android:background="#E0E0E0"
+                            android:visibility="gone">
+
+                            <RelativeLayout
+                                android:id="@+id/rl_ad"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                            <com.facebook.shimmer.ShimmerFrameLayout
+                                android:id="@+id/shimmer_view_container_banner"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_50sdp"
+                                app:shimmer_auto_start="true">
+
+                                <TextView
+                                    android:id="@+id/yourTextView"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:text="Ad Loading...."
+                                    android:textColor="#888888"
+                                    android:textSize="@dimen/_14ssp" />
+
+                            </com.facebook.shimmer.ShimmerFrameLayout>
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/rl_collapsible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone">
+
+                            <FrameLayout
+                                android:id="@+id/CollapsibleContainer"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_marginTop="@dimen/_1sdp" />
+
+                            <com.facebook.shimmer.ShimmerFrameLayout
+                                android:id="@+id/shimmer_view_CollapsibleContainer"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_50sdp"
+                                android:layout_alignParentBottom="true"
+                                android:background="@color/teal_200"
+                                app:shimmer_auto_start="true">
+
+                                <TextView
+                                    android:id="@+id/CollapsibleTextView"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:text="Ad Loading...."
+                                    android:textColor="@color/black"
+                                    android:textSize="@dimen/_20ssp" />
+
+                            </com.facebook.shimmer.ShimmerFrameLayout>
+
+                        </RelativeLayout>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
+            </com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout>
+
+            <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->
+            <RelativeLayout
+                android:id="@+id/bottom_nav_bar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_72sdp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/spawner_bg_bottom_nav"
+                android:elevation="@dimen/_16sdp"
+                android:paddingHorizontal="@dimen/_12sdp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:clipChildren="false">
+
+                    <!-- Home Tab (Active) -->
+                    <LinearLayout
+                        android:id="@+id/tab_home"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
-                            android:id="@+id/lay_creation"
-                            android:layout_width="match_parent"
+                            android:layout_width="@dimen/_26sdp"
+                            android:layout_height="@dimen/_26sdp"
+                            android:src="@drawable/spawner_ic_home"
+                            android:contentDescription="Home" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:adjustViewBounds="true"
-                            android:src="@drawable/spawner_btn_n_creation" />
+                            android:layout_marginTop="@dimen/_4sdp"
+                            android:text="Home"
+                            android:textColor="@color/bottom_nav_active"
+                            android:textSize="@dimen/_11ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold" />
+                    </LinearLayout>
+
+                    <!-- Explore Tab -->
+                    <LinearLayout
+                        android:id="@+id/tab_explore"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
-                            android:id="@+id/lay_template"
-                            android:layout_width="match_parent"
+                            android:layout_width="@dimen/_26sdp"
+                            android:layout_height="@dimen/_26sdp"
+                            android:src="@drawable/spawner_ic_explore"
+                            android:contentDescription="Explore" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:adjustViewBounds="true"
-                            android:src="@drawable/spawner_btn_readymadeposter" />
+                            android:layout_marginTop="@dimen/_4sdp"
+                            android:text="Explore"
+                            android:textColor="@color/bottom_nav_inactive"
+                            android:textSize="@dimen/_11ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
+                    </LinearLayout>
 
+                    <!-- Center FAB Container -->
+                    <LinearLayout
+                        android:id="@+id/tab_create"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:clickable="true"
+                        android:focusable="true">
 
+                        <RelativeLayout
+                            android:layout_width="@dimen/_46sdp"
+                            android:layout_height="@dimen/_46sdp"
+                            android:background="@drawable/spawner_bg_fab_gradient"
+                            android:elevation="0dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="+"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/_26ssp"
+                                android:includeFontPadding="false"
+                                android:fontFamily="sans-serif-light" />
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <!-- My Creations Tab -->
+                    <LinearLayout
+                        android:id="@+id/tab_creations"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="@dimen/_26sdp"
+                            android:layout_height="@dimen/_26sdp"
+                            android:src="@drawable/spawner_ic_creations"
+                            android:contentDescription="My Creations" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_4sdp"
+                            android:text="Creations"
+                            android:textColor="@color/bottom_nav_inactive"
+                            android:textSize="@dimen/_11ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
+                    </LinearLayout>
+
+                    <!-- Settings Tab -->
+                    <LinearLayout
+                        android:id="@+id/tab_settings"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="@dimen/_26sdp"
+                            android:layout_height="@dimen/_26sdp"
+                            android:src="@drawable/spawner_ic_settings_gear"
+                            android:contentDescription="Settings" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_4sdp"
+                            android:text="Settings"
+                            android:textColor="@color/bottom_nav_inactive"
+                            android:textSize="@dimen/_11ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
                     </LinearLayout>
 
                 </LinearLayout>
-            </RelativeLayout>
-
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/_40sdp"
-                android:layout_marginBottom="@dimen/_12sdp"
-                android:visibility="visible"
-                android:layout_height="match_parent">
-
-                <RelativeLayout
-                    android:id="@+id/rl_native_ad"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:visibility="gone">
-
-                    <RelativeLayout
-                        android:id="@+id/native_banner_ad_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:visibility="visible" />
-
-                    <com.facebook.shimmer.ShimmerFrameLayout
-                        android:id="@+id/shimmer_view_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:shimmer_auto_start="true">
-
-                        <include layout="@layout/spawner_native_ad_layout" />
-
-                    </com.facebook.shimmer.ShimmerFrameLayout>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_banner_ad"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_gravity="bottom"
-                    android:layout_marginVertical="5dp"
-                    android:background="@color/black"
-                    android:visibility="gone">
-
-                    <RelativeLayout
-                        android:id="@+id/rl_ad"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                    <com.facebook.shimmer.ShimmerFrameLayout
-                        android:id="@+id/shimmer_view_container_banner"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        app:shimmer_auto_start="true">
-
-                        <TextView
-                            android:id="@+id/yourTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="Ad Loading...."
-                            android:textColor="@color/white"
-                            android:textSize="20sp" />
-
-                    </com.facebook.shimmer.ShimmerFrameLayout>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_collapsible"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone">
-
-                    <FrameLayout
-                        android:id="@+id/CollapsibleContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginTop="1dp" />
-
-                    <com.facebook.shimmer.ShimmerFrameLayout
-                        android:id="@+id/shimmer_view_CollapsibleContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_alignParentBottom="true"
-                        android:background="@color/teal_200"
-                        app:shimmer_auto_start="true">
-
-                        <TextView
-                            android:id="@+id/CollapsibleTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="Ad Loading...."
-                            android:textColor="@color/black"
-                            android:textSize="20sp" />
-
-                    </com.facebook.shimmer.ShimmerFrameLayout>
-
-                </RelativeLayout>
 
             </RelativeLayout>
-        </LinearLayout>
 
-        <com.google.android.material.navigation.NavigationView
-            android:id="@+id/nav_view_poster_maker"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:background="@drawable/spawner_btn_rounded_text_bg"
-            app:itemIconTint="@color/white"
-            app:itemTextColor="@color/white"
-            app:menu="@menu/spawner_navigation_menu" />
-
-    </androidx.drawerlayout.widget.DrawerLayout>
+        </RelativeLayout>
 
 </RelativeLayout>

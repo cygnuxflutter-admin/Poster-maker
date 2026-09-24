@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/spawner_bg_bottom_sheet"
+    android:padding="@dimen/_16sdp">
+
+    <View
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_4sdp"
+        android:layout_gravity="center_horizontal"
+        android:background="#D1D1D1"
+        android:layout_marginBottom="@dimen/_12sdp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="All Categories"
+        android:textColor="#1F1735"
+        android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/spawner_visbyroundcf_bold"
+        android:layout_marginBottom="@dimen/_12sdp"
+        android:layout_gravity="center_horizontal"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/_20sdp"/>
+
+</LinearLayout>

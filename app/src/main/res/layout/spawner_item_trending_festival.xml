@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/_140sdp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/_12sdp"
+    android:layout_marginBottom="@dimen/_8sdp"
+    android:layout_marginTop="@dimen/_4sdp"
+    android:layout_marginStart="@dimen/_4sdp"
+    app:cardCornerRadius="@dimen/_12sdp"
+    app:cardElevation="@dimen/_4sdp"
+    app:cardBackgroundColor="@color/white"
+    android:clipToOutline="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Top Part (Banner Image) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_100sdp"
+            app:cardCornerRadius="@dimen/_12sdp"
+            app:cardElevation="0dp"
+            android:layout_margin="0dp">
+
+            <ImageView
+                android:id="@+id/iv_trending_banner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:background="@drawable/spawner_bg_placeholder_top_rounded" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Bottom Part (Title & Button) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingBottom="@dimen/_12sdp"
+            android:paddingHorizontal="@dimen/_8sdp">
+
+            <TextView
+                android:id="@+id/tv_trending_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Festival"
+                android:textColor="#333333"
+                android:textSize="@dimen/_11ssp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:fontFamily="@font/spawner_visbyroundcf_bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:background="@drawable/spawner_bg_btn_create_now_outline"
+                android:gravity="center"
+                android:paddingVertical="@dimen/_6sdp"
+                android:text="Create Now"
+                android:textColor="#8A2BE2"
+                android:textSize="@dimen/_10ssp"
+                android:fontFamily="@font/spawner_visbyroundcf_bold" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

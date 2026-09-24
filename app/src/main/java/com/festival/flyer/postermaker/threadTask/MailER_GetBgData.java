@@ -56,20 +56,8 @@ public class MailER_GetBgData extends AsyncTask<Void, Void, String> {
                 String field_44 = textJSONObject.getString(preferenceClass.getDataType("field_44"));
                 String field_45 = textJSONObject.getString(preferenceClass.getDataType("field_45"));
 
-//                if (j != 0) {
-//                    if (!isFirstShow) {
-//                        if ((j) % preferenceClass.getInt("First_rv_count", 4) == 0) {
-//                            bgImageArrayList.add(null);
-//                            isFirstShow = true;
-//                        }
-//                    } else {
-//                        if ((j) % preferenceClass.getInt("rv_count", 4) == 0) {
-//                            bgImageArrayList.add(null);
-//                        }
-//                    }
-//                }
-
-                bgImageArrayList.add(new MailER_BgImage(field_43, field_44, field_45));
+                boolean isPremium = (j % preferenceClass.getInt("PremiumPostCount", 3) == 0);
+                bgImageArrayList.add(new MailER_BgImage(field_43, field_44, field_45, isPremium));
             }
             return bgImageArrayList;
         } catch (Exception e) {

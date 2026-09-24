@@ -2,23 +2,25 @@ package com.festival.flyer.postermaker;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.view.Display;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
 import com.facebook.ads.AudienceNetworkAds;
+import com.festival.flyer.postermaker.activities.MailER_SplashScreen;
 import com.festival.flyer.postermaker.adManager.MailER_AppOpenManager;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
-//import com.google.android.play.core.review.ReviewInfo;
-//import com.google.android.play.core.review.ReviewManager;
-//import com.google.android.play.core.review.ReviewManagerFactory;
-//import com.google.android.play.core.tasks.Task;
+import com.onesignal.OneSignal;
+import com.onesignal.debug.LogLevel;
 
 import java.io.File;
 import java.util.Collections;
@@ -26,17 +28,8 @@ import java.util.List;
 
 public class MyApplication extends android.app.Application {
 
-
     public static Context context;
-
     public static MyApplication myApplication;
-
-/*
-    public static void showInterstitialAdWithOutCount(Activity activity, InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showInterstitialAd(activity, onAdLoadInterface);
-    }
-*/
-
 
     public static boolean isShowingAppOpen = true, isAdsSplash = true;
     public MailER_AppOpenManager appOpenManager;
@@ -67,32 +60,111 @@ public class MyApplication extends android.app.Application {
             interstitialAdManager = new MailER_InterstitialAdManager(MyApplication.this);
     }
 
+    private Activity currentActivity;
+    private android.app.Dialog noInternetDialog;
+
     @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
 
-
         myApplication = this;
-
-//        connectivity = new MailER_Connectivity(this);
-//        prefManager = new MailER_PrefManager(this);
-
         context = this;
 
+        // OneSignal Initialization
+        OneSignal.getDebug().setLogLevel(LogLevel.VERBOSE);
+        OneSignal.initWithContext(this, "43959a09-0f52-41be-a5b7-eda74bdbc1b6");
 
- /*       MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                    @Override
-                    public void onInitializationComplete(InitializationStatus initializationStatus) {}
-                });*/
-        /*       AudienceNetworkAds.initialize(this);*/
+        // OneSignal Notification Click Handler to redirect inside app
+        OneSignal.getNotifications().addClickListener(event -> {
+            if (event.getNotification() != null) {
+                String notifId = event.getNotification().getNotificationId();
+                if (notifId != null) {
+                    com.festival.flyer.postermaker.utils.MailER_NotificationHelper.markNotificationAsRead(context, notifId);
+                }
+            }
+            Intent intent = new Intent(context, MailER_SplashScreen.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(intent);
+        });
+
         MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
-//        appOpenAdManager = new AppOpenManager(this);
+
+        // Reward ad preload removed from here — now preloads only in screens that use reward ads
+        // (PosterEditActivity, TemplateSelectionActivity, BackgroundSelectionActivity, LikedTemplatesActivity)
 
         appOpenManager = new MailER_AppOpenManager(this);
 
-
         AudienceNetworkAds.initialize(this);
+
+        // Global Network Monitor Registration
+        com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().startMonitoring(this);
+        com.festival.flyer.postermaker.utils.MailER_NetworkMonitor.getInstance().addListener(isConnected -> {
+            if (currentActivity != null && !currentActivity.isFinishing() && !currentActivity.isDestroyed()) {
+                if (currentActivity.getClass().getSimpleName().contains("Splash")) {
+                    return;
+                }
+                if (!isConnected) {
+                    showNoInternetDialog(currentActivity);
+                } else {
+                    dismissNoInternetDialog();
+                }
+            }
+        });
+
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+                View rootView = activity.getWindow().getDecorView().findViewById(android.R.id.content);
+                if (rootView != null) {
+                    androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+                        androidx.core.graphics.Insets systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                        // Don't pad Splash Screen or Crop Activity if we want them full screen
+                        if (activity.getClass().getSimpleName().contains("Splash") ) {
+                            return insets;
+                        }
+                        v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                        return androidx.core.view.WindowInsetsCompat.CONSUMED;
+                    });
+                }
+            }
+            @Override
+            public void onActivityStarted(@NonNull Activity activity) {
+                currentActivity = activity;
+            }
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+                currentActivity = activity;
+                if (activity.getClass().getSimpleName().contains("Splash")) {
+                    return;
+                }
+                if (!com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(activity)) {
+                    showNoInternetDialog(activity);
+                } else {
+                    dismissNoInternetDialog();
+                }
+            }
+            @Override
+            public void onActivityPaused(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    dismissNoInternetDialog();
+                }
+            }
+            @Override
+            public void onActivityStopped(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    currentActivity = null;
+                }
+            }
+            @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+            @Override
+            public void onActivityDestroyed(@NonNull Activity activity) {
+                if (currentActivity == activity) {
+                    currentActivity = null;
+                    dismissNoInternetDialog();
+                }
+            }
+        });
 
         // Debug ma tamara phone ne Test Device banave → Account Safe
         // Release (Play Store) ma aa code chalse j nahi → Real Ads aavse
@@ -102,8 +174,42 @@ public class MyApplication extends android.app.Application {
             MobileAds.setRequestConfiguration(configuration);
         }
 
-        MobileAds.initialize(this, initializationStatus -> Log.d(" AD", " poster open ad"));
+    }
 
+    public synchronized void showNoInternetDialog(@NonNull Activity activity) {
+        if (activity.isFinishing() || activity.isDestroyed()) return;
+        if (activity.getClass().getSimpleName().contains("Splash")) return;
+        if (noInternetDialog != null && noInternetDialog.isShowing()) return;
+
+        try {
+            noInternetDialog = new android.app.Dialog(activity);
+            noInternetDialog.setContentView(R.layout.spawner_dialog_no_internet);
+            noInternetDialog.setCancelable(false);
+            noInternetDialog.setCanceledOnTouchOutside(false);
+
+            if (noInternetDialog.getWindow() != null) {
+                int width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.90);
+                noInternetDialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+                noInternetDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+            noInternetDialog.show();
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error showing No-Internet dialog: " + e.getMessage());
+        }
+    }
+
+    public synchronized void dismissNoInternetDialog() {
+        if (noInternetDialog != null) {
+            try {
+                if (noInternetDialog.isShowing()) {
+                    noInternetDialog.dismiss();
+                }
+            } catch (Exception e) {
+                Log.e("MyApplication", "Error dismissing No-Internet dialog: " + e.getMessage());
+            } finally {
+                noInternetDialog = null;
+            }
+        }
     }
 
     public static synchronized MyApplication getInstance() {
@@ -113,7 +219,6 @@ public class MyApplication extends android.app.Application {
         }
         return myApp;
     }
-
 
     public interface OnShowAdCompleteListener {
         void onShowAdComplete();
@@ -134,20 +239,6 @@ public class MyApplication extends android.app.Application {
     public boolean isAdAvailable() {
         return appOpenManager.isAdAvailable();
     }
-
-//    public void appReview(Activity activity) {
-//        ReviewManager reviewManager = ReviewManagerFactory.create(activity);
-//        Task<ReviewInfo> request = reviewManager.requestReviewFlow();
-//        request.addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                ReviewInfo reviewInfo = task.getResult();
-//                Task<Void> flow = reviewManager.launchReviewFlow(activity, reviewInfo);
-//                flow.addOnCompleteListener(task1 -> {
-//
-//                });
-//            }
-//        });
-//    }
 
     public String GetMainPath() {
         String folderName = getString(R.string.app_name);
@@ -192,6 +283,5 @@ public class MyApplication extends android.app.Application {
         Display display = wm.getDefaultDisplay();
         return display;
     }
-
 
 }

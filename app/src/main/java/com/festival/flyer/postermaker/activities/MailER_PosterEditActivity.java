@@ -154,7 +154,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     private String savePathWithWaterMark = null;
 
     private boolean isRewarded = false;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     private MailER_PreferenceClass prefManager;
     private String effect_name = "", temp_effect_name;
     private boolean premiumPoster = false;
@@ -170,10 +170,13 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.spawner_activity_poster_edit);
+
+        // Preload reward ad when user enters edit screen (for watermark removal)
+
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -889,43 +892,15 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-
-//            if (SDK_INT >= Build.VERSION_CODES.M) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PERMISSION_GRANTED
-//                        || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, READ_EXTERNAL_STORAGE)) {
-                        permission_type = "template";
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
             btn_watermark_remove.setVisibility(View.GONE);
-            new saveTemplateAsync(false).execute();
+            checkDownloadAdAndSave(false);
         } else if (id == R.id.btn_save_poster) {
             hideAllControls();
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-
-//            if (SDK_INT >= Build.VERSION_CODES.M) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PERMISSION_GRANTED
-//                        || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(MailER_PosterEditActivity.this, READ_EXTERNAL_STORAGE)) {
-                        permission_type = "poster";
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
             btn_watermark_remove.setVisibility(View.GONE);
-            new saveTemplateAsync(true).execute();
+            checkDownloadAdAndSave(true);
         } else if (id == R.id.btn_reset) {
             MyApplication.showEditInterstitialAd(this, () -> {
                 MailER_MaterialDialogUtils.getInstance().resetDialog(this, materialDialog -> {
@@ -983,6 +958,32 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         hideAllControls();
         hideStickerControl();
         hideEffectControl();
+    }
+
+    private void checkDownloadAdAndSave(boolean isPoster) {
+        com.festival.flyer.postermaker.utils.MailER_PreferenceClass prefManager = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+        int freeAllowed = prefManager.getInt("FreeDownloadsAllowed", 2);
+        int totalDownloads = prefManager.getInt("TotalDownloadsCount", 0);
+
+        if (totalDownloads < freeAllowed) {
+            prefManager.setInt("TotalDownloadsCount", totalDownloads + 1);
+            new saveTemplateAsync(isPoster).execute();
+        } else {
+            // Show custom pop-up dialog
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Premium Quality Download")
+                    .setMessage("Watch a short video to download your poster in High Quality!")
+                    .setCancelable(false)
+                    .setPositiveButton("Watch Ad", (dialog, which) -> {
+                        com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.showRewardVideoAd(this, () -> {
+                            new saveTemplateAsync(isPoster).execute();
+                        });
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        dialog.dismiss();
+                    })
+                    .show();
+        }
     }
 
     private void showUserDialog() {
@@ -1272,10 +1273,15 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         int ratioY = main_rel.getHeight() / gcd;
         options.withAspectRatio(ratioX, ratioY);
         options.withMaxResultSize(screenWidth, screenHeight);
-        options.setToolbarColor(ContextCompat.getColor(this, R.color.purple_700));
-        options.setStatusBarColor(ContextCompat.getColor(this, R.color.purple_700));
+        
+        options.setToolbarColor(Color.parseColor("#7B2FF7")); // Primary Purple
+        options.setStatusBarColor(Color.parseColor("#5A18C9")); // Darker Purple
         options.setToolbarWidgetColor(Color.WHITE);
-        options.setRootViewBackgroundColor(ContextCompat.getColor(this, R.color.purple_200));
+        options.setActiveControlsWidgetColor(Color.parseColor("#7B2FF7")); // Purple controls
+        options.setRootViewBackgroundColor(Color.WHITE); // Cleaner background
+        options.setCropFrameColor(Color.WHITE); // White crop frame
+        options.setCropGridColor(Color.WHITE); // White grid
+        
         return uCrop.withOptions(options);
     }
 
@@ -1735,6 +1741,11 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                     if (mMaterialDialog != null && mMaterialDialog.isShowing())
                         mMaterialDialog.dismiss();
                 }
+            } else {
+                if (mMaterialDialog != null && mMaterialDialog.isShowing())
+                    mMaterialDialog.dismiss();
+                Toast.makeText(MailER_PosterEditActivity.this, "Failed to load image. If this is a remote background, it needs to be downloaded first.", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
     }

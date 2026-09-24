@@ -89,7 +89,6 @@ public class MailER_ItemAdapter extends DragItemAdapter<Pair<Long, View>, MailER
             if (v instanceof MailER_AutofitTextRel) {
                 holder.textView.setText(((MailER_AutoResizeTextView) ((MailER_AutofitTextRel) v).getChildAt(2)).getText());
                 holder.textView.setTypeface(((MailER_AutoResizeTextView) ((MailER_AutofitTextRel) v).getChildAt(2)).getTypeface());
-                holder.textView.setTextColor(((MailER_AutoResizeTextView) ((MailER_AutofitTextRel) v).getChildAt(2)).getTextColors());
                 holder.textView.setTextSize(400.0f);
                 holder.textView.setGravity(17);
                 holder.textView.setMinTextSize(10.0f);

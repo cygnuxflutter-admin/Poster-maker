@@ -21,16 +21,16 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 public class MailER_InterstitialAdManager {
 
-    private final String admobInterstitialAdId, fbInterstitialAdId;
+    private String admobInterstitialAdId, fbInterstitialAdId;
     private final Context context;
     private final MailER_PreferenceClass preferenceClass;
-    private final String adXInterstitialAdId;
+    private String adXInterstitialAdId;
     private InterstitialAd admobInterstitialAd;
     private com.facebook.ads.InterstitialAd fbInterstitialAd;
     private OnAdLoadInterface onAdLoadInterface;
     private boolean isFailed = false;
     private boolean isADTimer = true;
-    private ProgressDialog progressDialog;
+    private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     public static Integer InterAdTimer = 20000;
     public MailER_InterstitialAdManager(Context context) {
         this.context = context;
@@ -38,7 +38,7 @@ public class MailER_InterstitialAdManager {
         admobInterstitialAdId = preferenceClass.getAdsId("InterstitalAdunitID");
         adXInterstitialAdId = preferenceClass.getAdsId("AdxInterstitalAdunitID");
         fbInterstitialAdId = preferenceClass.getAdsId("fbInterstitalAdunitID");
-        fetchAdMobAd();
+        // Ad will now load only when click count is close to target (Just-in-Time Pre-loading)
     }
 
     private void fetchFbAd() {
@@ -88,14 +88,28 @@ public class MailER_InterstitialAdManager {
 
     }
 
+    private boolean isLoadingAdMob = false;
+
     public void fetchAdMobAd() {
-        if (isAdmobAdAvailable()) {
+        if (isAdmobAdAvailable() || isLoadingAdMob) {
             return;
         }
+        if (preferenceClass != null) {
+            admobInterstitialAdId = preferenceClass.getAdsId("InterstitalAdunitID");
+            if (admobInterstitialAdId == null || admobInterstitialAdId.trim().isEmpty()) {
+                admobInterstitialAdId = preferenceClass.getDataType("InterstitalAdunitID");
+            }
+        }
+        if (admobInterstitialAdId == null || admobInterstitialAdId.trim().isEmpty()) {
+            Log.e("AdTracker", "Interstitial Ad (AdMob) ID is empty! Skipping request.");
+            return;
+        }
+        isLoadingAdMob = true;
 
         InterstitialAdLoadCallback loadCallback = new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
+                isLoadingAdMob = false;
                 Log.d("AdTracker", "AdMob Interstitial Ad Loaded Successfully! ID: " + admobInterstitialAdId);
                 admobInterstitialAd = ad;
 
@@ -103,6 +117,7 @@ public class MailER_InterstitialAdManager {
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                isLoadingAdMob = false;
                 Log.d("AdTracker", "Interstitial Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 // fetchAdXAd();
             }
@@ -153,9 +168,6 @@ public class MailER_InterstitialAdManager {
         this.onAdLoadInterface = onAdLoadInterface;
 
         if (!isADTimer) {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
             onAdLoadInterface.onAdClose();
             return;
         }
@@ -163,93 +175,90 @@ public class MailER_InterstitialAdManager {
         if (isFailed) {
             isFailed = false;
             fetchAdMobAd();
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            onAdLoadInterface.onAdClose();
-            return;
         }
 
         int interstitalAdStatus = preferenceClass.getAdsStatus("interstitalAdStatus");
-
         int getClickCount = preferenceClass.getInt("getClickCount");
-        if (getClickCount < interstitalAdStatus) {
-            preferenceClass.setInt("getClickCount", getClickCount + 1);
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
+        
+        if (getClickCount + 1 < interstitalAdStatus) {
+            int currentClick = getClickCount + 1;
+            preferenceClass.setInt("getClickCount", currentClick);
+
+            // Just-in-Time Pre-loading: Load ad one click before target so it's ready when needed
+            if (currentClick == interstitalAdStatus - 1 && !isAdmobAdAvailable()) {
+                Log.d("[ADS_LOG]", "🔄 Pre-loading Interstitial Ad at Click " + currentClick + " / " + interstitalAdStatus + " (Target)");
+                fetchAdMobAd();
             }
+
+            Log.d("[ADS_LOG]", "▶️ Click Count: " + currentClick + " / " + interstitalAdStatus + " (Required). Skipping Ad Show.");
             onAdLoadInterface.onAdClose();
             return;
         }
 
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        preferenceClass.setInt("getClickCount", 0);
+        Log.d("[ADS_LOG]", "⚡ Click Count Target (" + interstitalAdStatus + ") Reached! Showing Interstitial Ad...");
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        if (isAdmobAdAvailable()) {
+            progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
 
-                preferenceClass.setInt("getClickCount", 0);
-
-                if (isAdmobAdAvailable()) {
-                    FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
-                        @Override
-                        public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                            super.onAdFailedToShowFullScreenContent(adError);
-                            admobInterstitialAd = null;
-                            isFailed = true;
-                            if (progressDialog != null && progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
-                            onAdLoadInterface.onAdClose();
-                        }
-
-                        @Override
-                        public void onAdShowedFullScreenContent() {
-                            super.onAdShowedFullScreenContent();
-                        }
-
-                        @Override
-                        public void onAdDismissedFullScreenContent() {
-                            super.onAdDismissedFullScreenContent();
-                            admobInterstitialAd = null;
-                            fetchAdMobAd();
-                            if (progressDialog != null && progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
-                            onAdLoadInterface.onAdClose();
-                            Log.e("TAG", "onAdDismissedFullScreenContent: isADTimer 1= " + isADTimer);
-                            isADTimer = false;
-                            Log.e("TAG", "onAdDismissedFullScreenContent: isADTimer 2= " + isADTimer);
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    isADTimer = true;
-                                    Log.e("TAG", "onAdDismissedFullScreenContent: isADTimer 3= " + isADTimer);
-                                }
-                            }, InterAdTimer);
-                        }
-
-                        @Override
-                        public void onAdImpression() {
-                            super.onAdImpression();
-                        }
-                    };
-                    admobInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
-
-                    admobInterstitialAd.show(activity);
-                } else if (isFbAdAvailable()) {
-                    fbInterstitialAd.show();
-                } else {
+            FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    super.onAdFailedToShowFullScreenContent(adError);
+                    Log.d("[ADS_LOG]", "🔴 Interstitial Ad Failed to Show: " + adError.getMessage());
+                    admobInterstitialAd = null;
+                    isFailed = true;
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    onAdLoadInterface.onAdClose();
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                 }
-            }
-        }, 2000);
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    super.onAdShowedFullScreenContent();
+                    Log.d("[ADS_LOG]", "📺 Interstitial Ad Displayed on Screen!");
+                    MailER_AppOpenManager.lastInterstitialShowTime = System.currentTimeMillis();
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    super.onAdDismissedFullScreenContent();
+                    Log.d("[ADS_LOG]", "❌ Interstitial Ad Dismissed by User. Pre-fetching next Ad...");
+                    admobInterstitialAd = null;
+                    fetchAdMobAd();
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                    
+                    isADTimer = false;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isADTimer = true;
+                        }
+                    }, InterAdTimer);
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: Interstitial Ad IMPRESSION Logged!");
+                }
+            };
+            admobInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
+            admobInterstitialAd.show(activity);
+        } else if (isFbAdAvailable()) {
+            fbInterstitialAd.show();
+        } else {
+            onAdLoadInterface.onAdClose();
+        }
     }
 
     public void showInterstitialAd(Activity activity, OnAdLoadInterface onAdLoadInterface) {
@@ -258,48 +267,50 @@ public class MailER_InterstitialAdManager {
         if (isFailed) {
             isFailed = false;
             fetchAdMobAd();
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            onAdLoadInterface.onAdClose();
-            return;
         }
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+
         if (isAdmobAdAvailable()) {
+            progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
             FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
                 @Override
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     super.onAdFailedToShowFullScreenContent(adError);
+                    Log.d("[ADS_LOG]", "🔴 Direct Interstitial Ad Failed to Show: " + adError.getMessage());
                     admobInterstitialAd = null;
                     isFailed = true;
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    onAdLoadInterface.onAdClose();
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                 }
 
                 @Override
                 public void onAdShowedFullScreenContent() {
                     super.onAdShowedFullScreenContent();
+                    Log.d("[ADS_LOG]", "📺 Direct Interstitial Ad Displayed on Screen!");
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
                 }
 
                 @Override
                 public void onAdDismissedFullScreenContent() {
                     super.onAdDismissedFullScreenContent();
+                    Log.d("[ADS_LOG]", "❌ Direct Interstitial Ad Dismissed by User.");
                     admobInterstitialAd = null;
-                    fetchAdMobAd();
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    onAdLoadInterface.onAdClose();
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                 }
 
                 @Override
                 public void onAdImpression() {
                     super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: Direct Interstitial Ad IMPRESSION Logged!");
                 }
             };
             admobInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
@@ -307,12 +318,10 @@ public class MailER_InterstitialAdManager {
         } else if (isFbAdAvailable()) {
             fbInterstitialAd.show();
         } else {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
+            // No ad available, load one for next time
+            fetchAdMobAd();
             onAdLoadInterface.onAdClose();
         }
-
     }
 
     public void showEDitAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
@@ -321,81 +330,78 @@ public class MailER_InterstitialAdManager {
         if (isFailed) {
             isFailed = false;
             fetchAdMobAd();
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-            onAdLoadInterface.onAdClose();
-            return;
         }
 
         int interstitalAdStatus = preferenceClass.getAdsStatus("EditScreenAdCount");
-
         int getClickCount = preferenceClass.getInt("getEDitClickCount");
+        
         if (getClickCount < interstitalAdStatus) {
-            preferenceClass.setInt("getEDitClickCount", getClickCount + 1);
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
+            int currentClick = getClickCount + 1;
+            preferenceClass.setInt("getEDitClickCount", currentClick);
+
+            // Just-in-Time Pre-loading: Load ad one click before target so it's ready when needed
+            if (currentClick >= interstitalAdStatus - 1 && !isAdmobAdAvailable()) {
+                Log.d("[ADS_LOG]", "🔄 Pre-loading EditScreen Ad at Click " + currentClick + " / " + interstitalAdStatus + " (Target)");
+                fetchAdMobAd();
             }
+
             onAdLoadInterface.onAdClose();
             return;
         }
 
-        progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Ad Showing...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                preferenceClass.setInt("getEDitClickCount", 0);
+        preferenceClass.setInt("getEDitClickCount", 0);
 
-                if (isAdmobAdAvailable()) {
-                    FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
-                        @Override
-                        public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                            super.onAdFailedToShowFullScreenContent(adError);
-                            admobInterstitialAd = null;
-                            isFailed = true;
-                            if (progressDialog != null && progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
-                            onAdLoadInterface.onAdClose();
-                        }
+        if (isAdmobAdAvailable()) {
+            progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
 
-                        @Override
-                        public void onAdShowedFullScreenContent() {
-                            super.onAdShowedFullScreenContent();
-                        }
-
-                        @Override
-                        public void onAdDismissedFullScreenContent() {
-                            super.onAdDismissedFullScreenContent();
-                            admobInterstitialAd = null;
-                            fetchAdMobAd();
-                            if (progressDialog != null && progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
-                            onAdLoadInterface.onAdClose();
-                        }
-
-                        @Override
-                        public void onAdImpression() {
-                            super.onAdImpression();
-                        }
-                    };
-                    admobInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
-                    admobInterstitialAd.show(activity);
-                } else if (isFbAdAvailable()) {
-                    fbInterstitialAd.show();
-                } else {
+            FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    super.onAdFailedToShowFullScreenContent(adError);
+                    Log.d("[ADS_LOG]", "🔴 EditScreen Interstitial Ad Failed to Show: " + adError.getMessage());
+                    admobInterstitialAd = null;
+                    isFailed = true;
                     if (progressDialog != null && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    onAdLoadInterface.onAdClose();
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                 }
 
-            }
-        }, 2000);
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    super.onAdShowedFullScreenContent();
+                    Log.d("[ADS_LOG]", "📺 EditScreen Interstitial Ad Displayed on Screen!");
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    super.onAdDismissedFullScreenContent();
+                    Log.d("[ADS_LOG]", "❌ EditScreen Interstitial Ad Dismissed by User.");
+                    admobInterstitialAd = null;
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                }
+
+                @Override
+                public void onAdImpression() {
+                    super.onAdImpression();
+                    Log.d("[ADS_LOG]", "🟢 SUCCESS: EditScreen Interstitial Ad IMPRESSION Logged!");
+                }
+            };
+            admobInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
+            admobInterstitialAd.show(activity);
+        } else if (isFbAdAvailable()) {
+            fbInterstitialAd.show();
+        } else {
+            onAdLoadInterface.onAdClose();
+        }
     }
 
     public interface OnAdLoadInterface {

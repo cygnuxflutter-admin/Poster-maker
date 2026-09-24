@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:layout_margin="10dp"
+                android:layout_margin="@dimen/_10sdp"
                 android:layout_toEndOf="@+id/img"
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:singleLine="true"
@@ -47,8 +47,8 @@
         <View
             android:layout_width="fill_parent"
             android:layout_height="5.0dip"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginRight="@dimen/_10sdp"
             android:background="@drawable/spawner_seprator_line" />
 
         <TextView
@@ -66,7 +66,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10.0dip"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="@dimen/_30sdp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -79,11 +79,11 @@
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:gravity="center"
                 android:padding="@dimen/_5sdp"
-                android:paddingStart="65dp"
-                android:paddingEnd="65dp"
+                android:paddingStart="@dimen/_65sdp"
+                android:paddingEnd="@dimen/_65sdp"
                 android:text="@string/ok"
                 android:textColor="#fff"
-                android:textSize="17sp" />
+                android:textSize="@dimen/_17ssp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

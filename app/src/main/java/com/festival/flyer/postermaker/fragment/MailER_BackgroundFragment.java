@@ -61,16 +61,23 @@ public class MailER_BackgroundFragment extends Fragment {
         int cellWidth = (int) (screenWidth - (42 * screenDensity)) / 2;
         int cellHeight = (700 * cellWidth) / 507;
 
+        int firstAdCount = preferenceClass.getInt("First_rv_count", 3);
+        int repeatAdCount = preferenceClass.getInt("rv_count", 10);
+        int itemsSinceLastAd = 0;
+
         for (int j = 0; j < bgImages.size(); j++) {
             if (j != 0) {
+                itemsSinceLastAd++;
                 if (!TempisFirstShow) {
-                    if ((j) % preferenceClass.getInt("First_rv_count", 3) == 0) {
+                    if (itemsSinceLastAd >= firstAdCount) {
                         tempbgImages.add(null);
                         TempisFirstShow = true;
+                        itemsSinceLastAd = 0;
                     }
                 } else {
-                    if ((j) % preferenceClass.getInt("rv_count", 10) == 0) {
+                    if (itemsSinceLastAd >= repeatAdCount) {
                         tempbgImages.add(null);
+                        itemsSinceLastAd = 0;
                     }
                 }
             }

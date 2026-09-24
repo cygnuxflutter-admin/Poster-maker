@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    android:clipChildren="false"
     android:background="@color/white">
-    <!--  android:background="@color/purple_200"-->
 
     <LinearLayout
         android:id="@+id/top_ly"
@@ -21,74 +21,133 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="@dimen/_48sdp"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp">
 
-            <ImageView
-                android:id="@+id/ic_back"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/ll_pro_toggle"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="12dp"
-                android:padding="2dp"
-                android:src="@drawable/spawner_icon_back" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
+                <ImageView
+                    android:id="@+id/ic_back"
+                    android:layout_width="@dimen/_48sdp"
+                    android:layout_height="@dimen/_48sdp"
+                    android:padding="@dimen/_12sdp"
+                    android:src="@drawable/spawner_ic_chevron_left_new"
+                    app:tint="#381079" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/_2sdp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="@string/select_poster"
+                        android:textColor="#381079"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_medium"
+                        android:text="Choose a template"
+                        android:textColor="#9E9E9E"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_pro_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/_12sdp"
+                android:background="@drawable/spawner_tab_pill_background"
+                android:backgroundTint="#FF8C00"
                 android:gravity="center"
-                android:singleLine="true"
-                android:text="@string/select_poster"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:visibility="visible" />
+                android:paddingHorizontal="@dimen/_12sdp"
+                android:paddingVertical="@dimen/_6sdp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="@dimen/_16sdp"
+                    android:layout_height="@dimen/_16sdp"
+                    android:src="@drawable/spawner_ic_crown"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_6sdp"
+                    android:fontFamily="@font/spawner_visbyroundcf_bold"
+                    android:text="PRO"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_12ssp" />
+            </LinearLayout>
 
         </RelativeLayout>
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/rl_1"
+    <com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/top_ly"
-        android:layout_above="@+id/btm"
-        android:background="@color/white">
+        android:layout_above="@+id/btm">
+
         <RelativeLayout
-            android:id="@+id/viewPagerLay"
-            android:layout_width="fill_parent"
-            android:layout_height="50.0dip"
+            android:id="@+id/rl_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@color/white">
 
-            <com.festival.flyer.postermaker.view.MailER_PagerSlidingTabStrip
-                android:id="@+id/pagerSlidingTabStrip"
+            <RelativeLayout
+                android:id="@+id/viewPagerLay"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                app:pstsShouldExpand="true"
-                app:pstsTextAllCaps="false"
-                app:pstsDividerColor="@color/white"
-                app:pstsIndicatorColor="@color/new_selected"
-                app:pstsTabPaddingLeftRight="10dp"
-                app:pstsDividerPadding="10dp"
-                android:clipToPadding="true"
-                app:pstsUnderlineColor="@color/transparent" />
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/_8sdp"
+                android:paddingBottom="@dimen/_2sdp"
+                android:paddingStart="@dimen/_12sdp"
+                android:paddingEnd="@dimen/_12sdp">
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_category_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/_40sdp"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:clipToPadding="false"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp" />
+            </RelativeLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewPager"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@+id/viewPagerLay"
+                />
         </RelativeLayout>
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/viewPager"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/viewPagerLay"
-            />
-    </RelativeLayout>
+    </com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout>
 
     <RelativeLayout
         android:id="@+id/btm"
-        android:layout_width="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginVertical="5dp"
+        android:layout_width="match_parent"
+        android:layout_above="@+id/bottom_nav_bar"
         android:visibility="gone"
         android:layout_height="wrap_content">
 
@@ -102,7 +161,7 @@
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/_50sdp"
             app:shimmer_auto_start="true">
 
             <TextView
@@ -111,9 +170,183 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="Ad Loading...."
-                android:textSize="20sp" />
+                android:textSize="@dimen/_20ssp" />
 
         </com.facebook.shimmer.ShimmerFrameLayout>
+
+    </RelativeLayout>
+
+    <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->
+    <RelativeLayout
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_72sdp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/spawner_bg_bottom_nav"
+        android:elevation="@dimen/_16sdp"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:clipChildren="false">
+
+            <!-- Home Tab -->
+            <LinearLayout
+                android:id="@+id/tab_home"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_home"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_home"
+                    android:contentDescription="Home" />
+
+                <TextView
+                    android:id="@+id/txt_tab_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Home"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Explore Tab -->
+            <LinearLayout
+                android:id="@+id/tab_explore"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_explore"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_explore"
+                    android:contentDescription="Explore" />
+
+                <TextView
+                    android:id="@+id/txt_tab_explore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Explore"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Center FAB Container -->
+            <LinearLayout
+                android:id="@+id/tab_create"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:clickable="true"
+                android:focusable="true">
+
+                <RelativeLayout
+                    android:layout_width="@dimen/_46sdp"
+                    android:layout_height="@dimen/_46sdp"
+                    android:background="@drawable/spawner_bg_fab_gradient"
+                    android:elevation="0dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="+"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_26ssp"
+                        android:includeFontPadding="false"
+                        android:fontFamily="sans-serif-light" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <!-- My Creations Tab -->
+            <LinearLayout
+                android:id="@+id/tab_creations"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_creations"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_creations"
+                    android:contentDescription="My Creations" />
+
+                <TextView
+                    android:id="@+id/txt_tab_creations"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Creations"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+            <!-- Settings Tab -->
+            <LinearLayout
+                android:id="@+id/tab_settings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ic_tab_settings"
+                    android:layout_width="@dimen/_26sdp"
+                    android:layout_height="@dimen/_26sdp"
+                    android:src="@drawable/spawner_ic_settings_gear"
+                    android:contentDescription="Settings" />
+
+                <TextView
+                    android:id="@+id/txt_tab_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:text="Settings"
+                    android:textColor="@color/bottom_nav_inactive"
+                    android:textSize="@dimen/_11ssp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium" />
+            </LinearLayout>
+
+        </LinearLayout>
 
     </RelativeLayout>
 </RelativeLayout>

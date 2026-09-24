@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="24dp"
+    android:viewportWidth="56"
+    android:viewportHeight="24">
+
+    <!-- Background pill -->
+    <path
+        android:fillColor="#FFA000"
+        android:pathData="M8,0 L48,0 A8,8 0 0,1 56,8 L56,16 A8,8 0 0,1 48,24 L8,24 A8,8 0 0,1 0,16 L0,8 A8,8 0 0,1 8,0 Z" />
+
+    <!-- Crown icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,16 L21,16 L21,18 L9,18 Z M9,14 L11,7 L15,11 L19,7 L21,14 Z" />
+
+    <!-- PRO text -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,7 h4 c2,0 3,1 3,3 c0,2 -1,3 -3,3 h-2 v4 h-2 v-10 z M28,9 v2 h2 c1,0 1,-0.5 1,-1 c0,-0.5 0,-1 -1,-1 h-2 z
+                          M35,7 h4 c2,0 3,1 3,2.5 c0,1 -0.5,2 -1.5,2.3 l2.5,5.2 h-2.5 l-2,-4.5 h-1.5 v4.5 h-2 v-10 z M37,9 v2 h2 c1,0 1,-0.5 1,-1 c0,-0.5 0,-1 -1,-1 h-2 z
+                          M44,12 c0,3 2,5 5,5 c3,0 5,-2 5,-5 c0,-3 -2,-5 -5,-5 c-3,0 -5,2 -5,5 z M46,12 c0,-2 1,-3 3,-3 c2,0 3,1 3,3 c0,2 -1,3 -3,3 c-2,0 -3,-1 -3,-3 z" />
+</vector>

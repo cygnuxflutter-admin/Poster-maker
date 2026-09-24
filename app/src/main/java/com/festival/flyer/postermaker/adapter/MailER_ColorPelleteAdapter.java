@@ -42,6 +42,12 @@ public class MailER_ColorPelleteAdapter extends RecyclerView.Adapter<MailER_Colo
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         holder.adLoadLayout.setVisibility(View.GONE);
+        if (holder.progress_bar != null) {
+            holder.progress_bar.setVisibility(View.GONE);
+        }
+        if (holder.iv_like != null) {
+            holder.iv_like.setVisibility(View.GONE);
+        }
         holder.iv_image.getLayoutParams().width = cellWidth;
         holder.iv_image.getLayoutParams().height = cellHeight;
         holder.iv_image.invalidate();
@@ -58,15 +64,17 @@ public class MailER_ColorPelleteAdapter extends RecyclerView.Adapter<MailER_Colo
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        ImageView iv_image/*, titanicTextView*/;
+        ImageView iv_image, iv_like;
         NativeAdView adLoadLayout;
+        android.widget.ProgressBar progress_bar;
         public MyViewHolder(View itemView) {
             super(itemView);
 
             iv_image = itemView.findViewById(R.id.iv_image);
 //            titanicTextView = itemView.findViewById(R.id.titanicTextView);
             adLoadLayout = itemView.findViewById(R.id.ad_load_layout);
-
+            iv_like = itemView.findViewById(R.id.iv_like);
+            progress_bar = itemView.findViewById(R.id.progress_bar);
         }
     }
 }

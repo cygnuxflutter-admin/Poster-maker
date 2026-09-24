@@ -5,6 +5,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
+import com.festival.flyer.postermaker.utils.MailER_BottomNavHelper;
 import android.os.Bundle;
 import android.util.Log;
 import android.os.Environment;
@@ -38,6 +39,7 @@ import com.festival.flyer.postermaker.threadTask.MailER_GetPosDetail;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,6 +59,7 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
     private int cat_id, post_id;
     private boolean local_permission = false;
     private boolean isRewarded = false;
+    private boolean isProModeActive = false;
     private MailER_PreferenceClass preferenceClass;
 
     @Override
@@ -65,24 +68,23 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_template_selection);
 
+        // Preload reward ad for premium template unlock
+
+
+        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_explore);
+
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
 
         View statusBarSpacer = findViewById(R.id.status_bar_spacer);
-        ViewCompat.setOnApplyWindowInsetsListener(statusBarSpacer, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.getLayoutParams().height = systemBars.top;
-            v.requestLayout();
-            return insets;
-        });
+        if (statusBarSpacer != null) {
+            statusBarSpacer.setVisibility(View.GONE); // Let fitsSystemWindows handle it
+        }
 
         RelativeLayout btm = this.findViewById(R.id.btm);
-        ViewCompat.setOnApplyWindowInsetsListener(btm, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-            return insets;
-        });
+        // WindowInsets are handled by fitsSystemWindows on root now
 
         findByID();
 
@@ -102,7 +104,38 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         }
 
         findViewById(R.id.ic_back).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        
+        View proToggle = findViewById(R.id.ll_pro_toggle);
+        if (proToggle != null) {
+            proToggle.setOnClickListener(v -> {
+                isProModeActive = !isProModeActive;
+                if (isProModeActive) {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFD700"))); // Gold color for active
+                } else {
+                    proToggle.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF8C00"))); // Orange for inactive
+                }
+                if (templateSelectionController != null) {
+                    templateSelectionController.applyProFilter(isProModeActive);
+                }
+            });
+        }
+        
         deleteFromExternalStorage();
+
+        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeColors(androidx.core.content.ContextCompat.getColor(this, R.color.accent_purple));
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                if (MailER_NetworkUtils.isNetworkAvailable(this)) {
+                    if (templateSelectionController != null) {
+                        templateSelectionController.loadTemplates();
+                    }
+                } else {
+                    MyApplication.getInstance().showNoInternetDialog(this);
+                }
+                swipeRefreshLayout.setRefreshing(false);
+            });
+        }
 
     }
 
@@ -122,7 +155,8 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
     private void findByID() {
         preferenceClass = new MailER_PreferenceClass(this);
-        templateSelectionController = new MailER_TemplateSelectionController(this, getSupportFragmentManager(), preferenceClass);
+        String selectedCategory = getIntent().getStringExtra("selected_category");
+        templateSelectionController = new MailER_TemplateSelectionController(this, getSupportFragmentManager(), preferenceClass, selectedCategory);
     }
 
     @Override
@@ -197,13 +231,10 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
     public void loadPoster(String key, final int cat_id, final int pos_id) {
 
-        String requestUrl = preferenceClass.getDataType("field_1") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
-        Log.e("---API_DATA---", "--- REQUEST START ---");
-        Log.e("---API_DATA---", "URL: " + requestUrl);
+        String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_36");
+        android.util.Log.d("API_CALL_DEBUG", "REQUEST URL: " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
-            Log.e("---API_DATA---", "--- RESPONSE START ---");
-            Log.e("---API_DATA---", "URL: " + requestUrl);
-            Log.e("---API_DATA---", "Response: " + response);
+            android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM: " + requestUrl + "\nDATA: " + response);
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 int error = jsonObject.getInt(preferenceClass.getDataType("field_3"));
@@ -229,13 +260,13 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
                                 for (int i = 0; i < sticker_model.size(); i++) {
                                     if (!sticker_model.get(i).getSt_image().equals("")) {
-                                        stringArrayList.add(preferenceClass.getDataType("field_1") + "/" + sticker_model.get(i).getSt_image());
+                                        stringArrayList.add(preferenceClass.getDataType("field_51") + "/" + sticker_model.get(i).getSt_image());
                                     }
                                 }
 
                                 if (preferenceClass.getInt("download") == 0) {
                                     for (int i = 0; i < text_model.size(); i++) {
-                                        stringArrayList.add(preferenceClass.getDataType("field_37") + text_model.get(i).getFont_family());
+                                        stringArrayList.add(preferenceClass.getDataType("field_52") + text_model.get(i).getFont_family());
                                     }
                                 }
 
@@ -250,7 +281,6 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
                                                 return;
                                             }
                                             MyApplication.showInterstitialAd(MailER_TemplateSelectionActivity.this, MailER_TemplateSelectionActivity.this::startIntent);
-                                            templateSelectionController.dismissMaterialDialog();
                                         } else {
                                             MailER_MaterialDialogUtils.getInstance().errorDialog3(MailER_TemplateSelectionActivity.this, "Make sure you are connected to internet!!");
                                         }

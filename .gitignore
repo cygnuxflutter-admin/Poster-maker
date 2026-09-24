@@ -36,8 +36,9 @@ dist/
 # Compiled Java class files
 *.class
 
-# Compiled Python bytecode
+# Compiled Python and Scripts
 *.py[cod]
+*.py
 
 # Package files
 *.jar

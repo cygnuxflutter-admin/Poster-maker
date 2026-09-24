@@ -3,10 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="HardcodedText">
     <item
+        android:id="@+id/nav_liked_bg"
+        android:icon="@drawable/spawner_ic_heart_filled"
+        android:title="Liked Backgrounds" />
+        
+    <item
         android:id="@+id/nav_share_app"
         android:icon="@drawable/spawner_ic_share_app"
-        android:title="Share App"
-        />
+        android:title="Share App" />
 
     <item
         android:id="@+id/nav_rate_app"

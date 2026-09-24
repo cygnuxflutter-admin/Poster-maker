@@ -18,7 +18,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/_50sdp"
             android:background="@color/white">
 
             <LinearLayout
@@ -123,7 +123,7 @@
                 android:layout_marginEnd="10.0dip"
                 android:layout_toEndOf="@+id/ii"
                 android:max="255"
-                android:maxHeight="2dp"
+                android:maxHeight="@dimen/_2sdp"
                 android:progress="100"
                 android:progressDrawable="@drawable/spawner_seekbar_new"
                 android:thumbTint="@color/new_selected"
@@ -135,7 +135,7 @@
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="80.0dip"
-            android:paddingTop="10dp">
+            android:paddingTop="@dimen/_10sdp">
 
             <ImageView
                 android:id="@+id/btn_clear_effect"
@@ -143,7 +143,7 @@
                 android:layout_height="30.0dip"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="5.0dip"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:background="@drawable/spawner_btn_rounded_text_bg"
                 android:src="@drawable/spawner_ic_close" />
 

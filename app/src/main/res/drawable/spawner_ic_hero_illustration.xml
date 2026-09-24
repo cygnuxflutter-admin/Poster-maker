@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Back canvas -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M30,20 h50 a10,10 0 0 1 10,10 v60 a10,10 0 0 1 -10,10 h-50 a10,10 0 0 1 -10,-10 v-60 a10,10 0 0 1 10,-10 z" />
+    
+    <!-- Front canvas (rotated) -->
+    <path
+        android:fillColor="#4DFFFFFF"
+        android:pathData="M40,30 h50 a10,10 0 0 1 10,10 v50 a10,10 0 0 1 -10,10 h-50 a10,10 0 0 1 -10,-10 v-50 a10,10 0 0 1 10,-10 z" />
+
+    <!-- Pen tool/brush icon in center -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78.6,41.4c-0.8,-0.8 -2,-0.8 -2.8,0L64.2,53l-4.6,-4.6c-0.8,-0.8 -2,-0.8 -2.8,0l-1.4,1.4c-0.8,0.8 -0.8,2 0,2.8l2,2l-6,14.6c-0.3,0.7 0,1.5 0.6,1.9l2.8,1.4l1.4,2.8c0.4,0.7 1.2,1 1.9,0.6l14.6,-6l2,-2c0.8,0.8 2,0.8 2.8,0l1.4,-1.4c0.8,-0.8 0.8,-2 0,-2.8l-4.6,-4.6l11.6,-11.6c0.8,-0.8 0.8,-2 0,-2.8L78.6,41.4zM53.8,71.2L50,69.2l6,-14.6l5.2,5.2L46.6,74.4L53.8,71.2zM75.8,50L70,44.2l5.8,-5.8l5.8,5.8L75.8,50z" />
+        
+    <!-- Floating elements -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,40 a4,4 0 1 0 8,0 a4,4 0 1 0 -8,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M90,80 l8,-4 l4,8 l-8,4 z" />
+</vector>

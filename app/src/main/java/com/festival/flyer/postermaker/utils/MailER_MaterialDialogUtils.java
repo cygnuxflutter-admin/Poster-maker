@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.festival.flyer.postermaker.BuildConfig;
+import com.festival.flyer.postermaker.MyApplication;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.interfaces.MailER_DialogClickListener;
 
@@ -30,12 +31,41 @@ public class MailER_MaterialDialogUtils {
         return SingletonHolder.INSTANCE;
     }
 
+    private boolean isNetworkError(Context context, String msg) {
+        if (context == null) return false;
+        if (!MailER_NetworkUtils.isNetworkAvailable(context)) {
+            return true;
+        }
+        if (msg != null) {
+            String lower = msg.toLowerCase();
+            return lower.contains("unknownhostexception")
+                    || lower.contains("unable to resolve host")
+                    || lower.contains("noconnectionerror")
+                    || lower.contains("connectexception")
+                    || lower.contains("socketexception")
+                    || lower.contains("timeout")
+                    || lower.contains("networkerror")
+                    || lower.contains("connected to internet");
+        }
+        return false;
+    }
+
+    private String sanitizeMessage(Activity activity, String msg) {
+        if (msg == null || msg.trim().isEmpty() || msg.startsWith("java.") || msg.startsWith("javax.") || msg.contains("Exception:")) {
+            return activity != null ? activity.getResources().getString(R.string.something_went_wrong) : "Something went wrong";
+        }
+        return msg;
+    }
+
     public MaterialDialog createAnimationDialog(Context activity) {
-        return new MaterialDialog.Builder(activity)
+        MaterialDialog materialDialog = new MaterialDialog.Builder(activity)
                 .customView(R.layout.spawner_lottie_anim_dialog, false)
-                .contentColor(Color.TRANSPARENT)
-                .backgroundColor(Color.TRANSPARENT)
                 .build();
+        if (materialDialog.getWindow() != null) {
+            materialDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            materialDialog.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
+        return materialDialog;
     }
 
     private static class SingletonHolder {
@@ -43,6 +73,13 @@ public class MailER_MaterialDialogUtils {
     }
 
     public void errorDialog(Activity activity, String msg) {
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return;
+        if (isNetworkError(activity, msg)) {
+            MyApplication.getInstance().showNoInternetDialog(activity);
+            return;
+        }
+        msg = sanitizeMessage(activity, msg);
+
         MaterialDialog materialDialog = new MaterialDialog.Builder(activity)
                 .customView(R.layout.spawner_error_dialog, false)
                 .contentColor(Color.TRANSPARENT)
@@ -51,11 +88,6 @@ public class MailER_MaterialDialogUtils {
                 .build();
 
         Objects.requireNonNull(materialDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-//        @SuppressLint("ResourceType")
-//        Dialog materialDialog = new Dialog(activity, 16974126);
-//        materialDialog.requestWindowFeature(1);
-//        materialDialog.setContentView(R.layout.error_dialog);
-//        materialDialog.setCancelable(false);
 
         materialDialog.show();
 
@@ -72,12 +104,12 @@ public class MailER_MaterialDialogUtils {
     }
 
     public void errorDialog2(Activity activity, String msg) {
-//        MaterialDialog materialDialog = new MaterialDialog.Builder(activity)
-//                .customView(R.layout.error_dialog, false)
-//                .contentColor(Color.TRANSPARENT)
-//                .backgroundColor(Color.TRANSPARENT)
-//                .cancelable(false)
-//                .build();
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return;
+        if (isNetworkError(activity, msg)) {
+            MyApplication.getInstance().showNoInternetDialog(activity);
+            return;
+        }
+        msg = sanitizeMessage(activity, msg);
 
         @SuppressLint("ResourceType")
         Dialog materialDialog = new Dialog(activity, 16974126);
@@ -105,12 +137,12 @@ public class MailER_MaterialDialogUtils {
     }
 
     public void errorDialog3(Activity activity, String msg) {
-//        MaterialDialog materialDialog = new MaterialDialog.Builder(activity)
-//                .customView(R.layout.error_dialog, false)
-//                .contentColor(Color.TRANSPARENT)
-//                .backgroundColor(Color.TRANSPARENT)
-//                .cancelable(false)
-//                .build();
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return;
+        if (isNetworkError(activity, msg)) {
+            MyApplication.getInstance().showNoInternetDialog(activity);
+            return;
+        }
+        msg = sanitizeMessage(activity, msg);
 
         @SuppressLint("ResourceType")
         Dialog materialDialog = new Dialog(activity, 16974126);

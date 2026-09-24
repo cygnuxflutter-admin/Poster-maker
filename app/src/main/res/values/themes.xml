@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.PosterMaker" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.PosterMaker" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -12,7 +12,14 @@
         <item name="colorSurface">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Window background to prevent black flash during transitions -->
+        <item name="android:windowBackground">@color/white</item>
+        <!-- Disable automatic force dark on some devices to prevent black glitches -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
+    </style>
+    
+    <style name="UCropTheme" parent="Theme.AppCompat.Light.NoActionBar">
     </style>
 
 <!--    <style name="Theme.FestivalApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">-->

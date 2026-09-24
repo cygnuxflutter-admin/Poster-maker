@@ -5,13 +5,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.festival.flyer.postermaker.model.MailER_BgModel;
 
 import java.util.ArrayList;
 
-public class MailER_BackgroundPagerAdapter extends FragmentPagerAdapter {
+public class MailER_BackgroundPagerAdapter extends FragmentStatePagerAdapter {
 
     private final ArrayList<MailER_BgModel> posterDataLists;
 
@@ -28,6 +28,11 @@ public class MailER_BackgroundPagerAdapter extends FragmentPagerAdapter {
         bundle.putSerializable("posterDataLists", posterDataLists.get(position).getCategory_list());
         backgroundFragment.setArguments(bundle);
         return backgroundFragment;
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        return POSITION_NONE;
     }
 
     public CharSequence getPageTitle(int position) {

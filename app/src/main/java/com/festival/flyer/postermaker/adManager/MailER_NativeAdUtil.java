@@ -1,6 +1,8 @@
 package com.festival.flyer.postermaker.adManager;
 
 import android.app.Activity;
+import java.util.HashMap;
+import java.util.HashSet;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -36,9 +38,13 @@ public class MailER_NativeAdUtil {
     private final MailER_PreferenceClass preferenceClass;
     private final int width;
     private final int height;
-    private NativeAdView adView;
-    private NativeAd nativeAd;
     public static ShimmerFrameLayout shimmerFrameLayout;
+    private NativeAd nativeAd;
+    private NativeAdView adView;
+    private boolean isLoadingAdMob = false;
+    private final HashMap<Integer, NativeAd> nativeAdCache = new HashMap<>();
+    private final HashMap<Integer, NativeAdView> nativeAdViewCache = new HashMap<>();
+    private final HashSet<Integer> loadingPositions = new HashSet<>();
     public MailER_NativeAdUtil(Context context, int width, int height) {
         this.context = context;
         this.width = width;
@@ -55,26 +61,50 @@ public class MailER_NativeAdUtil {
 
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
         shimmerFrameLayout = shimmer_view_container;
-        nativeAdContainer.setVisibility(View.VISIBLE);
+        if (nativeAdContainer != null) {
+            nativeAdContainer.setVisibility(View.VISIBLE);
+        }
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
-        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer);
+        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1);
     }
 
-    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer) {
+    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer, final int position) {
+        if (nativeAdContainer == null) return;
+
+        if (nativeAdCache.containsKey(position) && nativeAdViewCache.containsKey(position)) {
+            NativeAdView cachedView = nativeAdViewCache.get(position);
+            nativeAdContainer.removeAllViews();
+            if (cachedView.getParent() != null) {
+                ((android.view.ViewGroup) cachedView.getParent()).removeView(cachedView);
+            }
+            nativeAdContainer.addView(cachedView);
+            nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
+            nativeAdContainer.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (loadingPositions.contains(position)) return;
+        loadingPositions.add(position);
+
         String nativeId = preferenceClass.getAdsId("NativeUnitID");
         Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
         AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
         builder.forNativeAd(nativeAd -> {
-            if (this.nativeAd != null) {
-                this.nativeAd.destroy();
+            loadingPositions.remove(position);
+            
+            if (nativeAdCache.containsKey(position)) {
+                nativeAdCache.get(position).destroy();
             }
-            this.nativeAd = nativeAd;
-            adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_native_ad_layout, null);
+            nativeAdCache.put(position, nativeAd);
+            NativeAdView adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_native_ad_layout, null);
+            nativeAdViewCache.put(position, adView);
+            
             populateUnifiedNativeAdView(nativeAd, adView);
             nativeAdContainer.removeAllViews();
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
+            nativeAdContainer.setVisibility(View.VISIBLE);
         });
 
         VideoOptions videoOptions = new VideoOptions.Builder().setStartMuted(true).build();
@@ -84,15 +114,35 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                loadingPositions.remove(position);
+                isLoadingAdMob = false;
+                Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                if (nativeAdContainer != null) {
+                    nativeAdContainer.setVisibility(View.GONE);
+                }
                 // fillAdXNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                Log.d("[ADS_LOG]", "🟢 AdMob Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdMob Native Ad Loaded Successfully!");
                 Log.e("AdMob_Error", "AdMob Native Ad Loaded Successfully!");
                 super.onAdLoaded();
+            }
+            @Override
+            public void onAdImpression() {
+                super.onAdImpression();
+                Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdMob) IMPRESSION Logged!");
             }
         }).build();
 
@@ -131,15 +181,22 @@ public class MailER_NativeAdUtil {
         AdLoader adLoader = builder.withAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.d("[ADS_LOG]", "🔴 Native Ad (AdX) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdX) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdX Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
                 // fbNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
+                Log.d("[ADS_LOG]", "🟢 AdX Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdX Native Ad Loaded Successfully!");
                 Log.e("AdMob_Error", "AdX Native Ad Loaded Successfully!");
                 super.onAdLoaded();
+            }
+            @Override
+            public void onAdImpression() {
+                super.onAdImpression();
+                Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdX) IMPRESSION Logged!");
             }
         }).build();
 

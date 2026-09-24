@@ -4,14 +4,14 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
-    android:layout_margin="5dp"
+    android:layout_margin="@dimen/_5sdp"
     android:background="@android:color/transparent">
 
     <com.festival.flyer.postermaker.view.MailER_CustomSquareImageView
         android:id="@+id/thumbnail_image"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:padding="10dp"
+        android:padding="@dimen/_10sdp"
         android:layout_gravity="center"
         android:background="#9E9E9E" />
 

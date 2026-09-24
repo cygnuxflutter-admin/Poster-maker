@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.ProgressBar;
+import com.festival.flyer.postermaker.utils.MailER_LikeManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +36,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
     private final OnBgClickListener onBgClickListener;
     private final MailER_NativeAdUtil nativeAdUtil;
     private MailER_PreferenceClass preferenceClass;
+    private final MailER_LikeManager likeManager;
 
     public MailER_BackgroundChildAdapter(Activity activity, ArrayList<MailER_BgImage> bgImages, int cellWidth, int cellHeight, OnBgClickListener onBgClickListener) {
         this.activity = activity;
@@ -42,6 +46,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         this.onBgClickListener = onBgClickListener;
         this.nativeAdUtil = new MailER_NativeAdUtil(activity, cellWidth, cellHeight);
         preferenceClass = new MailER_PreferenceClass(activity);
+        this.likeManager = new MailER_LikeManager(activity);
     }
 
     @NonNull
@@ -62,8 +67,12 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         holder.iv_image.getLayoutParams().height = cellHeight;
         holder.iv_image.invalidate();
 
-//        if (position > preferenceClass.getInt("PremiumPostCount", 6)) {
-        if (position % preferenceClass.getInt("PremiumPostCount", 3) == 0) {
+        boolean isPremium = false;
+        if (bgImages.get(position) != null) {
+            isPremium = bgImages.get(position).isPremium();
+        }
+
+        if (isPremium) {
             holder.iv_lock.setVisibility(View.VISIBLE);
         } else {
             holder.iv_lock.setVisibility(View.GONE);
@@ -72,6 +81,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         if (bgImages.get(position) != null) {
             holder.content_layout.setVisibility(View.VISIBLE);
             holder.ad_layout.setVisibility(View.GONE);
+            holder.progress_bar.setVisibility(View.VISIBLE);
             Glide.with(activity)
                     .load(bgImages.get(position).getThumb_url())
                     .thumbnail(0.1f)
@@ -81,6 +91,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
                     .into(new CustomTarget<Drawable>() {
                         @Override
                         public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            holder.progress_bar.setVisibility(View.GONE);
                             holder.iv_image.setImageDrawable(resource);
                             float aspectRatio = (float) resource.getIntrinsicWidth() / (float) resource.getIntrinsicHeight();
                             if (aspectRatio > 1) {
@@ -95,6 +106,12 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
                         }
 
                         @Override
+                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                            super.onLoadFailed(errorDrawable);
+                            holder.progress_bar.setVisibility(View.GONE);
+                        }
+
+                        @Override
                         public void onLoadCleared(@Nullable Drawable placeholder) {
 
                         }
@@ -103,18 +120,26 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
 
             Log.e("TAG", "onBindViewHolder: " + bgImages.get(position).getThumb_url());
 
+            String bgUrl = bgImages.get(position).getImage_url();
+            holder.iv_like.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
+
+            holder.iv_like.setOnClickListener(v -> {
+                likeManager.toggleLike(bgUrl);
+                holder.iv_like.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
+            });
+
             holder.iv_image.setOnClickListener(v -> {
                 if (holder.iv_image.getDrawable() == null) {
                     return;
                 }
 
-                onBgClickListener.onClick(bgImages.get(position).getImage_url(), holder.iv_lock.getVisibility() == View.VISIBLE);
+                onBgClickListener.onClick(bgUrl, holder.iv_lock.getVisibility() == View.VISIBLE);
             });
         } else {
             holder.content_layout.setVisibility(View.GONE);
             holder.ad_layout.setVisibility(View.VISIBLE);
             holder.iv_lock.setVisibility(View.GONE);
-            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container);
+            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position);
         }
     }
 
@@ -130,13 +155,16 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
     static class MyViewHolder extends RecyclerView.ViewHolder {
 
         private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
-        private final ImageView iv_image;
-        private final ImageView iv_lock;
+        private final ImageView iv_image, iv_like;
+        private final TextView iv_lock;
+        private final ProgressBar progress_bar;
 
         MyViewHolder(View itemView) {
             super(itemView);
 
             iv_image = itemView.findViewById(R.id.iv_image);
+            progress_bar = itemView.findViewById(R.id.progress_bar);
+            iv_like = itemView.findViewById(R.id.iv_like);
             iv_lock = itemView.findViewById(R.id.iv_lock);
             content_layout = itemView.findViewById(R.id.content_layout);
             ad_layout = itemView.findViewById(R.id.ad_layout);
