@@ -1,6 +1,7 @@
 package com.festival.flyer.postermaker.controller;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Base64;
 import android.util.Log;
 
@@ -194,6 +195,12 @@ public class MailER_TemplateSelectionController {
         viewPager.setAdapter(new MailER_TemplatePagerAdapter(supportFragmentManager, posterModel));
 
         setupTabsIcons(rvCategories, viewPager, posterModel);
+
+        if (activity.getIntent().getBooleanExtra("open_all_categories", false)) {
+            activity.getIntent().removeExtra("open_all_categories");
+            Intent intent = new Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
+            activity.startActivity(intent);
+        }
 
         if (initialCategoryToSelect != null && !initialCategoryToSelect.isEmpty()) {
             for (int i = 0; i < posterModel.size(); i++) {

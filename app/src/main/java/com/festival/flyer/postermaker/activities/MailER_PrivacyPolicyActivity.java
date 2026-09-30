@@ -20,12 +20,7 @@ public class MailER_PrivacyPolicyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_privacy_policy);
 
-        ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
-        RelativeLayout rl_ad = this.findViewById(R.id.rl_ad);
-        if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-            MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
 
-        }
 
         WebView webView = findViewById(R.id.webview_privacy);
         webView.loadUrl("https://cygnux.in/application-privacy-policy/poster-maker-policy.html");

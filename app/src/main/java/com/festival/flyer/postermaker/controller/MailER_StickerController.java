@@ -11,6 +11,15 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions;
+import android.graphics.Bitmap;
+import android.app.ProgressDialog;
+import android.widget.Toast;
+
+
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
@@ -244,14 +253,73 @@ public class MailER_StickerController {
                 resizableStickerView.deleteSticker();
             }
         });
+        RelativeLayout btn_remove_bg = activity.findViewById(R.id.btn_remove_bg);
+        if (btn_remove_bg != null) {
+            btn_remove_bg.setOnClickListener(v -> {
+                if (resizableStickerView != null && resizableStickerView.getMainImageBitmap() != null) {
+                    android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(activity);
+                    progressDialog.setMessage("Removing background...");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+                    
+                    try {
+                        android.graphics.Bitmap originalBitmap = resizableStickerView.getMainImageBitmap();
+                        com.google.mlkit.vision.common.InputImage image = com.google.mlkit.vision.common.InputImage.fromBitmap(originalBitmap, 0);
+                        
+                        com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions options = 
+                            new com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions.Builder()
+                                .enableForegroundConfidenceMask()
+                                .build();
+                        
+                        com.google.mlkit.vision.segmentation.subject.SubjectSegmenter segmenter = com.google.mlkit.vision.segmentation.subject.SubjectSegmentation.getClient(options);
+                        segmenter.process(image)
+                            .addOnSuccessListener(result -> {
+                                java.nio.FloatBuffer confidenceMask = result.getForegroundConfidenceMask();
+                                if (confidenceMask == null) {
+                                    progressDialog.dismiss();
+                                    return;
+                                }
+                                
+                                int width = originalBitmap.getWidth();
+                                int height = originalBitmap.getHeight();
+                                android.graphics.Bitmap resultBitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+                                
+                                int[] pixels = new int[width * height];
+                                originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+                                
+                                confidenceMask.rewind();
+                                for (int i = 0; i < width * height; i++) {
+                                    float confidence = confidenceMask.get();
+                                    if (confidence < 0.5f) {
+                                        pixels[i] = android.graphics.Color.TRANSPARENT;
+                                    }
+                                }
+                                
+                                resultBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+                                resizableStickerView.setMainImageBitmap(resultBitmap);
+                                
+                                progressDialog.dismiss();
+                                android.widget.Toast.makeText(activity, "Background Removed!", android.widget.Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                progressDialog.dismiss();
+                                android.widget.Toast.makeText(activity, "Failed to remove background", android.widget.Toast.LENGTH_SHORT).show();
+                            });
+                    } catch (Exception e) {
+                        progressDialog.dismiss();
+                    }
+                }
+            });
+        }
+
 
     }
 
     private void showLayout(View view) {
-        ly_controlsShow.setVisibility(View.GONE);
-        lay_colorOpacity.setVisibility(View.GONE);
-        ly_stk_rotation.setVisibility(View.GONE);
-        view.setVisibility(View.VISIBLE);
+        ly_controlsShow.setVisibility(android.view.View.GONE);
+        lay_colorOpacity.setVisibility(android.view.View.GONE);
+        ly_stk_rotation.setVisibility(android.view.View.GONE);
+        view.setVisibility(android.view.View.VISIBLE);
     }
 
     public void setResizableStickerView(MailER_ResizableStickerView resizableStickerView, MailER_GridLine gridLine) {

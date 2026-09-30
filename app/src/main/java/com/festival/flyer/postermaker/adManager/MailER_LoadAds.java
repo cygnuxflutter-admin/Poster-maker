@@ -55,6 +55,13 @@ public class MailER_LoadAds {
     }
 
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
+        if (new MailER_PreferenceClass(activity).getAdsStatus("bannerAdStatus") == 0) {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(android.view.View.GONE);
+            }
+            return;
+        }
         String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
 
         shimmerFrameLayout = shimmer_view_container;
@@ -140,6 +147,13 @@ public class MailER_LoadAds {
     }
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
+        if (new MailER_PreferenceClass(activity).getAdsStatus("bannerAdStatus") == 0) {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(android.view.View.GONE);
+            }
+            return;
+        }
         shimmerFrameLayout = shimmer_view_container;
         // Skip reload if banner already loaded in this container
         if (hasLoadedAdView(mainLayout)) {

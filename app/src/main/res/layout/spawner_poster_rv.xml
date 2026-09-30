@@ -57,7 +57,7 @@
                 android:drawableStart="@drawable/spawner_ic_crown"
                 android:drawablePadding="@dimen/_4sdp"
                 android:drawableTint="@color/white"
-                android:text="PRO"
+                android:text="AD"
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/_8ssp"
                 android:textStyle="bold"

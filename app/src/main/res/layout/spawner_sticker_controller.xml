@@ -19,7 +19,7 @@
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="45.0dip"
+            android:layout_height="35.0dip"
             android:background="@color/white"
             android:orientation="horizontal"
             android:weightSum="4.0">
@@ -92,11 +92,14 @@
                     android:textColor="@color/new_selected"
                     android:textSize="14.0sp" />
             </RelativeLayout>
+
+
+
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/_120sdp"
+            android:layout_height="@dimen/_85sdp"
             android:splitMotionEvents="false">
 
             <LinearLayout
@@ -130,8 +133,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btn_up"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -152,8 +155,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnLeft"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_alignParentStart="true">
 
                                 <ImageView
@@ -166,8 +169,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnRight"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_alignParentEnd="true">
 
                                 <ImageView
@@ -187,8 +190,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/sti_btnDown"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -209,58 +212,55 @@
                     android:layout_height="fill_parent"
                     android:layout_weight="0.4"
                     android:orientation="vertical"
-                    android:weightSum="2.0">
+                    android:gravity="center">
 
-                    <RelativeLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="0.0dip"
-                        android:layout_weight="1.0">
-
+                    <LinearLayout
+                        android:layout_width="114dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/spawner_btn_rounded_text_bg">
 
                         <RelativeLayout
                             android:id="@+id/lay_duplicateSticker"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true">
-
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/spawner_btn_rounded_text_bg"
-                                android:orientation="vertical"
-                                android:src="@drawable/spawner_bt_duplicate">
-
-                            </ImageView>
-
-
+                                android:src="@drawable/spawner_bt_duplicate" />
                         </RelativeLayout>
-                    </RelativeLayout>
 
-                    <RelativeLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="0.0dip"
-                        android:layout_weight="1.0">
+                        <RelativeLayout
+                            android:id="@+id/btn_remove_bg"
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="Erase BG"
+                                android:textColor="@color/white"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                android:fontFamily="@font/spawner_visbyroundcf_semibold" />
+                        </RelativeLayout>
 
                         <RelativeLayout
                             android:id="@+id/lay_str_delete"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true">
-
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/spawner_btn_rounded_text_bg"
-                                android:orientation="vertical"
-                                android:src="@drawable/spawner_bt_delete">
-
-                            </ImageView>
-
+                                android:src="@drawable/spawner_bt_delete" />
                         </RelativeLayout>
-                    </RelativeLayout>
 
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

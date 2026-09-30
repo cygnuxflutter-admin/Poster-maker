@@ -124,7 +124,11 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
             holder.iv_like.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
 
             holder.iv_like.setOnClickListener(v -> {
-                likeManager.toggleLike(bgUrl);
+                boolean isPrem = false;
+                if (bgImages.get(position) != null) {
+                    isPrem = bgImages.get(position).isPremium();
+                }
+                likeManager.toggleLike(bgUrl, isPrem);
                 holder.iv_like.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
             });
 

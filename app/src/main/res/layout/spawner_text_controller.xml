@@ -23,7 +23,7 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="45.0dip"
+                android:layout_height="35.0dip"
                 android:orientation="horizontal">
 
                 <RelativeLayout
@@ -212,7 +212,7 @@
         <RelativeLayout
             android:id="@+id/rellative"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/_120sdp"
+            android:layout_height="@dimen/_85sdp"
             android:splitMotionEvents="false">
 
             <LinearLayout
@@ -246,8 +246,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/txt_btn_up"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -268,8 +268,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/txt_btnLeft"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_alignParentStart="true">
 
                                 <ImageView
@@ -281,8 +281,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/txt_btnRight"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_alignParentEnd="true">
 
                                 <ImageView
@@ -302,8 +302,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/txt_btnDown"
-                                android:layout_width="@dimen/_45sdp"
-                                android:layout_height="@dimen/_30sdp"
+                                android:layout_width="@dimen/_38sdp"
+                                android:layout_height="@dimen/_25sdp"
                                 android:layout_gravity="center">
 
                                 <ImageView
@@ -325,79 +325,51 @@
                     android:layout_weight="0.4"
                     android:orientation="vertical"
                     android:splitMotionEvents="false"
-                    android:weightSum="3.0">
+                    android:gravity="center">
 
-                    <RelativeLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="0.0dip"
-                        android:layout_weight="1.0">
+                    <LinearLayout
+                        android:layout_width="114dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/spawner_btn_rounded_text_bg">
 
                         <RelativeLayout
                             android:id="@+id/lay_dupliText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true">
-
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/spawner_btn_rounded_text_bg"
-                                android:orientation="vertical"
-                                android:src="@drawable/spawner_bt_duplicate">
-
-                            </ImageView>
+                                android:src="@drawable/spawner_bt_duplicate" />
                         </RelativeLayout>
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="0.0dip"
-                        android:layout_weight="1.0">
 
                         <RelativeLayout
                             android:id="@+id/lay_edit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true">
-
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/spawner_btn_rounded_text_bg"
-                                android:orientation="vertical"
-                                android:src="@drawable/spawner_bt_edit">
-
-                            </ImageView>
-
+                                android:src="@drawable/spawner_bt_edit" />
                         </RelativeLayout>
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="0.0dip"
-                        android:layout_weight="1.0">
 
                         <RelativeLayout
                             android:id="@+id/lay_txt_delete"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true">
-
+                            android:layout_width="match_parent"
+                            android:layout_height="37dp"
+                            android:background="?attr/selectableItemBackground">
                             <ImageView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/spawner_btn_rounded_text_bg"
-                                android:orientation="vertical"
-                                android:src="@drawable/spawner_bt_delete">
-
-                            </ImageView>
-
+                                android:src="@drawable/spawner_bt_delete" />
                         </RelativeLayout>
-                    </RelativeLayout>
 
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
@@ -759,7 +731,7 @@
 
                         <ImageView
                             android:id="@+id/boldIV"
-                            android:layout_width="@dimen/_45sdp"
+                            android:layout_width="@dimen/_38sdp"
                             android:layout_height="@dimen/_45sdp"
                             android:background="@drawable/spawner_ripple_effect"
                             android:src="@drawable/spawner_bold_font" />
@@ -773,7 +745,7 @@
 
                         <ImageView
                             android:id="@+id/italicIV"
-                            android:layout_width="@dimen/_45sdp"
+                            android:layout_width="@dimen/_38sdp"
                             android:layout_height="@dimen/_45sdp"
                             android:background="@drawable/spawner_ripple_effect"
                             android:src="@drawable/spawner_italic_font" />
@@ -787,7 +759,7 @@
 
                         <ImageView
                             android:id="@+id/bold_italic_iv"
-                            android:layout_width="@dimen/_45sdp"
+                            android:layout_width="@dimen/_38sdp"
                             android:layout_height="@dimen/_45sdp"
                             android:background="@drawable/spawner_ripple_effect"
                             android:src="@drawable/spawner_bold_italic_font" />
@@ -801,7 +773,7 @@
 
                         <ImageView
                             android:id="@+id/normalIV"
-                            android:layout_width="@dimen/_45sdp"
+                            android:layout_width="@dimen/_38sdp"
                             android:layout_height="@dimen/_45sdp"
                             android:background="@drawable/spawner_ripple_effect"
                             android:src="@drawable/spawner_normal_font" />

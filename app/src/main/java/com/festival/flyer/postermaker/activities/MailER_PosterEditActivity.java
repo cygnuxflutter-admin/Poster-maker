@@ -146,7 +146,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     private boolean first_click = false;
     private boolean notifyRedoData = false;
     private boolean failedNotifyRedoData = false;
-    private ScrollView lay_scroll;
+    private RelativeLayout lay_scroll;
     private float parentY;
     private int distanceScroll;
     private String permission_type = "";
@@ -284,6 +284,33 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         guideline = findViewById(R.id.guidelines);
         background_img = findViewById(R.id.background_img);
         trans_img = findViewById(R.id.trans_img);
+
+        lay_scroll.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (center_rel == null || main_rel == null) return;
+                int centerWidth = center_rel.getWidth();
+                int mainWidth = main_rel.getWidth();
+                
+                if (centerWidth > 0 && mainWidth > 0) {
+                    float scale = (float) centerWidth / mainWidth;
+                    main_rel.setPivotX(mainWidth / 2.0f);
+                    main_rel.setPivotY(main_rel.getHeight() / 2.0f);
+                    
+                    Float targetScale = (Float) main_rel.getTag(R.id.background_img); // safe id to use as key
+                    if (targetScale == null || Math.abs(targetScale - scale) > 0.001f) {
+                        main_rel.setTag(R.id.background_img, scale);
+                        main_rel.animate()
+                                .scaleX(scale)
+                                .scaleY(scale)
+                                .setDuration(250)
+                                .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                                .start();
+                    }
+                }
+            }
+        });
+
 
         lay_sticker = findViewById(R.id.lay_sticker);
         img_sticker = findViewById(R.id.img_sticker);
@@ -720,7 +747,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 //                    if (lay_scroll.getY() < 0.0f) {
 //                        lay_scroll.setY(0.0f);
 //                    }
-//                    lay_scroll.smoothScrollTo(0, distanceScroll);
+//                    // lay_scroll.smoothScrollTo(0, distanceScroll);
 //                });
 //            }
 //        }
@@ -995,8 +1022,12 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_container);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
-
-        MailER_NativeAdUtil.loadNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        if (new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
 
         img_camera.setOnClickListener(v -> {
 
@@ -1036,7 +1067,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                 }
             } else {
                 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                camera_file = new File(Environment.getExternalStorageDirectory(), ".temp.jpg");
+                camera_file = new File(getCacheDir(), ".temp.jpg");
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", camera_file));
                 startActivityForResult(intent, SELECT_PICTURE_FROM_CAMERA);
                 dialog.dismiss();
@@ -1260,7 +1291,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 //        if (file.exists()){
 //            file.delete();
 //        }
-//        UCrop uCrop = UCrop.of(uri, Uri.fromFile(new File(Environment.getExternalStorageDirectory(), destinationFileName)));
+//        UCrop uCrop = UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), destinationFileName)));
         UCrop uCrop = UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), destinationFileName)));
         uCrop = advancedConfig(uCrop);
         uCrop.start(this);
@@ -1294,8 +1325,12 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
-
-        MailER_NativeAdUtil.loadNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        if (new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
 
         TextView btn_yes = dialog.findViewById(R.id.btn_yes);
         btn_yes.setOnClickListener(v -> {
@@ -1470,8 +1505,12 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
-
-        MailER_NativeAdUtil.loadNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        if (new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
     public int colorParse(String color_string) {

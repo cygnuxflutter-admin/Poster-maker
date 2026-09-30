@@ -59,6 +59,13 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_liked_templates);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_LikedTemplatesActivity.this, () -> finish());
+            }
+        });
+
 
         // Preload reward ad for premium template unlock
 
@@ -106,6 +113,9 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
             if (MailER_NetworkUtils.isNetworkAvailable(this)) {
                 if (premium) {
                     MailER_MaterialDialogUtils.getInstance().rewardDialog(this, "Use Template(One Time)", "Use premium Template by watching Ads", materialDialog -> {
+                        if (materialDialog != null && materialDialog.isShowing()) {
+                            materialDialog.dismiss();
+                        }
                         if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
                             com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.showRewardVideoAd(MailER_LikedTemplatesActivity.this, new com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
                                 @Override

@@ -35,7 +35,7 @@
         android:id="@+id/webview_privacy"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/btm"
+        
         android:layout_below="@id/header_title" />
 
 

@@ -358,7 +358,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             } else {
-                nextActivity(MailER_MyCreationActivity.class);
+                nextActivity(MailER_BackgroundSelectionActivity.class);
             }
         });
 
@@ -374,6 +374,15 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         findViewById(R.id.chip_sale).setOnClickListener(v -> openCategory("Sale"));
         findViewById(R.id.chip_birthday).setOnClickListener(v -> openCategory("Birthday"));
         findViewById(R.id.chip_business).setOnClickListener(v -> openCategory("Business"));
+        
+        android.view.View chipViewAllCat = findViewById(R.id.btn_view_all_cat_top);
+        if (chipViewAllCat != null) {
+            chipViewAllCat.setOnClickListener(v -> {
+                Intent intent = new Intent(MailER_PosterMainActivity.this, MailER_TemplateSelectionActivity.class);
+                intent.putExtra("open_all_categories", true);
+                MyApplication.showInterstitialAd(MailER_PosterMainActivity.this, () -> startActivity(intent));
+            });
+        }
     }
 
     private void openCategory(String category) {
@@ -743,4 +752,3 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 }
-

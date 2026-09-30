@@ -58,6 +58,13 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_background_selection);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_BackgroundSelectionActivity.this, () -> finish());
+            }
+        });
+
 
         // Preload reward ad for premium background unlock
 
@@ -66,7 +73,7 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
             getSupportActionBar().hide();
         }
 
-        com.festival.flyer.postermaker.utils.MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
+        com.festival.flyer.postermaker.utils.MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_creations);
 
         View statusBarSpacer = findViewById(R.id.status_bar_spacer);
         // WindowInsets are handled by fitsSystemWindows on root now

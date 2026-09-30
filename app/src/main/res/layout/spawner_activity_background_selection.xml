@@ -113,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_6sdp"
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:text="PRO"
+                        android:text="AD"
                         android:textColor="@color/white"
                         android:textSize="@dimen/_12ssp" />
                 </LinearLayout>
@@ -263,14 +263,30 @@
     <RelativeLayout
         android:id="@+id/btm"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottom_nav_bar"
         android:visibility="gone"
-        android:layout_above="@+id/bottom_nav_bar">
+        android:background="#E0E0E0"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/banner_sep"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D0D0D0"
+            android:layout_alignParentTop="true" />
+            
+        <View
+            android:id="@+id/banner_space"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="#F5F5F5"
+            android:layout_below="@id/banner_sep" />
 
         <RelativeLayout
             android:id="@+id/rl_ad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/banner_space"
             android:visibility="visible"
             tools:visibility="visible"/>
 
@@ -278,6 +294,7 @@
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_50sdp"
+            android:layout_below="@id/banner_space"
             app:shimmer_auto_start="true">
 
             <TextView

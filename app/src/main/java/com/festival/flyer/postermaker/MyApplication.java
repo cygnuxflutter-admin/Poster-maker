@@ -37,15 +37,33 @@ public class MyApplication extends android.app.Application {
     public static MyApplication mInstance;
 
     public static void showInterstitialAd(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showAdIfAvailable(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: InterstitialAdManager is NULL! loadInterstitialAd() was not called.");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showAdIfAvailable(activity, onAdLoadInterface);
     }
 
     public static void showInterstitialAdWithOutCount(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showInterstitialAd(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: InterstitialAdManager is NULL! loadInterstitialAd() was not called.");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showInterstitialAd(activity, onAdLoadInterface);
     }
 
     public static void showEditInterstitialAd(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showEDitAdIfAvailable(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: Edit InterstitialAdManager is NULL!");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showEDitAdIfAvailable(activity, onAdLoadInterface);
     }
 
     public MailER_InterstitialAdManager getInterstitialAdManager() {
@@ -56,6 +74,7 @@ public class MyApplication extends android.app.Application {
     }
 
     public void loadInterstitialAd() {
+        android.util.Log.e("[ADS_LOG]", ">>> loadInterstitialAd() called. Manager is " + (interstitialAdManager == null ? "NULL (will create)" : "ALREADY EXISTS"));
         if (interstitialAdManager == null)
             interstitialAdManager = new MailER_InterstitialAdManager(MyApplication.this);
     }

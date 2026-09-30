@@ -77,7 +77,8 @@ public class MailER_GetTemplateData extends AsyncTask<Void, Void, String> {
 //                    }
 //                }
 
-                boolean isPremium = (j % preferenceClass.getInt("PremiumPostCount", 3) == 0);
+                int premiumCount = preferenceClass.getInt("PremiumPostCount", 3);
+                boolean isPremium = (premiumCount > 0) && (j % premiumCount == 0);
                 posterThumbFullArrayList.add(new MailER_PosterImage(field_10, field_11, field_8, isPremium));
             }
             return posterThumbFullArrayList;

@@ -58,7 +58,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private Dialog dialog;
 
     private long startTime;
-    private static final long MIN_SPLASH_TIME = 3000; // 3.0 seconds
+    private static final long MIN_SPLASH_TIME = 4500; // 4.5 seconds
     private boolean isDataLoaded = false;
     private boolean isUpdateClicked = false;
     private MailER_NetworkMonitor.NetworkStateListener networkListener;
@@ -178,7 +178,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             database = FirebaseDatabase.getInstance();
             DatabaseReference project_data = database.getReference("all_data").child("datas");
-            project_data.addValueEventListener(new ValueEventListener() {
+            project_data.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     try {
@@ -192,7 +192,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
                         Log.e("---API_DATA---", "API Path (field_34): " + preferenceClass.getDataType("field_34"));
 
                         project_data2 = database.getReference("all_data").child("ad_data");
-                        project_data2.addValueEventListener(new ValueEventListener() {
+                        project_data2.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 try {
@@ -236,6 +236,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                     if (snapshot.hasChild("fbInterstitalAdunitID")) preferenceClass.setAdsId("fbInterstitalAdunitID", getSnapshotString(snapshot, "fbInterstitalAdunitID", ""));
                                     if (snapshot.hasChild("fbNativeUnitID")) preferenceClass.setAdsId("fbNativeUnitID", getSnapshotString(snapshot, "fbNativeUnitID", ""));
 
+                                    preferenceClass.setAdsStatus("ExitDialog_NativeAD", getSnapshotInt(snapshot, "ExitDialog_NativeAD", 0));
                                     preferenceClass.setAdsStatus("bannerAdStatus", getSnapshotInt(snapshot, "bannerAdStatus", 0));
                                     preferenceClass.setAdsStatus("interstitalAdStatus", getSnapshotInt(snapshot, "interstitalAdStatus", 0));
                                     preferenceClass.setAdsStatus("EditScreenAdCount", getSnapshotInt(snapshot, "EditScreenAdCount", 0));
@@ -267,19 +268,15 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                         preferenceClass.setAdsId("InterstitalAdunitID", "ca-app-pub-3940256099942544/1033173712");
                                         preferenceClass.setDataType("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
                                         preferenceClass.setAdsId("NativeUnitID", "ca-app-pub-3940256099942544/2247696110");
-                                        preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
-                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5224354917");
-                                        preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5224354917");
+                                        preferenceClass.setDataType("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
+                                        preferenceClass.setAdsId("RewardVideoUnitID", "ca-app-pub-3940256099942544/5354046379");
+                                        preferenceClass.setAdsId("google_Rw_ID", "ca-app-pub-3940256099942544/5354046379");
                                     }
 
                                     MailER_AppOpenManager.AppOpenAdShow = getSnapshotInt(snapshot, "AppOpenAdShow", 0);
+                                    com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.APPOPEN_COOLDOWN_MS = getSnapshotInt(snapshot, "splashAdTimer", 60000);
                                     MailER_InterstitialAdManager.InterAdTimer = getSnapshotInt(snapshot, "InterAdTimer", 0);
-
-                                    // Connect Firebase keys to App Open Ad timers
-                                    MailER_AppOpenManager.APPOPEN_COOLDOWN_MS = getSnapshotInt(snapshot, "splashAdTimer", 20000);
-                                    MailER_AppOpenManager.INTERSTITIAL_CLASH_MS = getSnapshotInt(snapshot, "InterAdTimer", 30000);
-                                    
-                                    preferenceClass.setInt("FreeDownloadsAllowed", getSnapshotInt(snapshot, "FreeDownloadsAllowed", 2));
+                                    com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.INTERSTITIAL_CLASH_MS = getSnapshotInt(snapshot, "InterAdTimer", 30000);
 
                                     int rawUpdateVal = getSnapshotInt(snapshot, "UpdateAvailable", 0);
                                     int rawForceUpdateVal = getSnapshotInt(snapshot, "ForceUpdate", 0);
@@ -295,6 +292,7 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
                                     preferenceClass.setInt("download", getSnapshotInt(snapshot, "download", 0));
                                     preferenceClass.setInt("splashscreen", getSnapshotInt(snapshot, "splashscreen", 0));
+                                    preferenceClass.setInt("SplashAppOpen", getSnapshotInt(snapshot, "SplashAppOpen", 1));
 
                                     preferenceClass.setInt("IsEditScreenBannerAD", getSnapshotInt(snapshot, "IsEditScreenBannerAD", 0));
                                     preferenceClass.setInt("rv_count", getSnapshotInt(snapshot, "rv_count", 0));
@@ -303,6 +301,16 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
                                     preferenceClass.setDataType("main_key", getSnapshotString(snapshot, "main_key", ""));
                                     preferenceClass.setDecryptionType(getSnapshotInt(snapshot, "decryptionType", 0));
+
+                                    // Mark Firebase ads as loaded - fallback IDs will no longer be used
+
+                                    preferenceClass.setFirebaseAdsLoaded();
+                                    
+                                    // Start loading ads immediately after Firebase gives us the IDs
+                                    ((com.festival.flyer.postermaker.MyApplication) getApplicationContext()).sendRequest();
+                                    ((com.festival.flyer.postermaker.MyApplication) getApplicationContext()).loadInterstitialAd();
+
+
 
                                     save_token(true);
                                 } catch (Exception e) {
@@ -333,6 +341,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
     }
 
     private void save_token(boolean update) {
+        try { ((MyApplication) getApplicationContext()).appOpenManager.fetchAd(); } catch (Exception e) {}
+
         isDataLoaded = true;
         if (update) {
             @SuppressLint("SimpleDateFormat")
@@ -461,10 +471,31 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private void performNavigation() {
         MyApplication.isAdsSplash = false;
         ((MyApplication) getApplicationContext()).sendRequest();
+        ((MyApplication) getApplicationContext()).loadInterstitialAd();
 
-        Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
-        startActivity(intent);
-        finish();
+        int isSplashAdEnabled = preferenceClass.getInt("splashscreen");
+        int isAppOpenAdEnabled = com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.AppOpenAdShow;
+        int splashAppOpen = preferenceClass.getInt("SplashAppOpen", 1);
+
+        boolean isAppOpenLoaded = ((MyApplication) getApplicationContext()).appOpenManager.isAdAvailable();
+        
+        if (isAppOpenAdEnabled == 1 && splashAppOpen == 1 && isAppOpenLoaded) {
+            ((MyApplication) getApplicationContext()).appOpenManager.showAdIfSplashAvailable(this, () -> {
+                Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        } else if (isSplashAdEnabled == 1) {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAdWithOutCount(this, () -> {
+                Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        } else {
+            Intent intent = new Intent(getApplicationContext(), MailER_PosterMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override

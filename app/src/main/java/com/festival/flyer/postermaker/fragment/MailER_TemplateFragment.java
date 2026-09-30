@@ -66,7 +66,7 @@ public class MailER_TemplateFragment extends Fragment {
         int itemsSinceLastAd = 0;
 
         for (int j = 0; j < posterThumbFulls.size(); j++) {
-            if (j != 0) {
+            if (j != 0 && firstAdCount > 0 && repeatAdCount > 0) {
                 itemsSinceLastAd++;
                 if (!TempisFirstShow) {
                     if (itemsSinceLastAd >= firstAdCount) {

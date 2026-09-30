@@ -9,10 +9,15 @@ import java.util.Set;
 public class MailER_LikeManager {
     private static final String PREF_NAME = "liked_backgrounds_pref";
     private static final String KEY_LIKED_URLS = "liked_urls";
+    private static final String KEY_PREMIUM_URLS = "premium_urls";
     private SharedPreferences sharedPreferences;
 
     public MailER_LikeManager(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    public Set<String> getPremiumUrls() {
+        return new HashSet<>(sharedPreferences.getStringSet(KEY_PREMIUM_URLS, new HashSet<>()));
     }
 
     public Set<String> getLikedUrls() {
@@ -23,13 +28,25 @@ public class MailER_LikeManager {
         return getLikedUrls().contains(url);
     }
 
-    public void toggleLike(String url) {
+    public void toggleLike(String url, boolean isPremium) {
         Set<String> likedUrls = getLikedUrls();
+        Set<String> premiumUrls = getPremiumUrls();
         if (likedUrls.contains(url)) {
             likedUrls.remove(url);
+            premiumUrls.remove(url);
         } else {
             likedUrls.add(url);
+            if (isPremium) {
+                premiumUrls.add(url);
+            }
         }
-        sharedPreferences.edit().putStringSet(KEY_LIKED_URLS, likedUrls).apply();
+        sharedPreferences.edit()
+                .putStringSet(KEY_LIKED_URLS, likedUrls)
+                .putStringSet(KEY_PREMIUM_URLS, premiumUrls)
+                .apply();
+    }
+    
+    public void toggleLike(String url) {
+        toggleLike(url, false);
     }
 }

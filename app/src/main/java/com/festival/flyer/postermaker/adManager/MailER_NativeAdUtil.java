@@ -59,6 +59,10 @@ public class MailER_NativeAdUtil {
         this.preferenceClass = new MailER_PreferenceClass(context);
     }
 
+        public static void loadDialogNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmerFrameLayout) {
+        loadNativeAd(nativeAdContainer, context, shimmerFrameLayout);
+    }
+
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
         shimmerFrameLayout = shimmer_view_container;
         if (nativeAdContainer != null) {
@@ -119,12 +123,17 @@ public class MailER_NativeAdUtil {
                 Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
                 Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
+                // User request: If ad fails to load (e.g. no internet, no fill), KEEP showing the shimmer!
+                // Only hide the box entirely if ad is disabled via Firebase (which is handled by rv_count/First_rv_count).
                 if (shimmerFrameLayout != null) {
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.startShimmer();
+                    shimmerFrameLayout.setVisibility(View.VISIBLE);
                 }
                 if (nativeAdContainer != null) {
-                    nativeAdContainer.setVisibility(View.GONE);
+                    nativeAdContainer.setVisibility(View.VISIBLE);
+                    if (nativeAdContainer.getParent() instanceof android.view.ViewGroup) {
+                        ((android.view.ViewGroup) nativeAdContainer.getParent()).setVisibility(View.VISIBLE);
+                    }
                 }
                 // fillAdXNativeAd(nativeAdContainer);
             }
@@ -220,11 +229,15 @@ public class MailER_NativeAdUtil {
             public void onError(Ad ad, AdError adError) {
                 // Native ad failed to load
                 Log.d("AdTracker", "Native Ad (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
+                // User request: If ad fails to load (e.g. no internet, no fill), KEEP showing the shimmer!
                 if (shimmerFrameLayout!= null){
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.startShimmer();
+                    shimmerFrameLayout.setVisibility(View.VISIBLE);
                 }
-                nativeAdContainer.setVisibility(View.GONE);
+                nativeAdContainer.setVisibility(View.VISIBLE);
+                if (nativeAdContainer.getParent() instanceof android.view.ViewGroup) {
+                    ((android.view.ViewGroup) nativeAdContainer.getParent()).setVisibility(View.VISIBLE);
+                }
             }
 
             @Override

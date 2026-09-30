@@ -19,7 +19,7 @@
                 android:id="@+id/swipe_refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/bottom_nav_bar">
+                android:layout_above="@+id/ad_container_main">
 
                 <!-- Scrollable Content -->
                 <androidx.core.widget.NestedScrollView
@@ -153,10 +153,35 @@
                         android:orientation="horizontal"/>
 
                     <!-- ==================== SEARCH / HASHTAG CHIPS ==================== -->
-                    <HorizontalScrollView
+                                        <!-- ==================== BROWSE BY CATEGORY HEADER ==================== -->
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/_16sdp"
+                        android:paddingHorizontal="@dimen/_16sdp">
+
+
+
+                        <TextView
+                            android:id="@+id/btn_view_all_cat_top"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="See All"
+                            android:textColor="@color/accent_purple"
+                            android:textSize="@dimen/_14ssp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                    </RelativeLayout>
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_8sdp"
                         android:scrollbars="none"
                         android:overScrollMode="never"
                         android:clipToPadding="false"
@@ -230,7 +255,22 @@
                                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                                 android:background="@drawable/spawner_bg_chip_blue"
                                 android:paddingHorizontal="@dimen/_16sdp"
-                                android:paddingVertical="@dimen/_8sdp"/>
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
+
+                        
+                            <TextView
+                                android:id="@+id/chip_view_all_cat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View All ??"
+                                android:textColor="#000000"
+                                android:textSize="@dimen/_13ssp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:background="@drawable/spawner_bg_chip_grey"
+                                android:paddingHorizontal="@dimen/_16sdp"
+                                android:paddingVertical="@dimen/_8sdp"
+                                android:layout_marginEnd="@dimen/_8sdp"/>
 
                         </LinearLayout>
                     </HorizontalScrollView>
@@ -241,7 +281,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginHorizontal="@dimen/_16sdp"
+                        android:paddingHorizontal="@dimen/_16sdp"
                         android:layout_marginTop="@dimen/_24sdp"
                         android:visibility="visible">
 
@@ -623,24 +663,47 @@
                         android:visibility="gone" />
 
                     <!-- ==================== AD CONTAINERS (PRESERVED) ==================== -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/_20sdp"
-                        android:visibility="visible">
+                    
+
+                </LinearLayout>
+
+            </androidx.core.widget.NestedScrollView>
+            </com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout>
+
+            <LinearLayout
+                android:id="@+id/ad_container_main"
+                android:orientation="vertical"
+                android:layout_above="@+id/bottom_nav_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
 
                         <RelativeLayout
                             android:id="@+id/rl_native_ad"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="@dimen/_16sdp"
                             android:visibility="gone">
+                            
+                            <View
+                                android:id="@+id/native_sep"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#D0D0D0"
+                                android:layout_alignParentTop="true" />
+                                
+                            <View
+                                android:id="@+id/native_space"
+                                android:layout_width="match_parent"
+                                android:layout_height="5dp"
+                                android:background="#F5F5F5"
+                                android:layout_below="@id/native_sep" />
 
                             <RelativeLayout
                                 android:id="@+id/native_banner_ad_container"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:minHeight="@dimen/_100sdp"
+                                android:layout_below="@id/native_space"
                                 android:visibility="visible" />
 
                             <com.facebook.shimmer.ShimmerFrameLayout
@@ -648,6 +711,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:minHeight="@dimen/_100sdp"
+                                android:layout_below="@id/native_space"
                                 app:shimmer_auto_start="true">
 
                                 <include layout="@layout/spawner_native_ad_layout" />
@@ -660,19 +724,34 @@
                             android:id="@+id/rl_banner_ad"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="@dimen/_16sdp"
                             android:background="#E0E0E0"
                             android:visibility="gone">
+
+                            <View
+                                android:id="@+id/banner_sep"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#D0D0D0"
+                                android:layout_alignParentTop="true" />
+                                
+                            <View
+                                android:id="@+id/banner_space"
+                                android:layout_width="match_parent"
+                                android:layout_height="5dp"
+                                android:background="#F5F5F5"
+                                android:layout_below="@id/banner_sep" />
 
                             <RelativeLayout
                                 android:id="@+id/rl_ad"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/banner_space" />
 
                             <com.facebook.shimmer.ShimmerFrameLayout
                                 android:id="@+id/shimmer_view_container_banner"
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/_50sdp"
+                                android:layout_below="@id/banner_space"
                                 app:shimmer_auto_start="true">
 
                                 <TextView
@@ -690,23 +769,37 @@
 
                         <RelativeLayout
                             android:id="@+id/rl_collapsible"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:visibility="gone">
+
+                            <View
+                                android:id="@+id/col_sep"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#D0D0D0"
+                                android:layout_alignParentTop="true" />
+                                
+                            <View
+                                android:id="@+id/col_space"
+                                android:layout_width="match_parent"
+                                android:layout_height="5dp"
+                                android:background="#F5F5F5"
+                                android:layout_below="@id/col_sep" />
 
                             <FrameLayout
                                 android:id="@+id/CollapsibleContainer"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentBottom="true"
+                                android:layout_below="@id/col_space"
                                 android:layout_marginTop="@dimen/_1sdp" />
 
                             <com.facebook.shimmer.ShimmerFrameLayout
                                 android:id="@+id/shimmer_view_CollapsibleContainer"
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/_50sdp"
-                                android:layout_alignParentBottom="true"
                                 android:background="@color/teal_200"
+                                android:layout_below="@id/col_space"
                                 app:shimmer_auto_start="true">
 
                                 <TextView
@@ -722,178 +815,10 @@
 
                         </RelativeLayout>
 
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-            </androidx.core.widget.NestedScrollView>
-            </com.festival.flyer.postermaker.utils.MailER_CustomSwipeRefreshLayout>
+                    </LinearLayout>
 
             <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->
-            <RelativeLayout
-                android:id="@+id/bottom_nav_bar"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_72sdp"
-                android:layout_alignParentBottom="true"
-                android:background="@drawable/spawner_bg_bottom_nav"
-                android:elevation="@dimen/_16sdp"
-                android:paddingHorizontal="@dimen/_12sdp"
-                android:clipChildren="false"
-                android:clipToPadding="false">
-                
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:clipChildren="false">
-
-                    <!-- Home Tab (Active) -->
-                    <LinearLayout
-                        android:id="@+id/tab_home"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/_26sdp"
-                            android:layout_height="@dimen/_26sdp"
-                            android:src="@drawable/spawner_ic_home"
-                            android:contentDescription="Home" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/_4sdp"
-                            android:text="Home"
-                            android:textColor="@color/bottom_nav_active"
-                            android:textSize="@dimen/_11ssp"
-                            android:fontFamily="@font/spawner_visbyroundcf_bold" />
-                    </LinearLayout>
-
-                    <!-- Explore Tab -->
-                    <LinearLayout
-                        android:id="@+id/tab_explore"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/_26sdp"
-                            android:layout_height="@dimen/_26sdp"
-                            android:src="@drawable/spawner_ic_explore"
-                            android:contentDescription="Explore" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/_4sdp"
-                            android:text="Explore"
-                            android:textColor="@color/bottom_nav_inactive"
-                            android:textSize="@dimen/_11ssp"
-                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
-                    </LinearLayout>
-
-                    <!-- Center FAB Container -->
-                    <LinearLayout
-                        android:id="@+id/tab_create"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <RelativeLayout
-                            android:layout_width="@dimen/_46sdp"
-                            android:layout_height="@dimen/_46sdp"
-                            android:background="@drawable/spawner_bg_fab_gradient"
-                            android:elevation="0dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:text="+"
-                                android:textColor="@color/white"
-                                android:textSize="@dimen/_26ssp"
-                                android:includeFontPadding="false"
-                                android:fontFamily="sans-serif-light" />
-                        </RelativeLayout>
-                    </LinearLayout>
-
-                    <!-- My Creations Tab -->
-                    <LinearLayout
-                        android:id="@+id/tab_creations"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/_26sdp"
-                            android:layout_height="@dimen/_26sdp"
-                            android:src="@drawable/spawner_ic_creations"
-                            android:contentDescription="My Creations" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/_4sdp"
-                            android:text="Creations"
-                            android:textColor="@color/bottom_nav_inactive"
-                            android:textSize="@dimen/_11ssp"
-                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
-                    </LinearLayout>
-
-                    <!-- Settings Tab -->
-                    <LinearLayout
-                        android:id="@+id/tab_settings"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <ImageView
-                            android:layout_width="@dimen/_26sdp"
-                            android:layout_height="@dimen/_26sdp"
-                            android:src="@drawable/spawner_ic_settings_gear"
-                            android:contentDescription="Settings" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/_4sdp"
-                            android:text="Settings"
-                            android:textColor="@color/bottom_nav_inactive"
-                            android:textSize="@dimen/_11ssp"
-                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </RelativeLayout>
+    <include layout="@layout/spawner_bottom_nav_bar" />
 
         </RelativeLayout>
 

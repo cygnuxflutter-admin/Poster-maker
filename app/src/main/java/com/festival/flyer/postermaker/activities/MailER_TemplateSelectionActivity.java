@@ -67,6 +67,13 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_template_selection);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_TemplateSelectionActivity.this, () -> finish());
+            }
+        });
+
 
         // Preload reward ad for premium template unlock
 

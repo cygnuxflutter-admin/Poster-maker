@@ -4,10 +4,26 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MailER_PreferenceClass {
 
     private final String IS_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
     private final SharedPreferences prefs;
+
+    // Fallback Ad IDs — used ONLY when Firebase has never loaded successfully
+    private static final Map<String, String> FALLBACK_AD_IDS = new HashMap<>();
+    static {
+        FALLBACK_AD_IDS.put("AppOpenID", "ca-app-pub-5706123402805812/2933969658");
+        FALLBACK_AD_IDS.put("BannerAdunitID", "ca-app-pub-5706123402805812/4821766396");
+        FALLBACK_AD_IDS.put("CollapsibleBannerID", "ca-app-pub-5706123402805812/2657127464");
+        FALLBACK_AD_IDS.put("interstitalAdunitID", "ca-app-pub-5706123402805812/1594372797");
+        FALLBACK_AD_IDS.put("InterstitalAdunitID", "ca-app-pub-5706123402805812/1594372797");
+        FALLBACK_AD_IDS.put("NativeUnitID", "ca-app-pub-5706123402805812/8186296336");
+        FALLBACK_AD_IDS.put("RewardVideoUnitID", "ca-app-pub-5706123402805812/6490071289");
+        FALLBACK_AD_IDS.put("google_Rw_ID", "ca-app-pub-5706123402805812/6490071289");
+    }
 
     public MailER_PreferenceClass(Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -48,9 +64,49 @@ public class MailER_PreferenceClass {
         prefs.edit().putString(type, value).apply();
     }
 
+    /**
+     * Mark that Firebase ad data has been loaded at least once.
+     * After this, fallback IDs will never be used — Firebase is in full control.
+     */
+    public void setFirebaseAdsLoaded() {
+        prefs.edit().putBoolean("firebase_ads_loaded", true).apply();
+    }
+
+    public boolean isFirebaseAdsLoaded() {
+        return prefs.getBoolean("firebase_ads_loaded", false);
+    }
+
+    /**
+     * Get Ad ID with smart fallback:
+     * - If Firebase has loaded → return Firebase value (even if empty = ad disabled)
+     * - If Firebase has NEVER loaded → return fallback ID (so ads still work on first launch / no internet)
+     */
     public String getAdsId(String type) {
+        // Force Test Ads in Debug Mode
+        if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
+            if (type.equalsIgnoreCase("interstitalAdunitID") || type.equalsIgnoreCase("InterstitalAdunitID")) return "ca-app-pub-3940256099942544/1033173712";
+            if (type.equalsIgnoreCase("AppOpenID")) return "ca-app-pub-3940256099942544/9257395921";
+            if (type.equalsIgnoreCase("BannerAdunitID") || type.equalsIgnoreCase("CollapsibleBannerID") || type.equalsIgnoreCase("BGSelectScreen_BannerAD") || type.equalsIgnoreCase("ReadymadePoste_BannerAD") || type.equalsIgnoreCase("EditScreenBannerAD")) return "ca-app-pub-3940256099942544/6300978111";
+            if (type.equalsIgnoreCase("NativeUnitID") || type.equalsIgnoreCase("ExitDialog_NativeAD")) return "ca-app-pub-3940256099942544/2247696110";
+            if (type.equalsIgnoreCase("RewardVideoUnitID") || type.equalsIgnoreCase("google_Rw_ID")) return "ca-app-pub-3940256099942544/5224354917";
+        }
+
         if (prefs != null) {
-            return prefs.getString(type, "");
+            String firebaseId = prefs.getString(type, "");
+            if (firebaseId != null && !firebaseId.isEmpty()) {
+                return firebaseId;
+            }
+            // Firebase ID is empty/null — check if Firebase ever loaded
+            if (!isFirebaseAdsLoaded()) {
+                // Firebase never loaded — use fallback
+                String fallback = FALLBACK_AD_IDS.get(type);
+                if (fallback != null) {
+                    android.util.Log.d("[ADS_LOG]", "⚡ Using FALLBACK Ad ID for: " + type);
+                    return fallback;
+                }
+            }
+            // Firebase loaded but ID is empty — ad is disabled by Firebase
+            return "";
         }
         return "";
     }

@@ -55,15 +55,43 @@ public class MailER_CreateActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_create);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_CreateActivity.this, () -> finish());
+            }
+        });
+
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_create);
 
 
         findViewById(R.id.ic_back).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        findViewById(R.id.btn_gallery).setOnClickListener(v -> openPhotoGallery());
-        findViewById(R.id.btn_camera).setOnClickListener(v -> openCamera());
-        findViewById(R.id.btn_colors).setOnClickListener(v -> openColorDialog());
+        findViewById(R.id.btn_gallery).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openPhotoGallery);
+        });
+        findViewById(R.id.btn_camera).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openCamera);
+        });
+        findViewById(R.id.btn_colors).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openColorDialog);
+        });
 
+                com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+        android.widget.RelativeLayout btm = findViewById(R.id.btm);
+        android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
+        com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
+
+        int BannerAdStatus = preferenceClass.getAdsStatus("CreateScreen_BannerAD");
+        if (com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(this)) {
+            if (BannerAdStatus == 1) {
+                btm.setVisibility(android.view.View.VISIBLE);
+                com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
+            } else {
+                btm.setVisibility(android.view.View.GONE);
+            }
+        }
+        
         setupBottomNavigation();
     }
 

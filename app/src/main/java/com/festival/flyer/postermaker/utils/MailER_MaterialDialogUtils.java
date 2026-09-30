@@ -1,6 +1,7 @@
 package com.festival.flyer.postermaker.utils;
 
 import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadNativeAd;
+import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -199,13 +200,22 @@ public class MailER_MaterialDialogUtils {
         tv_title.setText(title);
         tv_description.setText(message);
 
-        button2.setOnClickListener(v -> positiveButton.onClick(materialDialog));
+        button2.setOnClickListener(v -> {
+            if (materialDialog != null && materialDialog.isShowing()) {
+                materialDialog.dismiss();
+            }
+            positiveButton.onClick(materialDialog);
+        });
         button1.setOnClickListener(v -> negativeButton.onClick(materialDialog));
 
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
 
     }
 
@@ -245,7 +255,12 @@ public class MailER_MaterialDialogUtils {
 
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
     public void exitAlertDialog(Activity activity, String title, String message, MailER_DialogClickListener dialogClickListener) {
@@ -295,7 +310,12 @@ public class MailER_MaterialDialogUtils {
 
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
 
@@ -371,7 +391,12 @@ public class MailER_MaterialDialogUtils {
 
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
 }

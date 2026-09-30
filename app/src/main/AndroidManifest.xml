@@ -145,6 +145,9 @@
         <meta-data
             android:name="com.onesignal.NotificationServiceExtension"
             android:value="com.festival.flyer.postermaker.utils.MailER_NotificationServiceExtension" />
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="subject_segment" />
     </application>
 
 </manifest>

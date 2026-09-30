@@ -26,6 +26,13 @@ public class MailER_SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.spawner_activity_settings);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_SettingsActivity.this, () -> finish());
+            }
+        });
+
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_settings);
 
 
@@ -41,11 +48,15 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
     private void setupSettingsOptions() {
         findViewById(R.id.ll_liked_backgrounds).setOnClickListener(v -> {
-            startActivity(new Intent(this, MailER_LikedBackgroundsActivity.class));
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
+                startActivity(new Intent(this, MailER_LikedBackgroundsActivity.class));
+            });
         });
 
         findViewById(R.id.ll_liked_templates).setOnClickListener(v -> {
-            startActivity(new Intent(this, MailER_LikedTemplatesActivity.class));
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
+                startActivity(new Intent(this, MailER_LikedTemplatesActivity.class));
+            });
         });
 
         findViewById(R.id.ll_share_app).setOnClickListener(v -> {

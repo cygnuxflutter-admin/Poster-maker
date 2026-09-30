@@ -36,7 +36,14 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_my_creation);
-        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_creations);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_MyCreationActivity.this, () -> finish());
+            }
+        });
+
+        
 
 
         if (getSupportActionBar() != null) {

@@ -224,8 +224,8 @@ public class MailER_MultiTouchListener implements OnTouchListener {
                 if (view instanceof MailER_AutofitTextRel) {
                     ((MailER_AutofitTextRel) view).setBorderVisibility(true);
                 }
-                this.mPrevX = event.getX();
-                this.mPrevY = event.getY();
+                this.mPrevX = event.getRawX();
+                this.mPrevY = event.getRawY();
                 this.mActivePointerId = event.getPointerId(0);
                 break;
             case MotionEvent.ACTION_UP:
@@ -267,10 +267,18 @@ public class MailER_MultiTouchListener implements OnTouchListener {
                 }
                 pointerIndex = event.findPointerIndex(this.mActivePointerId);
                 if (pointerIndex != INVALID_POINTER_ID) {
-                    float currX = event.getX(pointerIndex);
-                    float currY = event.getY(pointerIndex);
+                    float currX = event.getRawX();
+                    float currY = event.getRawY();
                     if (!this.mScaleGestureDetector.isInProgress()) {
-                        m28126a(view, currX - this.mPrevX, currY - this.mPrevY);
+                        float scale = 1.0f;
+                        if (view.getParent() != null && view.getParent() instanceof View) {
+                            scale = ((View)view.getParent()).getScaleX();
+                        }
+                        if (scale == 0) scale = 1.0f;
+                        
+                        m28126a(view, (currX - this.mPrevX) / scale, (currY - this.mPrevY) / scale);
+                        this.mPrevX = currX;
+                        this.mPrevY = currY;
                         break;
                     }
                 }
