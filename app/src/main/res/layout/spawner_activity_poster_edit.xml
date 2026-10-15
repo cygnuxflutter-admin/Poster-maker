@@ -58,6 +58,21 @@
                 android:background="@color/white"
                 android:rotation="180" />
 
+            
+        <!-- Switch Size Button for Auto Personalization -->
+        <Button
+            android:id="@+id/btn_switch_size"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Switch Size"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:backgroundTint="#2196F3"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:paddingHorizontal="12dp" />
+
             <TextView
                 android:id="@+id/txtHeader"
                 android:layout_width="match_parent"
@@ -281,26 +296,36 @@
 
                     <RelativeLayout
                         android:id="@+id/rl_watermark"
-                        android:layout_width="@dimen/_50sdp"
-                        android:layout_height="@dimen/_50sdp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginBottom="@dimen/_8sdp"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:visibility="visible">
 
                         <ImageView
                             android:id="@+id/btn_watermark"
-                            android:layout_width="@dimen/_50sdp"
+                            android:layout_width="@dimen/_60sdp"
                             android:layout_height="@dimen/_50sdp"
-                            android:src="@drawable/newlogo" />
+                            android:adjustViewBounds="true"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/spawner_watermark" />
 
                         <ImageView
                             android:id="@+id/btn_watermark_remove"
-                            android:layout_width="@dimen/_10sdp"
-                            android:layout_height="@dimen/_10sdp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_gravity="end|bottom"
-                            android:background="@color/black"
+                            android:layout_width="@dimen/_14sdp"
+                            android:layout_height="@dimen/_14sdp"
+                            android:layout_alignTop="@+id/btn_watermark"
+                            android:layout_alignEnd="@+id/btn_watermark"
+                            android:background="@drawable/spawner_bg_watermark_close"
+                            android:elevation="4dp"
+                            android:padding="@dimen/_3sdp"
                             android:src="@drawable/spawner_ic_close"
-                            android:visibility="visible" />
+                            android:visibility="gone" />
 
                     </RelativeLayout>
                 </com.festival.flyer.postermaker.view.MailER_AspectRatioFrameLayout>

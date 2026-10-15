@@ -78,7 +78,8 @@
                             android:layout_height="wrap_content"
                             android:text="Create "
                             android:textColor="#1A1A2E"
-                            android:textSize="@dimen/_20ssp"
+                            android:textSize="@dimen/_17ssp"
+                            android:maxLines="1"
                             android:fontFamily="@font/spawner_visbyroundcf_bold" />
 
                         <TextView
@@ -86,7 +87,8 @@
                             android:layout_height="wrap_content"
                             android:text="Something Amazing"
                             android:textColor="#7B2FF7"
-                            android:textSize="@dimen/_20ssp"
+                            android:textSize="@dimen/_17ssp"
+                            android:maxLines="1"
                             android:fontFamily="@font/spawner_visbyroundcf_bold" />
                     </LinearLayout>
 
@@ -324,27 +326,65 @@
             android:layout_below="@id/ad_sep" />
 
         <RelativeLayout
-            android:id="@+id/rl_ad"
+            android:id="@+id/rl_collapsible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/ad_space"
-            android:layout_centerHorizontal="true" />
+            android:visibility="gone">
 
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/shimmer_view_container"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_50sdp"
-            android:layout_below="@id/ad_space"
-            app:shimmer_auto_start="true">
-
-            <TextView
-                android:layout_width="wrap_content"
+            <FrameLayout
+                android:id="@+id/CollapsibleContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Ad Loading...."
-                android:textSize="@dimen/_20ssp" />
+                android:layout_marginTop="@dimen/_1sdp" />
 
-        </com.facebook.shimmer.ShimmerFrameLayout>
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmer_view_CollapsibleContainer"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:background="@color/teal_200"
+                app:shimmer_auto_start="true">
+
+                <TextView
+                    android:id="@+id/CollapsibleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Ad Loading...."
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20ssp" />
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_banner_ad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ad_space"
+            android:visibility="visible">
+
+            <RelativeLayout
+                android:id="@+id/rl_ad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmer_view_container"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                app:shimmer_auto_start="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Ad Loading...."
+                    android:textSize="@dimen/_20ssp" />
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
     <!-- ==================== PREMIUM FLOATING BOTTOM NAV ==================== -->

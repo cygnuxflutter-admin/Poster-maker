@@ -23,12 +23,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.print.PrintHelper;
 
+import android.net.Uri;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.festival.flyer.postermaker.BuildConfig;
 import com.festival.flyer.postermaker.MyApplication;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adManager.MailER_LoadAds;
+import com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager;
 import com.festival.flyer.postermaker.utils.MailER_Constant;
 import com.festival.flyer.postermaker.utils.MailER_FileUtils;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
@@ -42,12 +44,12 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
 
     private String imagePath;
     //    private String imagePathWithWaterMark="";
-    private RelativeLayout remove_wm_ll, rl_ad;
+    private RelativeLayout rl_ad;
     private LinearLayout ic_print_ll;
     private ImageView preview_image, ic_back, iv_whatsapp, iv_facebook, ic_twitter, iv_instagram, iv_more;
     private com.afollestad.materialdialogs.MaterialDialog progressDialog;
     private MailER_PreferenceClass preferenceClass;
-    //    private boolean premiumPoster;
+    private boolean premiumPoster = false;
     Boolean rateSubmit = false;
 
     @Override
@@ -84,17 +86,17 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
         iv_instagram.setOnClickListener(this);
         iv_more.setOnClickListener(this);
 
-//        if (premiumPoster) {
-        remove_wm_ll.setVisibility(View.GONE);
-//        } else {
-//            remove_wm_ll.setVisibility(View.VISIBLE);
-//        }
-
         ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
-        rl_ad.setVisibility(View.VISIBLE);
-        if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-            if (preferenceClass.getAdsId("BannerAdunitID") != null) {
-                MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
+        boolean isBannerEnabled = preferenceClass.getBoolean("share_banner_ad_enabled", true);
+        String customAdId = preferenceClass.getAdsId("share_banner_ad_id");
+        if (isBannerEnabled && MailER_NetworkUtils.isNetworkAvailable(this)) {
+            rl_ad.setVisibility(View.VISIBLE);
+            MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
+        } else {
+            rl_ad.setVisibility(View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
             }
         }
 
@@ -106,7 +108,6 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void findByID() {
-        remove_wm_ll = findViewById(R.id.remove_wm_ll);
         rl_ad = findViewById(R.id.rl_ad);
         preview_image = findViewById(R.id.preview_image);
         ic_back = findViewById(R.id.ic_back);
@@ -121,8 +122,7 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
         preferenceClass = new MailER_PreferenceClass(this);
 
         imagePath = getIntent().getStringExtra("imagePath");
-//        imagePathWithWaterMark = getIntent().getStringExtra("imagePathWithWaterMark");
-//        premiumPoster = getIntent().getBooleanExtra("premiumPoster", false);
+        premiumPoster = getIntent().getBooleanExtra("premiumPoster", false);
 
     }
 
@@ -199,8 +199,10 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     private void printImage() {
         PrintHelper photoPrinter = new PrintHelper(this);
         photoPrinter.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-        Bitmap bitmap = MailER_Constant.bitmap;
-        photoPrinter.printBitmap("poster_maker.jpg", bitmap);
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        if (bitmap != null) {
+            photoPrinter.printBitmap("poster_maker.jpg", bitmap);
+        }
     }
 
     public void shareIntent(String package_name, String error_msg, boolean more) {
@@ -226,49 +228,7 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private class copyFileAsync extends AsyncTask<String, String, Boolean> {
 
-        private MaterialDialog materialDialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            materialDialog = MailER_MaterialDialogUtils.getInstance().createAnimationDialog(MailER_ShareActivity.this);
-            Objects.requireNonNull(materialDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-            materialDialog.setCancelable(false);
-            materialDialog.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... strings) {
-            return MailER_FileUtils.copyFile(new File(MailER_FileUtils.getPremiumPath(MailER_ShareActivity.this)), new File(MailER_Constant.imgPath));
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            super.onPostExecute(result);
-            if (materialDialog != null && materialDialog.isShowing())
-                materialDialog.dismiss();
-            if (result) {
-                remove_wm_ll.setVisibility(View.GONE);
-                Bitmap bitmap = BitmapFactory.decodeFile(MailER_Constant.imgPath);
-                preview_image.setImageBitmap(bitmap);
-                saveDialog();
-            }
-        }
-
-        private void saveDialog() {
-            @SuppressLint("ResourceType")
-            Dialog dialog = new Dialog(MailER_ShareActivity.this, 16974126);
-            dialog.requestWindowFeature(1);
-            dialog.setCancelable(false);
-            dialog.setContentView(R.layout.spawner_premium_save_dialog);
-            TextView btn_ok = dialog.findViewById(R.id.btn_ok);
-            btn_ok.setOnClickListener(v -> dialog.dismiss());
-            dialog.show();
-        }
-    }
 
 
 }

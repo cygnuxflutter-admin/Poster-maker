@@ -53,6 +53,13 @@ public class MailER_SettingsActivity extends AppCompatActivity {
             });
         });
 
+        
+        findViewById(R.id.ll_liked_auto_posters).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
+                startActivity(new Intent(this, com.festival.flyer.postermaker.activities.MailER_LikedAutoPostersActivity.class));
+            });
+        });
+
         findViewById(R.id.ll_liked_templates).setOnClickListener(v -> {
             com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
                 startActivity(new Intent(this, MailER_LikedTemplatesActivity.class));

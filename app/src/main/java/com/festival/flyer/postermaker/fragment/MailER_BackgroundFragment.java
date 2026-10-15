@@ -26,17 +26,21 @@ import java.util.Objects;
 public class MailER_BackgroundFragment extends Fragment {
 
     private RecyclerView template_rv;
+    private int catId;
+    private String catName;
     private GetPosterListener getPosterListener;
     private ArrayList<MailER_BgImage> bgImages = new ArrayList<>();
     private ArrayList<MailER_BgImage> tempbgImages = new ArrayList<MailER_BgImage>();
     private MailER_PreferenceClass preferenceClass;
     public interface GetPosterListener {
-        void onPosterClick(String path, boolean premium);
+        void onPosterClick(String path, boolean premium, ArrayList<MailER_BgImage> bgList, int position, String catName);
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.spawner_template_fragment, container, false);
         assert getArguments() != null;
+        this.catId = getArguments().getInt("catId", 0);
+        this.catName = getArguments().getString("catName", "");
         //noinspection unchecked
         preferenceClass = new MailER_PreferenceClass(getActivity());
         bgImages = (ArrayList<MailER_BgImage>) getArguments().getSerializable("posterDataLists");
@@ -50,8 +54,18 @@ public class MailER_BackgroundFragment extends Fragment {
 
     public void setPosterAdapter() {
         template_rv.setHasFixedSize(true);
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
-//        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false);
+
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (tempbgImages != null && position < tempbgImages.size() && tempbgImages.get(position) == null) {
+                    return 2; // Full Width (both columns) for Native Ad!
+                }
+                return 1; // 1 column for background item
+            }
+        });
+
         template_rv.setLayoutManager(layoutManager);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -61,12 +75,14 @@ public class MailER_BackgroundFragment extends Fragment {
         int cellWidth = (int) (screenWidth - (42 * screenDensity)) / 2;
         int cellHeight = (700 * cellWidth) / 507;
 
-        int firstAdCount = preferenceClass.getInt("First_rv_count", 3);
-        int repeatAdCount = preferenceClass.getInt("rv_count", 10);
+        boolean isNativeEnabled = preferenceClass.getInt("backgrounds_native_enabled", 1) == 1;
+        int firstAdCount = preferenceClass.getInt("bg_first_ad_count", preferenceClass.getInt("First_rv_count", 4));
+        int repeatAdCount = preferenceClass.getInt("bg_repeat_ad_count", preferenceClass.getInt("rv_count", 6));
         int itemsSinceLastAd = 0;
 
+        tempbgImages.clear();
         for (int j = 0; j < bgImages.size(); j++) {
-            if (j != 0 && firstAdCount > 0 && repeatAdCount > 0) {
+            if (isNativeEnabled && j != 0 && firstAdCount > 0 && repeatAdCount > 0) {
                 itemsSinceLastAd++;
                 if (!TempisFirstShow) {
                     if (itemsSinceLastAd >= firstAdCount) {
@@ -83,7 +99,18 @@ public class MailER_BackgroundFragment extends Fragment {
             }
             tempbgImages.add(bgImages.get(j));
         }
-        MailER_BackgroundChildAdapter backgroundChildAdapter = new MailER_BackgroundChildAdapter(getActivity(), tempbgImages, cellWidth, cellHeight, (path, premium) -> getPosterListener.onPosterClick(path, premium));
+        MailER_BackgroundChildAdapter backgroundChildAdapter = new MailER_BackgroundChildAdapter(getActivity(), tempbgImages, cellWidth, cellHeight, (path, premium) -> {
+            int pos = 0;
+            if (bgImages != null) {
+                for (int i = 0; i < bgImages.size(); i++) {
+                    if (bgImages.get(i) != null && path.equals(bgImages.get(i).getImage_url())) {
+                        pos = i;
+                        break;
+                    }
+                }
+            }
+            getPosterListener.onPosterClick(path, premium, bgImages, pos, catName);
+        });
         template_rv.setAdapter(backgroundChildAdapter);
         template_rv.invalidate();
     }

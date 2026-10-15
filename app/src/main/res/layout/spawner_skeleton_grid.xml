@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/shimmer_skeleton_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    app:shimmer_auto_start="true"
+    app:shimmer_base_alpha="0.5"
+    app:shimmer_duration="1100"
+    app:shimmer_highlight_alpha="1.0">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Skeleton Category Tabs Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingEnd="@dimen/_12sdp"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingBottom="@dimen/_8sdp">
+
+            <View
+                android:layout_width="@dimen/_75sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:background="@drawable/spawner_bg_skeleton_pill" />
+
+            <View
+                android:layout_width="@dimen/_85sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:background="@drawable/spawner_bg_skeleton_pill" />
+
+            <View
+                android:layout_width="@dimen/_75sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:background="@drawable/spawner_bg_skeleton_pill" />
+
+            <View
+                android:layout_width="@dimen/_65sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:background="@drawable/spawner_bg_skeleton_pill" />
+        </LinearLayout>
+
+        <!-- Skeleton Grid Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/_10sdp"
+            android:paddingEnd="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+        </LinearLayout>
+
+        <!-- Skeleton Grid Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/_10sdp"
+            android:paddingEnd="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+        </LinearLayout>
+
+        <!-- Skeleton Grid Row 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/_10sdp"
+            android:paddingEnd="@dimen/_10sdp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_180sdp"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:background="@drawable/spawner_bg_skeleton_placeholder" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.facebook.shimmer.ShimmerFrameLayout>

@@ -111,35 +111,21 @@ public class MailER_LikedTemplatesActivity extends AppCompatActivity {
                 return;
             }
             if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-                if (premium) {
-                    MailER_MaterialDialogUtils.getInstance().rewardDialog(this, "Use Template(One Time)", "Use premium Template by watching Ads", materialDialog -> {
-                        if (materialDialog != null && materialDialog.isShowing()) {
-                            materialDialog.dismiss();
-                        }
-                        if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
-                            com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.showRewardVideoAd(MailER_LikedTemplatesActivity.this, new com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
-                                @Override
-                                public void onAdClose() {
-                                    isRewarded = true;
-                                    progressDialog.show();
-                                    loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
-                                }
-                            });
-                        } else {
-                            MyApplication.showInterstitialAdWithOutCount(MailER_LikedTemplatesActivity.this, () -> {
-                                isRewarded = true;
-                                progressDialog.show();
-                                loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
-                            });
-                        }
-                    }, materialDialog -> {
-                        if (materialDialog != null && materialDialog.isShowing())
-                            materialDialog.dismiss();
-                    });
-                } else {
-                    progressDialog.show();
-                    loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
+                int pos = 0;
+                for (int i = 0; i < likedTemplates.size(); i++) {
+                    if (likedTemplates.get(i).getPost_id() == post_id) {
+                        pos = i;
+                        break;
+                    }
                 }
+                Intent intent = new Intent(this, MailER_TemplatePreviewActivity.class);
+                intent.putExtra("cat_id", cat_id);
+                intent.putExtra("cat_name", "Favorites");
+                intent.putExtra("selected_position", pos);
+                intent.putExtra("selected_post_id", post_id);
+                MailER_TemplatePreviewActivity.tempPosterList = likedTemplates;
+                intent.putExtra("poster_list", likedTemplates);
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Make sure you are connected to internet!!", Toast.LENGTH_SHORT).show();
             }

@@ -31,14 +31,44 @@ public class MailER_RewardVideoManager {
     public static com.facebook.ads.InterstitialAd interstitialFB;
     private static boolean isLoading = false;
 
+    public interface OnRewardVideoResultListener {
+        void onRewardEarned();
+        void onRewardSkipped();
+    }
+
     public static void showRewardVideoAd(final Activity context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
+        showRewardVideoAd(context, new OnRewardVideoResultListener() {
+            @Override
+            public void onRewardEarned() {
+                if (onAdLoadInterface != null) {
+                    onAdLoadInterface.onAdClose();
+                }
+            }
+
+            @Override
+            public void onRewardSkipped() {
+                // Legacy interface skipped
+            }
+        });
+    }
+
+    public static void showRewardVideoAd(final Activity context, OnRewardVideoResultListener resultListener) {
         if (preferenceClass == null) {
             preferenceClass = new MailER_PreferenceClass(context);
         }
-        AD_google_Rw = preferenceClass.getAdsId("RewardVideoUnitID");
+        AD_google_Rw = preferenceClass.getAdsId("premium_reward_ad_id");
+        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+            AD_google_Rw = preferenceClass.getAdsId("RewardVideoUnitID");
+        }
+        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+            AD_google_Rw = preferenceClass.getAdsId("editor_reward_ad_id");
+        }
+        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+            AD_google_Rw = preferenceClass.getAdsId("google_Rw_ID");
+        }
 
         if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
-            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            if (resultListener != null) resultListener.onRewardEarned();
             return;
         }
 
@@ -77,10 +107,11 @@ public class MailER_RewardVideoManager {
                         Log.d("[ADS_LOG]", "❌ Reward Video Ad Closed by User.");
                         if (isEarned[0]) {
                             Log.d("[ADS_LOG]", "✅ User earned reward! Proceeding...");
-                            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                            if (resultListener != null) resultListener.onRewardEarned();
                         } else {
                             Log.d("[ADS_LOG]", "⚠️ User skipped Ad! Reward not given.");
-                            Toast.makeText(context, "You must watch the full ad to unlock feature!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "You must watch the full ad to continue!", Toast.LENGTH_SHORT).show();
+                            if (resultListener != null) resultListener.onRewardSkipped();
                         }
                     }
 
@@ -88,7 +119,7 @@ public class MailER_RewardVideoManager {
                     public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                         super.onAdFailedToShowFullScreenContent(adError);
                         Log.d("[ADS_LOG]", "🔴 Reward Video Failed to Show: " + adError.getMessage());
-                        if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                        if (resultListener != null) resultListener.onRewardEarned();
                     }
 
                     @Override
@@ -110,7 +141,7 @@ public class MailER_RewardVideoManager {
                     alertDialog.dismiss();
                 }
                 // FAIL OPEN: Grant reward if ad fails to load
-                if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                if (resultListener != null) resultListener.onRewardEarned();
             }
         });
     }

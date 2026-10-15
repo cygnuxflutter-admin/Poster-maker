@@ -77,22 +77,69 @@ public class MailER_CreateActivity extends AppCompatActivity {
             com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openColorDialog);
         });
 
-                com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+                loadRemoteConfigAds();
+        setupBottomNavigation();
+    }
+
+    private void loadRemoteConfigAds() {
         android.widget.RelativeLayout btm = findViewById(R.id.btm);
+        if (btm == null) return;
+
+        if (!com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(this)) {
+            btm.setVisibility(android.view.View.GONE);
+            return;
+        }
+
+        com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+        boolean isBannerEnabled = true;
+        String bannerType = "banner";
+        String customAdId = "";
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isBannerEnabled = rc.getBoolean("create_banner_ad_enabled");
+                bannerType = rc.getString("create_banner_ad_type");
+                customAdId = rc.getString("create_banner_ad_id");
+            } else {
+                isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
+                bannerType = preferenceClass.getDataType("create_banner_ad_type");
+                customAdId = preferenceClass.getAdsId("create_banner_ad_id");
+            }
+        } catch (Exception e) {
+            isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
+            bannerType = preferenceClass.getDataType("create_banner_ad_type");
+            customAdId = preferenceClass.getAdsId("create_banner_ad_id");
+        }
+
+        if (bannerType == null || bannerType.trim().isEmpty()) {
+            bannerType = "banner";
+        }
+
+        if (!isBannerEnabled || "none".equalsIgnoreCase(bannerType) || "false".equalsIgnoreCase(bannerType)) {
+            btm.setVisibility(android.view.View.GONE);
+            return;
+        }
+
+        android.widget.RelativeLayout rl_collapsible = findViewById(R.id.rl_collapsible);
+        android.widget.FrameLayout collapsibleContainer = findViewById(R.id.CollapsibleContainer);
+        com.facebook.shimmer.ShimmerFrameLayout shimmerCollapsible = findViewById(R.id.shimmer_view_CollapsibleContainer);
+
+        android.widget.RelativeLayout rl_banner_ad = findViewById(R.id.rl_banner_ad);
         android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
         com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
 
-        int BannerAdStatus = preferenceClass.getAdsStatus("CreateScreen_BannerAD");
-        if (com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(this)) {
-            if (BannerAdStatus == 1) {
-                btm.setVisibility(android.view.View.VISIBLE);
-                com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
-            } else {
-                btm.setVisibility(android.view.View.GONE);
-            }
+        if ("collapsible".equalsIgnoreCase(bannerType) && collapsibleContainer != null) {
+            btm.setVisibility(android.view.View.VISIBLE);
+            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.GONE);
+            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.VISIBLE);
+            com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadCollapsibleBanner(this, collapsibleContainer, rl_ad, shimmerCollapsible, customAdId);
+        } else {
+            btm.setVisibility(android.view.View.VISIBLE);
+            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.GONE);
+            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.VISIBLE);
+            com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
         }
-        
-        setupBottomNavigation();
     }
 
     public void openPhotoGallery() {
@@ -214,7 +261,7 @@ public class MailER_CreateActivity extends AppCompatActivity {
         });
 
         tabCreations.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_MyCreationActivity.class);
+            Intent intent = new Intent(this, MailER_BackgroundSelectionActivity.class);
             startActivity(intent);
             finish();
         });

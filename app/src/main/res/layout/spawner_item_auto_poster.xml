@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/poster_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <!-- Inner container to enforce Aspect Ratio -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ratio_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/spawner_bg_rounded_corners"
+        android:clipChildren="true"
+        android:clipToOutline="true">
+
+        <!-- Base Poster Thumbnail -->
+        <ImageView
+            android:id="@+id/iv_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="#E0E0E0" />
+
+        <!-- Overlay Container -->
+
+        <TextView
+            android:id="@+id/iv_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/spawner_tab_pill_background"
+            android:backgroundTint="#FF8C00"
+            android:drawableStart="@drawable/spawner_ic_crown"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/white"
+            android:text="AD"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:fontFamily="@font/spawner_visbyroundcf_bold"
+            android:gravity="center"
+            android:elevation="4dp" />
+
+        <ImageView
+            android:id="@+id/iv_like"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/spawner_bg_circle_white"
+            android:padding="6dp"
+            android:src="@drawable/spawner_ic_heart_outline"
+            android:elevation="4dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <FrameLayout
+            android:id="@+id/overlay_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/slot_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/slot_business_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="6sp"
+                app:autoSizeMaxTextSize="30sp"
+                android:maxLines="1"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/slot_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="6sp"
+                app:autoSizeMaxTextSize="20sp"
+                android:maxLines="1"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/slot_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="6sp"
+                app:autoSizeMaxTextSize="20sp"
+                android:maxLines="1"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/slot_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="6sp"
+                app:autoSizeMaxTextSize="20sp"
+                android:maxLines="2"
+                android:includeFontPadding="false"
+                android:visibility="gone" />
+
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

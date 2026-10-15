@@ -16,6 +16,7 @@ import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.festival.flyer.postermaker.BuildConfig;
+import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
@@ -55,6 +56,10 @@ public class MailER_LoadAds {
     }
 
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
+        loadCollapsibleBanner(activity, mainLayout, relativeLayout, shimmer_view_container, null);
+    }
+
+    public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout, RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
         if (new MailER_PreferenceClass(activity).getAdsStatus("bannerAdStatus") == 0) {
             if (shimmer_view_container != null) {
                 shimmer_view_container.stopShimmer();
@@ -62,7 +67,12 @@ public class MailER_LoadAds {
             }
             return;
         }
-        String CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
+        String CollapsiblebannerID = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
+                ? customAdUnitId.trim()
+                : new MailER_PreferenceClass(activity).getAdsId("CollapsibleBannerID");
+        if (CollapsiblebannerID == null || CollapsiblebannerID.trim().isEmpty()) {
+            CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
+        }
 
         shimmerFrameLayout = shimmer_view_container;
         // Skip reload if banner already loaded in this container
@@ -93,8 +103,22 @@ public class MailER_LoadAds {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Collapsible Banner Ad Failed to Load: " + loadAdError.getMessage());
                     Log.d("AdTracker", "Collapsible Banner (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                    // User requested to keep shimmer loading even on failure
-                    // loadADXBannerAd(activity, relativeLayout);
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                        shimmer_view_container.hideShimmer();
+                    }
+                    if (mainLayout != null) {
+                        mainLayout.setVisibility(View.GONE);
+                    }
+                    if (activity != null && !activity.isFinishing()) {
+                        View colView = activity.findViewById(R.id.rl_collapsible);
+                        if (colView != null) colView.setVisibility(View.GONE);
+                        View btmView = activity.findViewById(R.id.btm);
+                        if (btmView != null && (mainLayout == null || mainLayout.getId() == R.id.CollapsibleContainer || mainLayout.getId() == R.id.rl_ad)) {
+                            btmView.setVisibility(View.GONE);
+                        }
+                    }
                     Log.e("TAG", "onAdFailedToLoad: Collapse Fail="+ loadAdError.getMessage() );
                 }
                 @Override
@@ -147,6 +171,10 @@ public class MailER_LoadAds {
     }
 
     public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container) {
+        loadAdmobBannerAd(activity, mainLayout, shimmer_view_container, null);
+    }
+
+    public static void loadAdmobBannerAd(Activity activity, RelativeLayout mainLayout, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
         if (new MailER_PreferenceClass(activity).getAdsStatus("bannerAdStatus") == 0) {
             if (shimmer_view_container != null) {
                 shimmer_view_container.stopShimmer();
@@ -162,8 +190,10 @@ public class MailER_LoadAds {
         }
         destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
-        String bannerAdunitID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
-        if (bannerAdunitID != null) {
+        String bannerAdunitID = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
+                ? customAdUnitId.trim()
+                : new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
+        if (bannerAdunitID != null && !bannerAdunitID.trim().isEmpty()) {
             AdView adView = new AdView(activity);
             AdSize adSize = getAdSize(activity);
             adView.setAdSize(adSize);
@@ -185,7 +215,24 @@ public class MailER_LoadAds {
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Banner Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
-                    // User requested to keep shimmer loading even on failure
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                        shimmer_view_container.hideShimmer();
+                    }
+                    if (mainLayout != null) {
+                        mainLayout.setVisibility(View.GONE);
+                    }
+                    if (activity != null && !activity.isFinishing()) {
+                        View btm = activity.findViewById(R.id.btm);
+                        if (btm != null && mainLayout != null && (mainLayout.getId() == R.id.rl_ad || mainLayout.getId() == R.id.rl_banner_ad)) {
+                            btm.setVisibility(View.GONE);
+                        }
+                        View bannerLayout = activity.findViewById(R.id.rl_banner_ad);
+                        if (bannerLayout != null && mainLayout != null && mainLayout.getId() == R.id.rl_ad) {
+                            bannerLayout.setVisibility(View.GONE);
+                        }
+                    }
                 }
                 @Override
                 public void onAdLoaded() {

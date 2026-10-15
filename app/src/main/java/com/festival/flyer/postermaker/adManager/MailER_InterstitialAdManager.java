@@ -17,7 +17,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class MailER_InterstitialAdManager {
     private final Context context;
     private final MailER_PreferenceClass preferenceClass;
-    private final String admobInterstitialAdId;
+    private String admobInterstitialAdId;
     private android.app.Dialog progressDialog;
     
     private InterstitialAd mInterstitialAd;
@@ -31,17 +31,44 @@ public class MailER_InterstitialAdManager {
     public MailER_InterstitialAdManager(Context context) {
         this.context = context;
         preferenceClass = new MailER_PreferenceClass(context);
-        admobInterstitialAdId = preferenceClass.getAdsId("InterstitalAdunitID");
+        admobInterstitialAdId = getAdUnitId();
         loadAd();
+    }
+
+    private String getAdUnitId() {
+        if (preferenceClass == null) return "";
+        String id = preferenceClass.getAdsId("interstitial_ad_id");
+        if (id == null || id.trim().isEmpty()) {
+            id = preferenceClass.getAdsId("InterstitalAdunitID");
+        }
+        if (id == null || id.trim().isEmpty()) {
+            id = preferenceClass.getDataType("InterstitalAdunitID");
+        }
+        return id != null ? id.trim() : "";
     }
     
     public void loadAd() {
         if (mInterstitialAd != null || isLoading) {
             return;
         }
+
+        boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
+                preferenceClass.getBoolean("interstitial_global_enabled", true));
+        String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
+        if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
+            Log.d("AdTracker", "Interstitial Ad is disabled or type is none. Skipping load.");
+            return;
+        }
+
+        admobInterstitialAdId = getAdUnitId();
+        if (admobInterstitialAdId.isEmpty()) {
+            Log.d("AdTracker", "Interstitial Ad ID is empty. Skipping load.");
+            return;
+        }
+
         isLoading = true;
         AdRequest request = new AdRequest.Builder().build();
-        Log.d("AdTracker", "Preloading Interstitial Ad (AdMob)...");
+        Log.d("AdTracker", "Preloading Interstitial Ad (AdMob)... ID: " + admobInterstitialAdId);
         
         InterstitialAd.load(context, admobInterstitialAdId, request, new InterstitialAdLoadCallback() {
             @Override
@@ -125,30 +152,65 @@ public class MailER_InterstitialAdManager {
 
     public void showAdIfAvailable(Activity activity, OnAdLoadInterface onAdLoadInterface) {
         if (!isADTimer) {
-            onAdLoadInterface.onAdClose();
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
             return;
         }
 
-        int interstitalAdStatus = preferenceClass.getAdsStatus("interstitalAdStatus");
-        
-        if (interstitalAdStatus <= 0) {
-            onAdLoadInterface.onAdClose();
+        // 1. Check Global Interstitial Enabled & Ad Type from Firebase Remote Config
+        boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
+                preferenceClass.getBoolean("interstitial_global_enabled", true));
+        String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
+
+        if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
+            Log.d("AdTracker", "Interstitial Ad is disabled via Remote Config (enabled=" + isEnabled + ", adType=" + adType + ")");
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
             return;
         }
 
-        int getClickCount = preferenceClass.getInt("getClickCount") + 1;
-        
-        if (getClickCount < interstitalAdStatus) {
-            preferenceClass.setInt("getClickCount", getClickCount);
-            onAdLoadInterface.onAdClose();
+        // 2. Editing Screen Exemption:
+        // Editing screens (e.g. PosterEditActivity) have NO role in the global click counter
+        // and must remain completely separate with their own flows.
+        boolean isEditorScreen = (activity != null && activity.getClass().getSimpleName().contains("PosterEdit"));
+        if (isEditorScreen) {
+            Log.d("AdTracker", "Editor screen requested interstitial - bypassing global click counter");
+            loadAndShowAdmob(activity, onAdLoadInterface);
             return;
         }
 
+        // 3. Target Click Count from Remote Config (default 4)
+        int targetInterval = preferenceClass.getInt("interstitial_count", 0);
+        if (targetInterval <= 0) {
+            targetInterval = preferenceClass.getAdsStatus("interstitalAdStatus");
+        }
+        if (targetInterval <= 0) {
+            targetInterval = 4;
+        }
+
+        // 4. Global Click Counter across all other screens in the app
+        int currentCount = preferenceClass.getInt("getClickCount", 0) + 1;
+        Log.d("AdTracker", "▶️ Global Interstitial Click Count: " + currentCount + " / " + targetInterval);
+
+        if (currentCount < targetInterval) {
+            preferenceClass.setInt("getClickCount", currentCount);
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
+
+        // Target reached! Reset global counter to 0 and show the ad
         preferenceClass.setInt("getClickCount", 0);
+        Log.d("AdTracker", "⚡ Global Interstitial Target Reached (" + targetInterval + ")! Showing Ad...");
         loadAndShowAdmob(activity, onAdLoadInterface);
     }
 
     public void showInterstitialAd(Activity activity, OnAdLoadInterface onAdLoadInterface) {
+        boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
+                preferenceClass.getBoolean("interstitial_global_enabled", true));
+        String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
+
+        if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
+            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+            return;
+        }
         loadAndShowAdmob(activity, onAdLoadInterface);
     }
 
@@ -160,7 +222,7 @@ public class MailER_InterstitialAdManager {
             return;
         }
 
-        int getClickCount = preferenceClass.getInt("getEDitClickCount") + 1;
+        int getClickCount = preferenceClass.getInt("getEDitClickCount", 0) + 1;
         
         if (getClickCount < interstitalAdStatus) {
             preferenceClass.setInt("getEDitClickCount", getClickCount);

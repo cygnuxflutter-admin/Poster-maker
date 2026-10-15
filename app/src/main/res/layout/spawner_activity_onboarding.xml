@@ -1,0 +1,1573 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F9FAFB">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_16sdp">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/spawner_ic_chevron_left_new"
+            app:tint="@color/text_primary"
+            android:visibility="gone"/>
+
+        <!-- Progress Indicators -->
+        <LinearLayout
+            android:id="@+id/llProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal">
+            <View android:id="@+id/prog1" android:layout_width="@dimen/_20sdp" android:layout_height="@dimen/_4sdp" android:background="@color/accent_purple" android:layout_marginEnd="@dimen/_4sdp"/>
+            <View android:id="@+id/prog2" android:layout_width="@dimen/_20sdp" android:layout_height="@dimen/_4sdp" android:background="#E0E0E0" android:layout_marginEnd="@dimen/_4sdp"/>
+            <View android:id="@+id/prog3" android:layout_width="@dimen/_20sdp" android:layout_height="@dimen/_4sdp" android:background="#E0E0E0"/>
+            <View android:id="@+id/prog4" android:layout_width="@dimen/_20sdp" android:layout_height="@dimen/_4sdp" android:background="#E0E0E0" android:visibility="gone"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvSkip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Skip"
+            android:visibility="gone"
+            android:textColor="@color/accent_purple"
+            android:textStyle="bold"
+            android:textSize="@dimen/_12sdp"
+            android:fontFamily="@font/spawner_visbyroundcf_bold" />
+    </RelativeLayout>
+
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topBar"
+        android:layout_above="@id/bottomContainer">
+
+        <!-- STEP 1: DISCOVER AMAZING POSTERS (3D ANIMATED HERO) -->
+        <RelativeLayout
+            android:id="@+id/layoutScreen1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Floating 3D Showcase Stage -->
+            <RelativeLayout
+                android:id="@+id/stageContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/llScreen1Text"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Soft Glow Aura in Background -->
+                <ImageView
+                    android:id="@+id/ivAuraGlow"
+                    android:layout_width="@dimen/_280sdp"
+                    android:layout_height="@dimen/_280sdp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/spawner_bg_aura_glow"
+                    android:scaleType="fitCenter" />
+
+                <!-- Left Floating Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardLeft"
+                    android:layout_width="@dimen/_115sdp"
+                    android:layout_height="@dimen/_165sdp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:translationX="-75dp"
+                    android:rotation="-12"
+                    app:cardCornerRadius="@dimen/_14sdp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <ImageView
+                        android:id="@+id/ivCardLeft"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/onboarding_poster_business" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Right Floating Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardRight"
+                    android:layout_width="@dimen/_115sdp"
+                    android:layout_height="@dimen/_165sdp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:translationX="75dp"
+                    android:rotation="10"
+                    app:cardCornerRadius="@dimen/_14sdp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <ImageView
+                        android:id="@+id/ivCardRight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/onboarding_poster_fitness" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Center Floating Card (Primary / Hero) -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardCenter"
+                    android:layout_width="@dimen/_140sdp"
+                    android:layout_height="@dimen/_205sdp"
+                    android:layout_centerInParent="true"
+                    app:cardCornerRadius="@dimen/_16sdp"
+                    app:cardElevation="14dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <ImageView
+                        android:id="@+id/ivCardCenter"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/onboarding_poster_valentine" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Floating Glassmorphism Pills / Badges -->
+                <LinearLayout
+                    android:id="@+id/pillFestival"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/cardCenter"
+                    android:layout_alignEnd="@id/cardCenter"
+                    android:layout_marginTop="-12dp"
+                    android:layout_marginEnd="-25dp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_10sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <TextView
+                        android:id="@+id/tvPillFestival"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="💖 Valentine Special"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/pillTrending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/cardLeft"
+                    android:layout_alignStart="@id/cardLeft"
+                    android:layout_marginTop="-10dp"
+                    android:layout_marginStart="-15dp"
+                    android:translationX="-75dp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_10sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <TextView
+                        android:id="@+id/tvPillTrending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🔥 Trending Romance"
+                        android:textColor="#9333EA"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/pillBusiness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/cardCenter"
+                    android:layout_alignStart="@id/cardCenter"
+                    android:layout_marginBottom="-14dp"
+                    android:layout_marginStart="-25dp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_10sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <TextView
+                        android:id="@+id/tvPillBusiness"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="✨ 50% Off Today"
+                        android:textColor="#E11D48"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/pillCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/cardRight"
+                    android:layout_alignEnd="@id/cardRight"
+                    android:layout_marginBottom="-10dp"
+                    android:layout_marginEnd="-15dp"
+                    android:translationX="75dp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_10sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <TextView
+                        android:id="@+id/tvPillCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="⭐ 10,000+ Designs"
+                        android:textColor="#2563EB"
+                        android:textSize="@dimen/_10sdp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Bottom Titles and Subtitles Area -->
+            <LinearLayout
+                android:id="@+id/llScreen1Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/_16sdp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/_20sdp">
+
+                <TextView
+                    android:id="@+id/tvScreen1Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/spawner_visbyroundcf_bold"
+                    android:gravity="center"
+                    android:text="Discover Amazing Posters"
+                    android:textColor="#1A1A2E"
+                    android:textSize="@dimen/_20sdp" />
+
+                <TextView
+                    android:id="@+id/tvScreen1Subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_6sdp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp"
+                    android:text="“Romantic Valentine &amp; Festival Posters”"
+                    android:textColor="#6B7280"
+                    android:textSize="@dimen/_12sdp" />
+
+                <!-- Category tags bar with horizontal scroll -->
+                <HorizontalScrollView
+                    android:id="@+id/hsvCategoryTags"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:scrollbars="none"
+                    android:overScrollMode="never">
+
+                    <LinearLayout
+                        android:id="@+id/llCategoryTags"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvTagFestivals"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:background="@drawable/spawner_bg_chip_purple_gradient"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:paddingHorizontal="@dimen/_10sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:text="💖 Valentine"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <TextView
+                            android:id="@+id/tvTagBusiness"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:background="@drawable/spawner_bg_chip_grey"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:paddingHorizontal="@dimen/_10sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:text="💼 Business"
+                            android:textColor="#6B7280"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <TextView
+                            android:id="@+id/tvTagFitness"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:background="@drawable/spawner_bg_chip_grey"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:paddingHorizontal="@dimen/_10sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:text="💪 Fitness"
+                            android:textColor="#6B7280"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <TextView
+                            android:id="@+id/tvTagRealEstate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:background="@drawable/spawner_bg_chip_grey"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:paddingHorizontal="@dimen/_10sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:text="🏡 Real Estate"
+                            android:textColor="#6B7280"
+                            android:textSize="@dimen/_10sdp" />
+
+                        <TextView
+                            android:id="@+id/tvTagBirthday"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/spawner_bg_chip_grey"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:paddingHorizontal="@dimen/_10sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:text="🎂 Birthday"
+                            android:textColor="#6B7280"
+                            android:textSize="@dimen/_10sdp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- STEP 2: CUSTOMIZE IT YOUR WAY (STUDIO EDITOR SHOWCASE) -->
+        <RelativeLayout
+            android:id="@+id/layoutScreen2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Stage Container for Canvas and Floating Tool Badges -->
+            <RelativeLayout
+                android:id="@+id/stageContainerScreen2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/llScreen2BottomArea"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Soft Glow Aura in Background -->
+                <ImageView
+                    android:id="@+id/ivAuraGlow2"
+                    android:layout_width="@dimen/_290sdp"
+                    android:layout_height="@dimen/_290sdp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/spawner_bg_aura_glow" />
+
+                <!-- The Live Poster Design Canvas / Artboard -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardCanvas"
+                    android:layout_width="@dimen/_175sdp"
+                    android:layout_height="@dimen/_245sdp"
+                    android:layout_centerInParent="true"
+                    app:cardCornerRadius="@dimen/_16sdp"
+                    app:cardElevation="14dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <!-- Real Diwali Poster Image as Canvas Base -->
+                        <ImageView
+                            android:id="@+id/ivCanvasPoster"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/onboarding_poster_diwali" />
+
+                        <!-- Dynamic Background Color/Glow Overlay for BG Change demo -->
+                        <View
+                            android:id="@+id/viewCanvasBgOverlay"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#00000000" />
+
+                        <!-- Top-left category tag inside canvas -->
+                        <LinearLayout
+                            android:id="@+id/canvasTagContainer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_marginTop="@dimen/_8sdp"
+                            android:background="@drawable/spawner_bg_tag_pill"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:paddingVertical="@dimen/_2sdp">
+
+                            <TextView
+                                android:id="@+id/tvCanvasTag"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:text="🪔 DIWALI"
+                                android:textColor="#7B2FF7"
+                                android:textSize="@dimen/_7sdp" />
+                        </LinearLayout>
+
+                        <!-- Live Editable Text Box with Selection Frame -->
+                        <RelativeLayout
+                            android:id="@+id/layoutTextBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginBottom="@dimen/_10sdp"
+                            android:padding="@dimen/_6sdp">
+
+                            <!-- Dashed selection border -->
+                            <View
+                                android:id="@+id/viewSelectionBorder"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_alignStart="@id/llCanvasTextContent"
+                                android:layout_alignTop="@id/llCanvasTextContent"
+                                android:layout_alignEnd="@id/llCanvasTextContent"
+                                android:layout_alignBottom="@id/llCanvasTextContent"
+                                android:layout_margin="-4dp"
+                                android:background="@drawable/spawner_bg_dashed_border" />
+
+                            <!-- 4 Corner anchor dots -->
+                            <View
+                                android:id="@+id/handleTL"
+                                android:layout_width="8dp"
+                                android:layout_height="8dp"
+                                android:layout_alignStart="@id/viewSelectionBorder"
+                                android:layout_alignTop="@id/viewSelectionBorder"
+                                android:layout_marginStart="-3dp"
+                                android:layout_marginTop="-3dp"
+                                android:background="@drawable/spawner_bg_selection_handle" />
+
+                            <View
+                                android:id="@+id/handleTR"
+                                android:layout_width="8dp"
+                                android:layout_height="8dp"
+                                android:layout_alignEnd="@id/viewSelectionBorder"
+                                android:layout_alignTop="@id/viewSelectionBorder"
+                                android:layout_marginEnd="-3dp"
+                                android:layout_marginTop="-3dp"
+                                android:background="@drawable/spawner_bg_selection_handle" />
+
+                            <View
+                                android:id="@+id/handleBL"
+                                android:layout_width="8dp"
+                                android:layout_height="8dp"
+                                android:layout_alignStart="@id/viewSelectionBorder"
+                                android:layout_alignBottom="@id/viewSelectionBorder"
+                                android:layout_marginStart="-3dp"
+                                android:layout_marginBottom="-3dp"
+                                android:background="@drawable/spawner_bg_selection_handle" />
+
+                            <View
+                                android:id="@+id/handleBR"
+                                android:layout_width="8dp"
+                                android:layout_height="8dp"
+                                android:layout_alignEnd="@id/viewSelectionBorder"
+                                android:layout_alignBottom="@id/viewSelectionBorder"
+                                android:layout_marginEnd="-3dp"
+                                android:layout_marginBottom="-3dp"
+                                android:background="@drawable/spawner_bg_selection_handle" />
+
+                            <!-- Center text content -->
+                            <LinearLayout
+                                android:id="@+id/llCanvasTextContent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:background="#80000000"
+                                android:paddingHorizontal="@dimen/_6sdp"
+                                android:paddingVertical="@dimen/_2sdp"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvCanvasHeadline"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                    android:gravity="center"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="0"
+                                    android:shadowDy="2"
+                                    android:shadowRadius="4"
+                                    android:text="SHUBH DIWALI"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="@dimen/_12sdp" />
+
+                                <TextView
+                                    android:id="@+id/tvCanvasSub"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/spawner_visbyroundcf_medium"
+                                    android:gravity="center"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="0"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="3"
+                                    android:text="SPECIAL FESTIVAL OFFER"
+                                    android:textColor="#FFD700"
+                                    android:textSize="@dimen/_8sdp" />
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                        <!-- 3D Sales / Offer Sticker Badge -->
+                        <LinearLayout
+                            android:id="@+id/layoutBadge3D"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginEnd="@dimen/_8sdp"
+                            android:layout_marginTop="@dimen/_8sdp"
+                            android:background="@drawable/spawner_bg_badge_sale"
+                            android:elevation="6dp"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="@dimen/_8sdp"
+                            android:paddingVertical="@dimen/_4sdp"
+                            android:rotation="-6">
+
+                            <TextView
+                                android:id="@+id/tvBadgeText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:text="🔥 50% OFF"
+                                android:textColor="#FFFFFF"
+                                android:textSize="@dimen/_8sdp" />
+                        </LinearLayout>
+
+                        <!-- Magic Sparkle Icons -->
+                        <ImageView
+                            android:id="@+id/ivSparkle1"
+                            android:layout_width="@dimen/_16sdp"
+                            android:layout_height="@dimen/_16sdp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="@dimen/_10sdp"
+                            android:src="@drawable/spawner_ic_sparkle"
+                            app:tint="#FFD700" />
+
+                        <ImageView
+                            android:id="@+id/ivSparkle2"
+                            android:layout_width="@dimen/_12sdp"
+                            android:layout_height="@dimen/_12sdp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="@dimen/_10sdp"
+                            android:src="@drawable/spawner_ic_sparkle"
+                            app:tint="#FFFFFF" />
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Floating Tool Pills around the Canvas -->
+                <!-- Pill 1: Top-Left Change BG -->
+                <LinearLayout
+                    android:id="@+id/pillToolBg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/cardCanvas"
+                    android:layout_alignStart="@id/cardCanvas"
+                    android:layout_marginTop="-8dp"
+                    android:layout_marginStart="-12dp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_4sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🎨 Change BG"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <!-- Pill 2: Top-Right 3D Stickers -->
+                <LinearLayout
+                    android:id="@+id/pillToolStickers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/cardCanvas"
+                    android:layout_alignEnd="@id/cardCanvas"
+                    android:layout_marginTop="-8dp"
+                    android:layout_marginEnd="-12dp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_4sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="✨ 3D Stickers"
+                        android:textColor="#EC4899"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <!-- Pill 3: Bottom-Left Pro Fonts -->
+                <LinearLayout
+                    android:id="@+id/pillToolFonts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/cardCanvas"
+                    android:layout_alignStart="@id/cardCanvas"
+                    android:layout_marginBottom="-6dp"
+                    android:layout_marginStart="-12dp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_4sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🔤 100+ Fonts"
+                        android:textColor="#2563EB"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <!-- Pill 4: Bottom-Right Magic Effects -->
+                <LinearLayout
+                    android:id="@+id/pillToolEffects"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/cardCanvas"
+                    android:layout_alignEnd="@id/cardCanvas"
+                    android:layout_marginBottom="-6dp"
+                    android:layout_marginEnd="-12dp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_4sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🪄 Magic Glow"
+                        android:textColor="#F59E0B"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <!-- Floating Sticker Choices Around Screen (Aju Baju) -->
+                <LinearLayout
+                    android:id="@+id/stickerChoice1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/cardCanvas"
+                    android:layout_alignTop="@id/cardCanvas"
+                    android:layout_marginTop="@dimen/_45sdp"
+                    android:layout_marginEnd="-14dp"
+                    android:background="@drawable/spawner_bg_badge_sale"
+                    android:elevation="22dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_9sdp"
+                    android:paddingVertical="@dimen/_5sdp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvStickerChoice1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🔥 50% OFF"
+                        android:textColor="#FFFFFF"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/stickerChoice2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/cardCanvas"
+                    android:layout_alignTop="@id/cardCanvas"
+                    android:layout_marginTop="@dimen/_45sdp"
+                    android:layout_marginStart="-14dp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="22dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_9sdp"
+                    android:paddingVertical="@dimen/_5sdp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvStickerChoice2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🪔 SHUBH"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/stickerChoice3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/cardCanvas"
+                    android:layout_alignBottom="@id/cardCanvas"
+                    android:layout_marginBottom="@dimen/_45sdp"
+                    android:layout_marginEnd="-14dp"
+                    android:background="@drawable/spawner_bg_chip_purple_gradient"
+                    android:elevation="22dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_9sdp"
+                    android:paddingVertical="@dimen/_5sdp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvStickerChoice3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🎉 SPECIAL"
+                        android:textColor="#FFFFFF"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/stickerChoice4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/cardCanvas"
+                    android:layout_alignBottom="@id/cardCanvas"
+                    android:layout_marginBottom="@dimen/_45sdp"
+                    android:layout_marginStart="-14dp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="22dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_9sdp"
+                    android:paddingVertical="@dimen/_5sdp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvStickerChoice4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="✨ DIWALI"
+                        android:textColor="#9333EA"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Bottom Area: Studio Dock + Titles -->
+            <LinearLayout
+                android:id="@+id/llScreen2BottomArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/_14sdp">
+
+                <!-- Mini Option Tray (Live Font / Sticker / Color picker simulator) -->
+                <LinearLayout
+                    android:id="@+id/layoutMiniTray"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_6sdp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_4sdp">
+
+                    <TextView
+                        android:id="@+id/tvMiniTrayLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/_6sdp"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="🎨 Choose:"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_8sdp" />
+
+                    <!-- Option Chip 1 -->
+                    <LinearLayout
+                        android:id="@+id/chipOpt1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/_4sdp"
+                        android:background="@drawable/spawner_bg_dock_item_active"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/_6sdp"
+                        android:paddingVertical="@dimen/_3sdp">
+
+                        <TextView
+                            android:id="@+id/tvChipOpt1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Gold"
+                            android:textColor="#FFFFFF"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+
+                    <!-- Option Chip 2 -->
+                    <LinearLayout
+                        android:id="@+id/chipOpt2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/_4sdp"
+                        android:background="@drawable/spawner_bg_tag_pill"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/_6sdp"
+                        android:paddingVertical="@dimen/_3sdp">
+
+                        <TextView
+                            android:id="@+id/tvChipOpt2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Purple"
+                            android:textColor="#7B2FF7"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+
+                    <!-- Option Chip 3 -->
+                    <LinearLayout
+                        android:id="@+id/chipOpt3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/spawner_bg_tag_pill"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/_6sdp"
+                        android:paddingVertical="@dimen/_3sdp">
+
+                        <TextView
+                            android:id="@+id/tvChipOpt3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Magenta"
+                            android:textColor="#E11D48"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Interactive Creative Studio Dock -->
+                <LinearLayout
+                    android:id="@+id/llEditorDock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_8sdp"
+                    android:background="@drawable/spawner_bg_dock_bar"
+                    android:elevation="6dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_3sdp">
+
+                    <!-- Dock Item 1: Background -->
+                    <LinearLayout
+                        android:id="@+id/dockToolBg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/spawner_bg_dock_item_active"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/_10sdp"
+                        android:paddingVertical="@dimen/_5sdp">
+
+                        <TextView
+                            android:id="@+id/tvDockBg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="🎨 BG"
+                            android:textColor="#FFFFFF"
+                            android:textSize="@dimen/_9sdp" />
+                    </LinearLayout>
+
+                    <!-- Dock Item 2: Fonts -->
+                    <LinearLayout
+                        android:id="@+id/dockToolFonts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/_10sdp"
+                        android:paddingVertical="@dimen/_5sdp">
+
+                        <TextView
+                            android:id="@+id/tvDockFonts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="🔤 Text"
+                            android:textColor="#64748B"
+                            android:textSize="@dimen/_9sdp" />
+                    </LinearLayout>
+
+                    <!-- Dock Item 3: Stickers -->
+                    <LinearLayout
+                        android:id="@+id/dockToolStickers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/_10sdp"
+                        android:paddingVertical="@dimen/_5sdp">
+
+                        <TextView
+                            android:id="@+id/tvDockStickers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="🏷️ Stickers"
+                            android:textColor="#64748B"
+                            android:textSize="@dimen/_9sdp" />
+                    </LinearLayout>
+
+                    <!-- Dock Item 4: Effects -->
+                    <LinearLayout
+                        android:id="@+id/dockToolEffects"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/_10sdp"
+                        android:paddingVertical="@dimen/_5sdp">
+
+                        <TextView
+                            android:id="@+id/tvDockEffects"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="🪄 Glow"
+                            android:textColor="#64748B"
+                            android:textSize="@dimen/_9sdp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Interactive Tap Ripple Effect -->
+            <View
+                android:id="@+id/viewTapRipple"
+                android:layout_width="@dimen/_28sdp"
+                android:layout_height="@dimen/_28sdp"
+                android:background="@drawable/spawner_bg_tap_ripple"
+                android:elevation="28dp"
+                android:alpha="0"
+                android:scaleX="0"
+                android:scaleY="0" />
+
+            <!-- Interactive Hand Pointer Cursor (👆) -->
+            <ImageView
+                android:id="@+id/ivHandPointer"
+                android:layout_width="@dimen/_32sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:elevation="30dp"
+                android:src="@drawable/spawner_ic_hand_pointer" />
+        </RelativeLayout>
+        
+        <!-- STEP 3: READY. SET. SHARE! (VIRAL SOCIAL SHARING SHOWCASE) -->
+        <RelativeLayout
+            android:id="@+id/layoutScreen3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Stage Container for Poster and Floating Social Badges -->
+            <RelativeLayout
+                android:id="@+id/stageContainerScreen3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/llScreen3BottomArea"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Soft Glow Aura in Background -->
+                <ImageView
+                    android:id="@+id/ivAuraGlow3"
+                    android:layout_width="@dimen/_240sdp"
+                    android:layout_height="@dimen/_240sdp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/spawner_bg_aura_glow" />
+
+                <!-- The Final Exported Poster Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardSharePoster"
+                    android:layout_width="@dimen/_135sdp"
+                    android:layout_height="@dimen/_185sdp"
+                    android:layout_centerInParent="true"
+                    app:cardCornerRadius="@dimen/_14sdp"
+                    app:cardElevation="14dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:id="@+id/ivSharePoster"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/onboarding_poster_diwali" />
+
+                        <!-- Top-Right HD Saved Badge on Poster -->
+                        <LinearLayout
+                            android:id="@+id/layoutBadgeSaved"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginEnd="@dimen/_8sdp"
+                            android:layout_marginTop="@dimen/_8sdp"
+                            android:background="@drawable/spawner_bg_badge_saved"
+                            android:elevation="6dp"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="@dimen/_7sdp"
+                            android:paddingVertical="@dimen/_3sdp">
+
+                            <ImageView
+                                android:layout_width="@dimen/_11sdp"
+                                android:layout_height="@dimen/_11sdp"
+                                android:src="@drawable/ic_check_circle"
+                                app:tint="#10B981" />
+
+                            <TextView
+                                android:id="@+id/tvBadgeSaved"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_3sdp"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:text="HD Saved"
+                                android:textColor="#065F46"
+                                android:textSize="@dimen/_7sdp" />
+                        </LinearLayout>
+
+                        <!-- Bottom Strip on Poster: Ultra HD / No Watermark -->
+                        <LinearLayout
+                            android:id="@+id/layoutBadgeWatermark"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:background="#B3000000"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_3sdp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                                android:text="✨ ULTRA HD • NO WATERMARK"
+                                android:textColor="#FFD700"
+                                android:textSize="@dimen/_6sdp" />
+                        </LinearLayout>
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Floating WhatsApp Node (Left Side) -->
+                <LinearLayout
+                    android:id="@+id/cardShareWhatsapp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/cardSharePoster"
+                    android:layout_alignStart="@id/cardSharePoster"
+                    android:layout_marginTop="@dimen/_14sdp"
+                    android:layout_marginStart="-28dp"
+                    android:background="@drawable/spawner_bg_card_whatsapp"
+                    android:elevation="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <FrameLayout
+                        android:layout_width="@dimen/_22sdp"
+                        android:layout_height="@dimen/_22sdp"
+                        android:background="@drawable/spawner_bg_social_wa">
+
+                        <ImageView
+                            android:layout_width="@dimen/_13sdp"
+                            android:layout_height="@dimen/_13sdp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/spawner_ic_whatsapp"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="WhatsApp"
+                            android:textColor="#1A1A2E"
+                            android:textSize="@dimen/_9sdp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_medium"
+                            android:text="Status &amp; Chats"
+                            android:textColor="#10B981"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- WhatsApp Speech / Reaction Bubble -->
+                <LinearLayout
+                    android:id="@+id/bubbleWhatsappSent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@id/cardShareWhatsapp"
+                    android:layout_alignStart="@id/cardShareWhatsapp"
+                    android:layout_marginBottom="@dimen/_4sdp"
+                    android:background="@drawable/spawner_bg_floating_pill"
+                    android:elevation="18dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_7sdp"
+                    android:paddingVertical="@dimen/_3sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="💬 Sent to Status!"
+                        android:textColor="#059669"
+                        android:textSize="@dimen/_8sdp" />
+                </LinearLayout>
+
+                <!-- Floating Instagram Node (Right Side) -->
+                <LinearLayout
+                    android:id="@+id/cardShareInstagram"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/cardSharePoster"
+                    android:layout_alignEnd="@id/cardSharePoster"
+                    android:layout_marginBottom="@dimen/_16sdp"
+                    android:layout_marginEnd="-28dp"
+                    android:background="@drawable/spawner_bg_card_instagram"
+                    android:elevation="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <FrameLayout
+                        android:layout_width="@dimen/_22sdp"
+                        android:layout_height="@dimen/_22sdp"
+                        android:background="@drawable/spawner_bg_social_ig">
+
+                        <ImageView
+                            android:layout_width="@dimen/_13sdp"
+                            android:layout_height="@dimen/_13sdp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/spawner_ic_instagram"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Instagram"
+                            android:textColor="#1A1A2E"
+                            android:textSize="@dimen/_9sdp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/spawner_visbyroundcf_medium"
+                            android:text="Story &amp; Feed"
+                            android:textColor="#E1306C"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Instagram Likes / Reaction Bubble -->
+                <LinearLayout
+                    android:id="@+id/bubbleInstagramLikes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@id/cardShareInstagram"
+                    android:layout_alignEnd="@id/cardShareInstagram"
+                    android:layout_marginBottom="@dimen/_4sdp"
+                    android:background="@drawable/spawner_bg_tag_pill"
+                    android:elevation="18dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_7sdp"
+                    android:paddingVertical="@dimen/_3sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="❤️ 99+ Likes"
+                        android:textColor="#E11D48"
+                        android:textSize="@dimen/_8sdp" />
+                </LinearLayout>
+
+                <!-- Floating Sparkles -->
+                <ImageView
+                    android:id="@+id/ivShareSparkle1"
+                    android:layout_width="@dimen/_16sdp"
+                    android:layout_height="@dimen/_16sdp"
+                    android:layout_alignTop="@id/cardSharePoster"
+                    android:layout_alignEnd="@id/cardSharePoster"
+                    android:layout_marginTop="-8dp"
+                    android:layout_marginEnd="-12dp"
+                    android:src="@drawable/spawner_ic_sparkle"
+                    app:tint="#FFD700" />
+
+                <ImageView
+                    android:id="@+id/ivShareSparkle2"
+                    android:layout_width="@dimen/_14sdp"
+                    android:layout_height="@dimen/_14sdp"
+                    android:layout_alignBottom="@id/cardSharePoster"
+                    android:layout_alignStart="@id/cardSharePoster"
+                    android:layout_marginBottom="-6dp"
+                    android:layout_marginStart="-12dp"
+                    android:src="@drawable/spawner_ic_sparkle"
+                    app:tint="#7B2FF7" />
+            </RelativeLayout>
+
+            <!-- Bottom Area: Branded Quick Share Bar + Titles -->
+            <LinearLayout
+                android:id="@+id/llScreen3BottomArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/_14sdp">
+
+                <!-- 1-Click Social Channels Strip -->
+                <LinearLayout
+                    android:id="@+id/llQuickShareBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_8sdp"
+                    android:background="@drawable/spawner_bg_share_strip"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/_12sdp"
+                    android:paddingVertical="@dimen/_5sdp">
+
+                    <!-- WhatsApp Button -->
+                    <LinearLayout
+                        android:id="@+id/btnQuickWa"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/_8sdp">
+
+                        <FrameLayout
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:background="@drawable/spawner_bg_social_wa">
+
+                            <ImageView
+                                android:layout_width="@dimen/_14sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/spawner_ic_whatsapp"
+                                app:tint="@color/white" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="WhatsApp"
+                            android:textColor="#475569"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+
+                    <!-- Instagram Button -->
+                    <LinearLayout
+                        android:id="@+id/btnQuickIg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/_8sdp">
+
+                        <FrameLayout
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:background="@drawable/spawner_bg_social_ig">
+
+                            <ImageView
+                                android:layout_width="@dimen/_14sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/spawner_ic_instagram"
+                                app:tint="@color/white" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Instagram"
+                            android:textColor="#475569"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+
+                    <!-- Facebook Button -->
+                    <LinearLayout
+                        android:id="@+id/btnQuickFb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/_8sdp">
+
+                        <FrameLayout
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:background="@drawable/spawner_bg_social_fb">
+
+                            <ImageView
+                                android:layout_width="@dimen/_14sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/spawner_ic_facebook"
+                                app:tint="@color/white" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Facebook"
+                            android:textColor="#475569"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+
+                    <!-- Download/Save Button -->
+                    <LinearLayout
+                        android:id="@+id/btnQuickDl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/_8sdp">
+
+                        <FrameLayout
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:background="@drawable/spawner_bg_social_dl">
+
+                            <ImageView
+                                android:layout_width="@dimen/_14sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/spawner_ic_download_share"
+                                app:tint="@color/white" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/spawner_visbyroundcf_bold"
+                            android:text="Save HD"
+                            android:textColor="#475569"
+                            android:textSize="@dimen/_7sdp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Titles and Subtitles -->
+                <TextView
+                    android:id="@+id/tvScreen3Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/spawner_visbyroundcf_bold"
+                    android:gravity="center"
+                    android:text="Ready. Set. Share!"
+                    android:textColor="#1A1A2E"
+                    android:textSize="@dimen/_18sdp" />
+
+                <TextView
+                    android:id="@+id/tvScreen3Subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_3sdp"
+                    android:fontFamily="@font/spawner_visbyroundcf_medium"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp"
+                    android:text="“Create, Download &amp; Share in Seconds”"
+                    android:textColor="#6B7280"
+                    android:textSize="@dimen/_11sdp" />
+
+                <!-- Features tag line -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_6sdp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="⚡ 1-Tap HD Save"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_9sdp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_5sdp"
+                        android:text="•"
+                        android:textColor="#CBD5E1"
+                        android:textSize="@dimen/_11sdp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="📲 Direct WhatsApp &amp; Insta"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_9sdp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_5sdp"
+                        android:text="•"
+                        android:textColor="#CBD5E1"
+                        android:textSize="@dimen/_11sdp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:text="✨ Zero Watermark"
+                        android:textColor="#7B2FF7"
+                        android:textSize="@dimen/_9sdp" />
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+
+    </ViewFlipper>
+
+    <!-- Bottom Container with Native Ad and Continue Button -->
+    <LinearLayout
+        android:id="@+id/bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/rl_onboarding_native"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:visibility="gone">
+
+            <RelativeLayout
+                android:id="@+id/native_ad_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/_55sdp"
+                android:visibility="visible" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/native_shimmer_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/_55sdp"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_55sdp"
+                    android:background="#E2E8F0" />
+            </com.facebook.shimmer.ShimmerFrameLayout>
+        </RelativeLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp"
+            android:layout_marginHorizontal="@dimen/_16sdp"
+            android:layout_marginBottom="@dimen/_16sdp"
+            android:background="@drawable/bg_onboarding_btn"
+            android:text="Continue &#x2192;"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14sdp"
+            android:fontFamily="@font/spawner_visbyroundcf_bold"
+            android:elevation="@dimen/_4sdp"/>
+    </LinearLayout>
+</RelativeLayout>

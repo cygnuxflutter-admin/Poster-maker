@@ -185,8 +185,8 @@ public class MyApplication extends android.app.Application {
             }
         });
 
-        // Debug ma tamara phone ne Test Device banave → Account Safe
-        // Release (Play Store) ma aa code chalse j nahi → Real Ads aavse
+        // Configure test device in debug mode for safe ad testing
+        // In release builds, this code is skipped and real ads are served
         if (BuildConfig.DEBUG) {
             List<String> testDeviceIds = Collections.singletonList("9EB1C89D5458256B2C93F844BAAC93F5");
             RequestConfiguration configuration = new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();

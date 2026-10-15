@@ -23,6 +23,9 @@ public class MailER_PreferenceClass {
         FALLBACK_AD_IDS.put("NativeUnitID", "ca-app-pub-5706123402805812/8186296336");
         FALLBACK_AD_IDS.put("RewardVideoUnitID", "ca-app-pub-5706123402805812/6490071289");
         FALLBACK_AD_IDS.put("google_Rw_ID", "ca-app-pub-5706123402805812/6490071289");
+        FALLBACK_AD_IDS.put("editor_reward_ad_id", "ca-app-pub-5706123402805812/6490071289");
+        FALLBACK_AD_IDS.put("editor_download_ad_id", "ca-app-pub-5706123402805812/6490071289");
+        FALLBACK_AD_IDS.put("editor_undo_redo_ad_id", "ca-app-pub-5706123402805812/6490071289");
     }
 
     public MailER_PreferenceClass(Context context) {
@@ -46,6 +49,19 @@ public class MailER_PreferenceClass {
             return prefs.getBoolean(type, false);
         }
         return false;
+    }
+
+    public void setBoolean(String key, boolean value) {
+        if (prefs != null) {
+            prefs.edit().putBoolean(key, value).apply();
+        }
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue) {
+        if (prefs != null) {
+            return prefs.getBoolean(key, defaultValue);
+        }
+        return defaultValue;
     }
 
     public void setDataType(String type, String value) {
@@ -84,11 +100,11 @@ public class MailER_PreferenceClass {
     public String getAdsId(String type) {
         // Force Test Ads in Debug Mode
         if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
-            if (type.equalsIgnoreCase("interstitalAdunitID") || type.equalsIgnoreCase("InterstitalAdunitID")) return "ca-app-pub-3940256099942544/1033173712";
+            if (type.equalsIgnoreCase("interstitalAdunitID") || type.equalsIgnoreCase("InterstitalAdunitID") || type.equalsIgnoreCase("OnboardingInterAdID")) return "ca-app-pub-3940256099942544/1033173712";
             if (type.equalsIgnoreCase("AppOpenID")) return "ca-app-pub-3940256099942544/9257395921";
             if (type.equalsIgnoreCase("BannerAdunitID") || type.equalsIgnoreCase("CollapsibleBannerID") || type.equalsIgnoreCase("BGSelectScreen_BannerAD") || type.equalsIgnoreCase("ReadymadePoste_BannerAD") || type.equalsIgnoreCase("EditScreenBannerAD")) return "ca-app-pub-3940256099942544/6300978111";
             if (type.equalsIgnoreCase("NativeUnitID") || type.equalsIgnoreCase("ExitDialog_NativeAD")) return "ca-app-pub-3940256099942544/2247696110";
-            if (type.equalsIgnoreCase("RewardVideoUnitID") || type.equalsIgnoreCase("google_Rw_ID")) return "ca-app-pub-3940256099942544/5224354917";
+            if (type.equalsIgnoreCase("RewardVideoUnitID") || type.equalsIgnoreCase("google_Rw_ID") || type.equalsIgnoreCase("editor_reward_ad_id") || type.equalsIgnoreCase("editor_download_ad_id") || type.equalsIgnoreCase("editor_undo_redo_ad_id")) return "ca-app-pub-3940256099942544/5224354917";
         }
 
         if (prefs != null) {

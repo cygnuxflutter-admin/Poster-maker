@@ -131,10 +131,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <include
+                    android:id="@+id/shimmer_skeleton_container"
+                    layout="@layout/spawner_skeleton_grid"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
                 <RelativeLayout
                     android:id="@+id/viewPagerLay"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     android:paddingTop="@dimen/_8sdp"
                     android:paddingBottom="@dimen/_2sdp"
                     android:paddingStart="@dimen/_12sdp"
@@ -156,6 +163,7 @@
                     android:id="@+id/viewPager"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:visibility="gone"
                     android:layout_below="@+id/viewPagerLay"
                     android:layout_marginBottom="0dp" />
             </RelativeLayout>

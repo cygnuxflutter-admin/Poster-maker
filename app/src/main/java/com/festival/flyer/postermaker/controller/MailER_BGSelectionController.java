@@ -30,6 +30,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.festival.flyer.postermaker.BuildConfig;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adapter.MailER_ColorPelleteAdapter;
@@ -74,66 +75,111 @@ public class MailER_BGSelectionController {
     private final MailER_PreferenceClass preferenceClass;
     private MaterialDialog materialDialog;
 
+    private ShimmerFrameLayout shimmerSkeleton;
+    private View viewPagerLay;
+    private View viewPager;
+
     public MailER_BGSelectionController(Activity activity, FragmentManager supportFragmentManager, MailER_PreferenceClass preferenceClass, String mode) {
         this.activity = activity;
         this.supportFragmentManager = supportFragmentManager;
         this.preferenceClass = preferenceClass;
         this.mode = mode;
+        initSkeletonViews();
         loadBgImages();
     }
 
+    private void initSkeletonViews() {
+        if (activity != null) {
+            shimmerSkeleton = activity.findViewById(R.id.shimmer_skeleton_container);
+            viewPagerLay = activity.findViewById(R.id.viewPagerLay);
+            viewPager = activity.findViewById(R.id.viewPager);
+        }
+    }
+
+    public void showSkeleton() {
+        if (shimmerSkeleton == null) {
+            initSkeletonViews();
+        }
+        if (shimmerSkeleton != null) {
+            shimmerSkeleton.setVisibility(View.VISIBLE);
+            shimmerSkeleton.startShimmer();
+        }
+        if (viewPagerLay != null) {
+            viewPagerLay.setVisibility(View.GONE);
+        }
+        if (viewPager != null) {
+            viewPager.setVisibility(View.GONE);
+        }
+    }
+
+    public void hideSkeleton() {
+        if (shimmerSkeleton == null) {
+            initSkeletonViews();
+        }
+        if (shimmerSkeleton != null) {
+            shimmerSkeleton.stopShimmer();
+            shimmerSkeleton.setVisibility(View.GONE);
+        }
+        if (viewPagerLay != null) {
+            viewPagerLay.setVisibility(View.VISIBLE);
+        }
+        if (viewPager != null) {
+            viewPager.setVisibility(View.VISIBLE);
+        }
+    }
+
     public void loadBgImages() {
-        startMaterialDialog();
-        getBgThumb(preferenceClass.getDataType("field_0"));
+        String cachedBg = com.festival.flyer.postermaker.utils.MailER_AppCacheManager.getBackgrounds(activity);
+        boolean hasCache = false;
+        if (cachedBg != null && !cachedBg.trim().isEmpty()) {
+            hasCache = parseAndLoadBgData(cachedBg, true);
+        }
+
+        if (!hasCache) {
+            showSkeleton();
+        }
+        getBgThumb(preferenceClass.getDataType("field_0"), hasCache);
     }
 
     private void getBgThumb(String key) {
+        getBgThumb(key, false);
+    }
+
+    private void getBgThumb(String key, final boolean hasCache) {
         String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_38");
         android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (BG): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
             android.util.Log.d("API_CALL_DEBUG", "RESPONSE FROM (BG): " + requestUrl + "\nDATA: " + response);
-            String text1 = null;
-
-            Log.d("qwertyu", "getBgThumb: " + response);
-//            if (preferenceClass.getDecryptionType() == 0) {
-//                byte[] octets = Base64.decode(response, Base64.URL_SAFE);
-//                String text_base = new String(octets, StandardCharsets.UTF_8);
-//                byte[] octets1 = Base64.decode(text_base, Base64.URL_SAFE);
-//                text1 = new String(octets1, StandardCharsets.UTF_8);
-//            } else if (preferenceClass.getDecryptionType() == 1) {
-//                MainSecurity decrypted = MainSecurity.decrypt(preferenceClass.getDataType("main_key"), response);
-//                text1 = decrypted.getData();
-//            }
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 JSONArray jsonArray = jsonObject.getJSONArray(preferenceClass.getDataType("field_39"));
                 if (jsonArray.length() == 0) {
-                    MailER_MaterialDialogUtils.getInstance().errorDialog2(activity, activity.getResources().getString(R.string.something_went_wrong));
+                    if (!hasCache) {
+                        MailER_MaterialDialogUtils.getInstance().errorDialog2(activity, activity.getResources().getString(R.string.something_went_wrong));
+                    }
                 } else {
-                    new MailER_GetBgData(preferenceClass, jsonArray, new MailER_GetBgData.OnGetCatDataListener() {
-                        @Override
-                        public void onGetDataComplete(ArrayList<MailER_BgModel> posterDataLists) {
-                            new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 1200);
-                        }
-
-                        @Override
-                        public void onError() {
-                            dismissMaterialDialog();
-                            MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
-                        }
-                    }).execute();
+                    boolean success = parseAndLoadBgData(response, false);
+                    if (success) {
+                        com.festival.flyer.postermaker.utils.MailER_AppCacheManager.saveBackgrounds(activity, response);
+                    }
                 }
             } catch (Exception e) {
-                dismissMaterialDialog();
-                MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+                if (!hasCache) {
+                    dismissMaterialDialog();
+                    MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+                }
                 e.printStackTrace();
             }
         }, error -> {
             Log.e("---API_DATA---", "--- ERROR (BG Thumb) ---");
             Log.e("---API_DATA---", "URL: " + requestUrl);
             Log.e("---API_DATA---", "Error: " + error.getMessage());
-            dismissMaterialDialog();
-            MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+            if (!hasCache) {
+                dismissMaterialDialog();
+                MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+            } else {
+                dismissMaterialDialog();
+            }
             error.printStackTrace();
         }) {
             @Override
@@ -146,6 +192,37 @@ public class MailER_BGSelectionController {
             }
         };
         Volley.newRequestQueue(activity).add(stringRequest);
+    }
+
+    private boolean parseAndLoadBgData(String response, boolean fromCache) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray(preferenceClass.getDataType("field_39"));
+            if (jsonArray.length() > 0) {
+                new MailER_GetBgData(preferenceClass, jsonArray, new MailER_GetBgData.OnGetCatDataListener() {
+                    @Override
+                    public void onGetDataComplete(ArrayList<MailER_BgModel> posterDataLists) {
+                        if (fromCache) {
+                            setPagerAdapter(posterDataLists);
+                        } else {
+                            new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 400);
+                        }
+                    }
+
+                    @Override
+                    public void onError() {
+                        if (!fromCache) {
+                            dismissMaterialDialog();
+                            MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+                        }
+                    }
+                }).execute();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void applyProFilter(boolean isPro) {
@@ -509,6 +586,7 @@ public class MailER_BGSelectionController {
     }
 
     public void dismissMaterialDialog() {
+        hideSkeleton();
         try {
             if (activity instanceof Activity) {
                 if (!((Activity) activity).isFinishing())

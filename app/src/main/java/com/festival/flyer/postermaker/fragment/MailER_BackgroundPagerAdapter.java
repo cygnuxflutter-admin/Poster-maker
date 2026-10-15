@@ -25,6 +25,8 @@ public class MailER_BackgroundPagerAdapter extends FragmentStatePagerAdapter {
         MailER_BackgroundFragment.TempisFirstShow = false;
         MailER_BackgroundFragment backgroundFragment = new MailER_BackgroundFragment();
         Bundle bundle = new Bundle();
+        bundle.putInt("catId", posterDataLists.get(position).getCategory_id());
+        bundle.putString("catName", posterDataLists.get(position).getCategory_name());
         bundle.putSerializable("posterDataLists", posterDataLists.get(position).getCategory_list());
         backgroundFragment.setArguments(bundle);
         return backgroundFragment;

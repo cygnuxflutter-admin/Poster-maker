@@ -20,6 +20,7 @@
 
 
             <RelativeLayout
+                android:id="@+id/rl_native_ad_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_200sdp"
                 android:layout_margin="@dimen/_10sdp">

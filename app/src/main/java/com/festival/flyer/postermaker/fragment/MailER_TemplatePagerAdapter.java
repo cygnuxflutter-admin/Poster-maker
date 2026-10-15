@@ -27,6 +27,7 @@ public class MailER_TemplatePagerAdapter extends FragmentStatePagerAdapter {
         MailER_TemplateFragment templateFragment = new MailER_TemplateFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("catId", catId);
+        bundle.putString("catName", posterModels.get(position).getCat_name());
         bundle.putSerializable("posterDataLists", posterModels.get(position).getPoster_list());
         templateFragment.setArguments(bundle);
         return templateFragment;

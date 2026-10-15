@@ -57,7 +57,8 @@ public class MailER_GetBgData extends AsyncTask<Void, Void, String> {
                 String field_45 = textJSONObject.getString(preferenceClass.getDataType("field_45"));
 
                 int premiumCount = preferenceClass.getInt("PremiumPostCount", 3);
-                boolean isPremium = (premiumCount > 0) && (j % premiumCount == 0);
+                boolean premiumEnabled = preferenceClass.getBoolean("premium_enabled", true);
+                boolean isPremium = premiumEnabled && (premiumCount > 0) && (j != 0) && (j % premiumCount == 0);
                 bgImageArrayList.add(new MailER_BgImage(field_43, field_44, field_45, isPremium));
             }
             return bgImageArrayList;

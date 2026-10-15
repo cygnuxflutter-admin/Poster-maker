@@ -40,7 +40,7 @@
                         android:id="@+id/ad_media"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minHeight="@dimen/_120sdp" />
+                        android:minHeight="120dp" />
 
                 </RelativeLayout>
 
@@ -49,13 +49,14 @@
                     android:id="@+id/ad_headline"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="2"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:paddingLeft="@dimen/_5sdp"
-                    android:paddingTop="@dimen/_5sdp"
+                    android:paddingTop="@dimen/_3sdp"
                     android:paddingRight="@dimen/_5sdp"
                     android:text="Ad Loading....."
                     android:textColor="@color/black"
-                    android:textSize="@dimen/_13ssp"
+                    android:textSize="@dimen/_12ssp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -63,29 +64,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
+                    android:ellipsize="end"
                     android:paddingLeft="@dimen/_5sdp"
                     android:paddingRight="@dimen/_5sdp"
-                    android:paddingBottom="@dimen/_5sdp"
+                    android:paddingBottom="@dimen/_3sdp"
                     android:text="Ad Loading....."
                     android:textColor="#929090"
-                    android:textSize="@dimen/_10ssp" />
+                    android:textSize="@dimen/_9ssp" />
 
                 <Button
                     android:id="@+id/ad_call_to_action"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_35sdp"
+                    android:layout_height="@dimen/_30sdp"
                     android:layout_gravity="center"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
-                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
                     android:background="@drawable/spawner_rounded_bg"
                     android:backgroundTint="@color/new_selected"
                     android:gravity="center"
                     android:paddingLeft="@dimen/_10sdp"
                     android:paddingRight="@dimen/_10sdp"
                     android:textColor="@android:color/white"
-                    android:textSize="@dimen/_12ssp"
+                    android:textSize="@dimen/_11ssp"
                     android:text="Ad"
                     android:textStyle="bold" />
 

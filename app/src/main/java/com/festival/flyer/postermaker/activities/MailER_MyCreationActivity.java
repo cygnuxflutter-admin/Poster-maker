@@ -76,12 +76,33 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.template_rv);
         txtEmptyMsg = findViewById(R.id.txtEmptyMsg);
 
+        View btm = findViewById(R.id.btm);
         ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
         RelativeLayout rl_ad = findViewById(R.id.rl_ad);
-        if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-            if (new MailER_PreferenceClass(this).getAdsId("BannerAdunitID") != null) {
-                loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
+
+        MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(this);
+        boolean isBannerEnabled = false; // default false for cleaner UX as discussed
+        String customAdId = "";
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isBannerEnabled = rc.getBoolean("my_creation_banner_ad_enabled");
+                customAdId = rc.getString("my_creation_banner_ad_id");
+            } else {
+                isBannerEnabled = preferenceClass.getBoolean("my_creation_banner_ad_enabled", false);
+                customAdId = preferenceClass.getAdsId("my_creation_banner_ad_id");
             }
+        } catch (Exception e) {
+            isBannerEnabled = preferenceClass.getBoolean("my_creation_banner_ad_enabled", false);
+            customAdId = preferenceClass.getAdsId("my_creation_banner_ad_id");
+        }
+
+        if (!isBannerEnabled || !MailER_NetworkUtils.isNetworkAvailable(this)) {
+            if (btm != null) btm.setVisibility(View.GONE);
+        } else {
+            if (btm != null) btm.setVisibility(View.VISIBLE);
+            loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
         }
     }
 

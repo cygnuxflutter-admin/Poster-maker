@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:splitMotionEvents="false">
+
+    <RelativeLayout
+        android:id="@+id/full_ly"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:splitMotionEvents="false">
+
+
+<!--        <RelativeLayout-->
+<!--            android:id="@+id/btm"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_marginVertical="@dimen/_5sdp"-->
+<!--            android:visibility="gone"-->
+<!--            android:layout_below="@+id/viewPager"-->
+<!--            android:layout_height="wrap_content">-->
+
+<!--            <RelativeLayout-->
+<!--                android:id="@+id/rl_ad"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+
+<!--            <com.facebook.shimmer.ShimmerFrameLayout-->
+<!--                android:id="@+id/shimmer_view_container"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="@dimen/_50sdp"-->
+<!--                app:shimmer_auto_start="true">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/yourTextView"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:text="Ad Loading...."-->
+<!--                    android:textSize="@dimen/_20ssp" />-->
+
+<!--            </com.facebook.shimmer.ShimmerFrameLayout>-->
+
+<!--        </RelativeLayout>-->
+
+        
+          <RelativeLayout
+            android:id="@+id/top_ly"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_55sdp"
+            android:background="@color/white">
+            
+            <RelativeLayout
+                android:id="@+id/btn_backPress"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true">
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="@dimen/_24sdp"
+                    android:layout_height="@dimen/_24sdp"
+                    android:layout_centerInParent="true"
+                    app:tint="@color/new_selected"
+                    android:src="@drawable/spawner_ic_chevron_left_new" />
+            </RelativeLayout>
+            
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingEnd="10dp">
+                
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/btn_undo"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/new_selected"
+                    android:src="@drawable/spawner_ic_n_left_rotate"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                    
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/btn_redo"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:layout_marginEnd="8dp"
+                    app:tint="@color/new_selected"
+                    android:src="@drawable/spawner_ic_n_right_rotate"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                    
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/btn_save_poster"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:layout_marginEnd="12dp"
+                    app:tint="@color/new_selected"
+                    android:src="@drawable/spawner_ic_n_save"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                    
+                <ImageView
+                    android:id="@+id/btn_download_poster"
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:padding="@dimen/_6sdp"
+                    android:background="@drawable/spawner_bg_rounded_purple"
+                    android:src="@drawable/spawner_ic_download_white" />
+            </LinearLayout>
+        </RelativeLayout>
+
+
+<RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/ll_new_bottom_controls"
+            android:layout_below="@id/top_ly"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="#F5F6F9"
+            android:visibility="visible">
+
+            <RelativeLayout
+                android:id="@+id/lay_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true">
+
+                <com.festival.flyer.postermaker.view.MailER_AspectRatioFrameLayout
+                    android:id="@+id/center_rel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:background="@color/white"
+                    android:elevation="4dp"
+                    app:resize_mode="fit"
+                    tools:ignore="MissingClass">
+
+                    <RelativeLayout
+                        android:id="@+id/main_rel"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        tools:ignore="MissingClass">
+
+                        <ImageView
+                            android:id="@+id/background_img"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true" />
+
+                        <ImageView
+                            android:id="@+id/trans_img"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            android:scaleType="centerCrop"
+                            android:visibility="visible" />
+
+                        <RelativeLayout
+                            android:id="@+id/txt_stkr_rel"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_centerInParent="true"
+                            android:splitMotionEvents="false" />
+
+                        <com.festival.flyer.postermaker.view.MailER_GridLine
+                            android:id="@+id/guidelines"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_watermark"
+                        android:layout_width="@dimen/_50sdp"
+                        android:layout_height="@dimen/_50sdp"
+                        android:layout_gravity="end|bottom"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/btn_watermark"
+                            android:layout_width="@dimen/_50sdp"
+                            android:layout_height="@dimen/_50sdp"
+                            android:src="@drawable/newlogo" />
+
+                        <ImageView
+                            android:id="@+id/btn_watermark_remove"
+                            android:layout_width="@dimen/_10sdp"
+                            android:layout_height="@dimen/_10sdp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_gravity="end|bottom"
+                            android:background="@color/black"
+                            android:src="@drawable/spawner_ic_close"
+                            android:visibility="visible" />
+
+                    </RelativeLayout>
+                </com.festival.flyer.postermaker.view.MailER_AspectRatioFrameLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        
+
+        
+    <FrameLayout
+        android:id="@+id/fl_bottom_popups"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        
+
+        
+        <include layout="@layout/spawner_text_controller" />
+
+        <include layout="@layout/spawner_sticker_controller" />
+
+        <include layout="@layout/spawner_effect_controller" />
+
+        <include layout="@layout/spawner_temp_layout" />
+
+        <RelativeLayout
+            android:id="@+id/lay_sticker"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/top_ly"
+            android:background="@color/white"
+            android:visibility="gone">
+
+            <RelativeLayout
+                android:id="@+id/pagerLay"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/_50sdp">
+
+                <com.festival.flyer.postermaker.view.MailER_PagerSlidingTabStrip
+                    android:id="@+id/pagerSlidingTabStrip"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_50sdp"
+                    app:pstsDividerColor="@color/white"
+                    app:pstsIndicatorColor="@color/new_selected"
+                    app:pstsTabBackground="@color/transparent"
+                    app:pstsTextAllCaps="false"
+                    app:pstsUnderlineColor="@color/transparent" />
+            </RelativeLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/stickerViewPager"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_below="@+id/pagerLay" />
+
+        </RelativeLayout>
+        
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/lay_container"
+        android:layout_width="@dimen/_220sdp"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/top_ly"
+        android:layout_alignParentStart="true"
+        android:background="@color/white"
+        android:elevation="@dimen/_5sdp"
+        android:visibility="gone" />
+
+
+    <LinearLayout
+        android:id="@+id/ll_new_bottom_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+        
+    <LinearLayout
+        android:id="@+id/ll_mini_editor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/spawner_bg_bottom_sheet"
+        android:visibility="gone"
+        android:elevation="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tab_color"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/spawner_tab_pill_selector"
+                    android:gravity="center"
+                    android:text="Color"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tab_font"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/spawner_tab_pill_selector"
+                    android:gravity="center"
+                    android:text="Font"
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tab_size"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/spawner_tab_pill_selector"
+                    android:gravity="center"
+                    android:text="Size"
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_delete_element"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/spawner_bg_delete_pill"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/spawner_ic_trash" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Delete"
+                    android:textColor="#E53935"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="8dp">
+
+            <HorizontalScrollView
+                android:id="@+id/hsv_colors"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:id="@+id/ll_color_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <HorizontalScrollView
+                android:id="@+id/hsv_fonts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/ll_font_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <SeekBar
+                android:id="@+id/sb_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:max="100"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_size_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@color/white"
+        android:gravity="center"
+        android:elevation="8dp">
+        
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_size_square"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="45dp"
+            android:layout_margin="8dp"
+            android:text="Square (1:1)"
+            app:backgroundTint="@null"
+            android:background="@drawable/spawner_tab_pill_selector"
+            android:textColor="@color/black"
+            android:textAllCaps="false"/>
+            
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_size_portrait"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="45dp"
+            android:layout_margin="8dp"
+            android:text="Portrait (9:16)"
+            app:backgroundTint="@null"
+            android:background="@drawable/spawner_tab_pill_selector"
+            android:textColor="@color/black"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+    </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
+

@@ -138,6 +138,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     private ProgressBar progress_undo_redo;
     private int undo_progress = 0;
     private int redo_progress = 0;
+    private int undoRedoActionCount = 0;
     private String bg_path;
     private int view_width, view_height;
     private float view_x, view_y, view_rotation;
@@ -325,6 +326,10 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         btn_watermark = findViewById(R.id.btn_watermark);
         btn_watermark_remove = findViewById(R.id.btn_watermark_remove);
         rl_watermark = findViewById(R.id.rl_watermark);
+        if (btn_watermark_remove != null) {
+            btn_watermark_remove.setVisibility(View.GONE);
+            btn_watermark_remove.setOnClickListener(null);
+        }
 
         lay_container = findViewById(R.id.lay_container);
 
@@ -386,104 +391,18 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         effectController = new MailER_EffectController(this);
 
 
-        final float[] widgetDX = {0f};
-        final float[] widgetDY = {0f};
-
-
-        rl_watermark.setOnTouchListener(new View.OnTouchListener() {
-            private final GestureDetector gestureDetector = new GestureDetector(MailER_PosterEditActivity.this, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-//                    MaterialDialogUtils.getInstance().rewardDialog(PosterEditActivity.this,
-//                            "Remove Watermark(One Time)", "Remove Watermark by watching Ads", materialDialog -> {
-//                        rewardType = "remWatermark";
-//                                AppOpenManager.loadRewardVideoAd(PosterEditActivity.this,() -> btn_watermark.setVisibility(View.GONE));
-////                                MyApplication.showInterstitialAd(PosterEditActivity.this,() -> btn_watermark.setVisibility(View.GONE));
-//                        if (materialDialog != null && materialDialog.isShowing())
-//                            materialDialog.dismiss();
-//                    }, materialDialog -> {
-//                        if (materialDialog != null && materialDialog.isShowing())
-//                            materialDialog.dismiss();
-//                    });
-                    return super.onDoubleTap(e);
-                }
-            });
-
-            private static final long CLICK_TIME_THRESHOLD = 200; // Adjust as needed
-            private float startX, startY;
-            private long touchStartTime;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                gestureDetector.onTouchEvent(event);
-                float parentHeight = main_rel.getHeight();
-                float parentWidth = main_rel.getWidth();
-                float xMax = parentWidth - v.getWidth();
-                float yMax = parentHeight - v.getHeight();
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
-                        startY = event.getY();
-                        touchStartTime = System.currentTimeMillis();
-                        widgetDX[0] = v.getX() - event.getRawX();
-                        widgetDY[0] = v.getY() - event.getRawY();
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        float newX = event.getRawX() + widgetDX[0];
-                        newX = Math.max(0F, newX);
-                        newX = Math.min(xMax, newX);
-                        v.setX(newX);
-
-                        float newY = event.getRawY() + widgetDY[0];
-                        newY = Math.max(0F, newY);
-                        newY = Math.min(yMax, newY);
-                        v.setY(newY);
-                        hideAllControls();
-                        removeScroll();
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        float endX = event.getX();
-                        float endY = event.getY();
-                        long touchDuration = System.currentTimeMillis() - touchStartTime;
-
-                        // Check for click event
-                        if (Math.abs(endX - startX) < 10 && Math.abs(endY - startY) < 10 && touchDuration < CLICK_TIME_THRESHOLD) {
-
-                            // Handle click event here
-                            // Add your desired code logic for handling the click event
-                            MailER_MaterialDialogUtils.getInstance().rewardDialog(MailER_PosterEditActivity.this,
-                                    "Remove Watermark(One Time)", "Remove Watermark by watching Ads", materialDialog -> {
-                                        rewardType = "remWatermark";
-                                        MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(MailER_PosterEditActivity.this);
-                                        if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
-                                            MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
-                                                @Override
-                                                public void onAdClose() {
-                                                    rl_watermark.setVisibility(View.GONE);
-                                                }
-                                            });
-                                        } else {
-                                            MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> rl_watermark.setVisibility(View.GONE));
-                                        }
-//                                MyApplication.showInterstitialAd(PosterEditActivity.this,() -> btn_watermark.setVisibility(View.GONE));
-                                        if (materialDialog != null && materialDialog.isShowing())
-                                            materialDialog.dismiss();
-                                    }, materialDialog -> {
-                                        if (materialDialog != null && materialDialog.isShowing())
-                                            materialDialog.dismiss();
-                                    });
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-
-                return true;
-            }
-        });
+        // Lock watermark in position; disable dragging and clicking during editing
+        if (rl_watermark != null) {
+            rl_watermark.setOnTouchListener(null);
+            rl_watermark.setOnClickListener(null);
+            rl_watermark.setClickable(false);
+            rl_watermark.setFocusable(false);
+        }
+        if (btn_watermark != null) {
+            btn_watermark.setOnClickListener(null);
+            btn_watermark.setClickable(false);
+            btn_watermark.setFocusable(false);
+        }
 
         this.listFragment = new MailER_ListFragment();
         showFragment(this.listFragment);
@@ -919,15 +838,21 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-            btn_watermark_remove.setVisibility(View.GONE);
-            checkDownloadAdAndSave(false);
+            if (btn_watermark_remove != null) {
+                btn_watermark_remove.setVisibility(View.GONE);
+            }
+            MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+                new saveTemplateAsync(false).execute();
+            });
         } else if (id == R.id.btn_save_poster) {
             hideAllControls();
             hideStickerControl();
             hideEffectControl();
             hideListControl();
-            btn_watermark_remove.setVisibility(View.GONE);
-            checkDownloadAdAndSave(true);
+            if (btn_watermark_remove != null) {
+                btn_watermark_remove.setVisibility(View.GONE);
+            }
+            showWatermarkDownloadPromptDialog(true);
         } else if (id == R.id.btn_reset) {
             MyApplication.showEditInterstitialAd(this, () -> {
                 MailER_MaterialDialogUtils.getInstance().resetDialog(this, materialDialog -> {
@@ -946,26 +871,12 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             if (undo_progress == 0) {
                 return;
             }
-            hideAllControls();
-            hideStickerControl();
-            hideEffectControl();
-            hideListControl();
-            btn_undo.setVisibility(View.GONE);
-            btn_redo.setVisibility(View.GONE);
-            progress_undo_redo.setVisibility(View.VISIBLE);
-            new saveRedoAsync().execute();
+            checkUndoRedoAdAndExecute(true);
         } else if (id == R.id.btn_redo) {
             if (redo_progress == 0) {
                 return;
             }
-            hideAllControls();
-            hideStickerControl();
-            hideEffectControl();
-            hideListControl();
-            btn_undo.setVisibility(View.GONE);
-            btn_redo.setVisibility(View.GONE);
-            progress_undo_redo.setVisibility(View.VISIBLE);
-            new saveUndoAsync().execute();
+            checkUndoRedoAdAndExecute(false);
         }
 
     }
@@ -987,30 +898,329 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         hideEffectControl();
     }
 
-    private void checkDownloadAdAndSave(boolean isPoster) {
-        com.festival.flyer.postermaker.utils.MailER_PreferenceClass prefManager = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
-        int freeAllowed = prefManager.getInt("FreeDownloadsAllowed", 2);
+    private void checkUndoRedoAdAndExecute(boolean isUndo) {
+        if (prefManager == null) {
+            prefManager = new MailER_PreferenceClass(this);
+        }
+
+        boolean isUndoRedoAdEnabled = true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isUndoRedoAdEnabled = rc.getBoolean("editor_undo_redo_ad_enabled");
+            } else {
+                isUndoRedoAdEnabled = prefManager.getBoolean("editor_undo_redo_ad_enabled", true);
+            }
+        } catch (Exception e) {
+            isUndoRedoAdEnabled = prefManager.getBoolean("editor_undo_redo_ad_enabled", true);
+        }
+
+        if (!isUndoRedoAdEnabled) {
+            performUndoRedoAction(isUndo);
+            return;
+        }
+
+        int freeAllowed = 3;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getLong("editor_free_undo_redo_allowed") >= 0) {
+                freeAllowed = (int) rc.getLong("editor_free_undo_redo_allowed");
+            } else {
+                freeAllowed = prefManager.getInt("editor_free_undo_redo_allowed", 3);
+            }
+        } catch (Exception e) {
+            freeAllowed = prefManager.getInt("editor_free_undo_redo_allowed", 3);
+        }
+
+        if (undoRedoActionCount < freeAllowed) {
+            undoRedoActionCount++;
+            performUndoRedoAction(isUndo);
+        } else {
+            showUndoRedoAdDialog(isUndo);
+        }
+    }
+
+    private void performUndoRedoAction(boolean isUndo) {
+        hideAllControls();
+        hideStickerControl();
+        hideEffectControl();
+        hideListControl();
+        btn_undo.setVisibility(View.GONE);
+        btn_redo.setVisibility(View.GONE);
+        progress_undo_redo.setVisibility(View.VISIBLE);
+        if (isUndo) {
+            new saveRedoAsync().execute();
+        } else {
+            new saveUndoAsync().execute();
+        }
+    }
+
+    private void showUndoRedoAdDialog(boolean isUndo) {
+        if (isFinishing() || isDestroyed()) return;
+
+        Dialog dialog = new Dialog(MailER_PosterEditActivity.this, 16974126);
+        dialog.requestWindowFeature(1);
+        dialog.setContentView(R.layout.spawner_dialog_editor_timer_reward);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        if (dialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            dialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+        TextView tvDesc = dialog.findViewById(R.id.tv_dialog_description);
+        TextView btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+        TextView btnWatchAd = dialog.findViewById(R.id.btn_dialog_watch);
+
+        tvTitle.setText("Unlock Undo & Redo");
+        tvDesc.setText("You've used your free Undo/Redo limit. Watch a short video to unlock more actions!");
+        btnWatchAd.setText("Watch Ad");
+        btnCancel.setText("Cancel");
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        String adType = prefManager != null ? prefManager.getDataType("editor_undo_redo_ad_type", "reward") : "reward";
+
+        btnWatchAd.setOnClickListener(v -> {
+            btnWatchAd.setEnabled(false);
+            if ("interstitial".equalsIgnoreCase(adType)) {
+                MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+                    btnWatchAd.setEnabled(true);
+                    dialog.dismiss();
+                    undoRedoActionCount = 0;
+                    Toast.makeText(MailER_PosterEditActivity.this, "Undo & Redo Unlocked!", Toast.LENGTH_SHORT).show();
+                    performUndoRedoAction(isUndo);
+                });
+            } else {
+                MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_RewardVideoManager.OnRewardVideoResultListener() {
+                    @Override
+                    public void onRewardEarned() {
+                        btnWatchAd.setEnabled(true);
+                        dialog.dismiss();
+                        undoRedoActionCount = 0;
+                        Toast.makeText(MailER_PosterEditActivity.this, "Undo & Redo Unlocked!", Toast.LENGTH_SHORT).show();
+                        performUndoRedoAction(isUndo);
+                    }
+
+                    @Override
+                    public void onRewardSkipped() {
+                        btnWatchAd.setEnabled(true);
+                        Toast.makeText(MailER_PosterEditActivity.this, "Watch full ad to unlock Undo & Redo!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void startDownloadProcess(boolean isPoster) {
+        if (prefManager == null) {
+            prefManager = new MailER_PreferenceClass(this);
+        }
+
+        boolean askWatermark = true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                askWatermark = rc.getBoolean("editor_ask_watermark_removal");
+            } else {
+                askWatermark = prefManager.getBoolean("editor_ask_watermark_removal", true);
+            }
+        } catch (Exception e) {
+            askWatermark = prefManager.getBoolean("editor_ask_watermark_removal", true);
+        }
+
+        // Check if watermark removal prompt should be shown
+        if (askWatermark && rl_watermark != null && rl_watermark.getVisibility() == View.VISIBLE) {
+            showWatermarkDownloadPromptDialog(isPoster);
+        } else {
+            proceedDownloadAfterWatermark(isPoster);
+        }
+    }
+
+    private void showWatermarkRemoveDialog() {
+        if (isFinishing() || isDestroyed()) return;
+        MailER_MaterialDialogUtils.getInstance().rewardDialog(MailER_PosterEditActivity.this,
+                "Remove Watermark(One Time)", "Remove Watermark by watching Ads", materialDialog -> {
+                    rewardType = "remWatermark";
+                    MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(MailER_PosterEditActivity.this);
+                    if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
+                        MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
+                            @Override
+                            public void onAdClose() {
+                                if (rl_watermark != null) {
+                                    rl_watermark.setVisibility(View.GONE);
+                                }
+                            }
+                        });
+                    } else {
+                        MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+                            if (rl_watermark != null) {
+                                rl_watermark.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                    if (materialDialog != null && materialDialog.isShowing()) {
+                        materialDialog.dismiss();
+                    }
+                }, materialDialog -> {
+                    if (materialDialog != null && materialDialog.isShowing()) {
+                        materialDialog.dismiss();
+                    }
+                });
+    }
+
+    private void showWatermarkDownloadPromptDialog(boolean isPoster) {
+        if (isFinishing() || isDestroyed()) return;
+
+        Dialog dialog = new Dialog(MailER_PosterEditActivity.this, 16974126);
+        dialog.requestWindowFeature(1);
+        dialog.setContentView(R.layout.spawner_dialog_watermark_download);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        if (dialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            dialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView btnRemoveWatermark = dialog.findViewById(R.id.btn_remove_watermark);
+        TextView btnCancelDialog = dialog.findViewById(R.id.btn_cancel_dialog);
+
+        // Cancel saving
+        btnCancelDialog.setOnClickListener(v -> dialog.dismiss());
+
+        // Watch Ad to Download (No Watermark)
+        btnRemoveWatermark.setOnClickListener(v -> {
+            btnRemoveWatermark.setEnabled(false);
+            MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_RewardVideoManager.OnRewardVideoResultListener() {
+                @Override
+                public void onRewardEarned() {
+                    btnRemoveWatermark.setEnabled(true);
+                    dialog.dismiss();
+                    if (rl_watermark != null) {
+                        rl_watermark.setVisibility(View.GONE);
+                    }
+                    Toast.makeText(MailER_PosterEditActivity.this, "Downloading HD Poster...", Toast.LENGTH_SHORT).show();
+                    new saveTemplateAsync(isPoster).execute();
+                }
+
+                @Override
+                public void onRewardSkipped() {
+                    btnRemoveWatermark.setEnabled(true);
+                    Toast.makeText(MailER_PosterEditActivity.this, "Watch full ad to download poster!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void proceedDownloadAfterWatermark(boolean isPoster) {
+        if (prefManager == null) {
+            prefManager = new MailER_PreferenceClass(this);
+        }
+
+        boolean isDownloadAdEnabled = true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isDownloadAdEnabled = rc.getBoolean("editor_download_ad_enabled");
+            } else {
+                isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
+            }
+        } catch (Exception e) {
+            isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
+        }
+
+        if (!isDownloadAdEnabled) {
+            new saveTemplateAsync(isPoster).execute();
+            return;
+        }
+
+        int freeAllowed = 2;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getLong("editor_free_downloads_allowed") >= 0) {
+                freeAllowed = (int) rc.getLong("editor_free_downloads_allowed");
+            } else {
+                freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
+            }
+        } catch (Exception e) {
+            freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
+        }
+
         int totalDownloads = prefManager.getInt("TotalDownloadsCount", 0);
 
         if (totalDownloads < freeAllowed) {
             prefManager.setInt("TotalDownloadsCount", totalDownloads + 1);
             new saveTemplateAsync(isPoster).execute();
         } else {
-            // Show custom pop-up dialog
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Premium Quality Download")
-                    .setMessage("Watch a short video to download your poster in High Quality!")
-                    .setCancelable(false)
-                    .setPositiveButton("Watch Ad", (dialog, which) -> {
-                        com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager.showRewardVideoAd(this, () -> {
-                            new saveTemplateAsync(isPoster).execute();
-                        });
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> {
-                        dialog.dismiss();
-                    })
-                    .show();
+            showDownloadAdDialog(isPoster);
         }
+    }
+
+    private void showDownloadAdDialog(boolean isPoster) {
+        if (isFinishing() || isDestroyed()) return;
+
+        Dialog dialog = new Dialog(MailER_PosterEditActivity.this, 16974126);
+        dialog.requestWindowFeature(1);
+        dialog.setContentView(R.layout.spawner_dialog_editor_timer_reward);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        if (dialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            dialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView tvTitle = dialog.findViewById(R.id.tv_dialog_title);
+        TextView tvDesc = dialog.findViewById(R.id.tv_dialog_description);
+        TextView btnCancel = dialog.findViewById(R.id.btn_dialog_cancel);
+        TextView btnWatchAd = dialog.findViewById(R.id.btn_dialog_watch);
+
+        tvTitle.setText("Premium Download");
+        tvDesc.setText("Watch a short video to download your poster in High Quality!");
+        btnWatchAd.setText("Watch Ad");
+        btnCancel.setText("Cancel");
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        String adType = prefManager != null ? prefManager.getDataType("editor_download_ad_type", "reward") : "reward";
+
+        btnWatchAd.setOnClickListener(v -> {
+            btnWatchAd.setEnabled(false);
+            if ("interstitial".equalsIgnoreCase(adType)) {
+                MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+                    btnWatchAd.setEnabled(true);
+                    dialog.dismiss();
+                    new saveTemplateAsync(isPoster).execute();
+                });
+            } else {
+                MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_RewardVideoManager.OnRewardVideoResultListener() {
+                    @Override
+                    public void onRewardEarned() {
+                        btnWatchAd.setEnabled(true);
+                        dialog.dismiss();
+                        new saveTemplateAsync(isPoster).execute();
+                    }
+
+                    @Override
+                    public void onRewardSkipped() {
+                        btnWatchAd.setEnabled(true);
+                        Toast.makeText(MailER_PosterEditActivity.this, "Watch full ad to download poster!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     private void showUserDialog() {
@@ -1323,13 +1533,40 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         dialog.setContentView(R.layout.spawner_leave_dialog);
         dialog.setCancelable(true);
 
+        RelativeLayout rl_native_ad_wrapper = dialog.findViewById(R.id.rl_native_ad_wrapper);
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
-        if (new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
-            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+
+        if (prefManager == null) {
+            prefManager = new MailER_PreferenceClass(this);
+        }
+
+        boolean isNativeEnabled = true;
+        String customAdId = "";
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isNativeEnabled = rc.getBoolean("editor_exit_dialog_native_enabled");
+                customAdId = rc.getString("editor_exit_dialog_native_id");
+            } else {
+                isNativeEnabled = prefManager.getBoolean("editor_exit_dialog_native_enabled", prefManager.getAdsStatus("ExitDialog_NativeAD") == 1);
+                customAdId = prefManager.getAdsId("editor_exit_dialog_native_id");
+            }
+        } catch (Exception e) {
+            isNativeEnabled = prefManager.getBoolean("editor_exit_dialog_native_enabled", prefManager.getAdsStatus("ExitDialog_NativeAD") == 1);
+            customAdId = prefManager.getAdsId("editor_exit_dialog_native_id");
+        }
+
+        if (isNativeEnabled && MailER_NetworkUtils.isNetworkAvailable(this)) {
+            if (rl_native_ad_wrapper != null) rl_native_ad_wrapper.setVisibility(View.VISIBLE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.VISIBLE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(View.VISIBLE);
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, customAdId);
         } else {
-            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
-            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+            if (rl_native_ad_wrapper != null) rl_native_ad_wrapper.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(View.GONE);
         }
 
         TextView btn_yes = dialog.findViewById(R.id.btn_yes);
@@ -1546,6 +1783,156 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         }
     }
 
+    private android.os.Handler editAdTimerHandler;
+    private Runnable editAdTimerRunnable;
+    private Dialog editorRewardDialog;
+
+    private void startEditAdTimer() {
+        if (prefManager == null) {
+            prefManager = new MailER_PreferenceClass(this);
+        }
+
+        // Check Remote Config directly, fallback to PreferenceClass
+        boolean isTimerEnabled = true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+                isTimerEnabled = rc.getBoolean("editor_reward_timer_enabled");
+            } else {
+                isTimerEnabled = prefManager.getBoolean("editor_reward_timer_enabled", true);
+            }
+        } catch (Exception e) {
+            isTimerEnabled = prefManager.getBoolean("editor_reward_timer_enabled", true);
+        }
+
+        // If Remote Config says FALSE, user continues editing freely without any popup or timer
+        if (!isTimerEnabled) {
+            Log.d("AdTracker", "Edit screen reward timer is DISABLED in Remote Config. Free editing allowed.");
+            stopEditAdTimer();
+            if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+                editorRewardDialog.dismiss();
+            }
+            return;
+        }
+
+        int timerSeconds = 60;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getLong("editor_reward_timer_seconds") > 0) {
+                timerSeconds = (int) rc.getLong("editor_reward_timer_seconds");
+            } else {
+                timerSeconds = prefManager.getInt("editor_reward_timer_seconds", 60);
+            }
+        } catch (Exception e) {
+            timerSeconds = prefManager.getInt("editor_reward_timer_seconds", 60);
+        }
+
+        if (timerSeconds <= 0) {
+            return;
+        }
+
+        stopEditAdTimer();
+
+        if (editAdTimerHandler == null) {
+            editAdTimerHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        }
+
+        final int currentTimerSeconds = timerSeconds;
+        editAdTimerRunnable = () -> {
+            if (!isFinishing() && !isDestroyed()) {
+                Log.d("AdTracker", "Edit screen " + currentTimerSeconds + "s timer elapsed! Showing Reward Ad Prompt Dialog...");
+                showEditorRewardTimerDialog();
+            }
+        };
+
+        Log.d("AdTracker", "Edit screen reward timer started: " + timerSeconds + " seconds.");
+        editAdTimerHandler.postDelayed(editAdTimerRunnable, timerSeconds * 1000L);
+    }
+
+    private void stopEditAdTimer() {
+        if (editAdTimerHandler != null && editAdTimerRunnable != null) {
+            editAdTimerHandler.removeCallbacks(editAdTimerRunnable);
+            editAdTimerRunnable = null;
+        }
+    }
+
+    private void showEditorRewardTimerDialog() {
+        if (isFinishing() || isDestroyed()) return;
+
+        if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+            return;
+        }
+
+        editorRewardDialog = new Dialog(MailER_PosterEditActivity.this, 16974126);
+        editorRewardDialog.requestWindowFeature(1);
+        editorRewardDialog.setContentView(R.layout.spawner_dialog_editor_timer_reward);
+        editorRewardDialog.setCancelable(false);
+        editorRewardDialog.setCanceledOnTouchOutside(false);
+
+        if (editorRewardDialog.getWindow() != null) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            editorRewardDialog.getWindow().setLayout(width, android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+            editorRewardDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView btnCancel = editorRewardDialog.findViewById(R.id.btn_dialog_cancel);
+        TextView btnWatchAd = editorRewardDialog.findViewById(R.id.btn_dialog_watch);
+        // Cancel / Exit: User refuses to watch ad -> NOT allowed to edit -> Exit editor
+        btnCancel.setOnClickListener(v -> {
+            if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+                editorRewardDialog.dismiss();
+            }
+            finish();
+        });
+
+        // Hardware Back button also acts as Cancel -> Exit editor
+        editorRewardDialog.setOnKeyListener((dialogInterface, keyCode, event) -> {
+            if (keyCode == android.view.KeyEvent.KEYCODE_BACK && event.getAction() == android.view.KeyEvent.ACTION_UP) {
+                if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+                    editorRewardDialog.dismiss();
+                }
+                finish();
+                return true;
+            }
+            return false;
+        });
+
+        // Watch Ad: Show Rewarded Ad
+        btnWatchAd.setOnClickListener(v -> {
+            btnWatchAd.setEnabled(false);
+            MailER_RewardVideoManager.showRewardVideoAd(MailER_PosterEditActivity.this, new MailER_RewardVideoManager.OnRewardVideoResultListener() {
+                @Override
+                public void onRewardEarned() {
+                    btnWatchAd.setEnabled(true);
+                    if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+                        editorRewardDialog.dismiss();
+                    }
+                    Toast.makeText(MailER_PosterEditActivity.this, "Editing Unlocked!", Toast.LENGTH_SHORT).show();
+                    // Restart timer so user can continue editing for the next interval
+                    startEditAdTimer();
+                }
+
+                @Override
+                public void onRewardSkipped() {
+                    btnWatchAd.setEnabled(true);
+                    // Reward not earned -> User cannot continue editing
+                    Toast.makeText(MailER_PosterEditActivity.this, "You must watch the full ad to continue editing!", Toast.LENGTH_LONG).show();
+                    if (editorRewardDialog != null && !editorRewardDialog.isShowing() && !isFinishing() && !isDestroyed()) {
+                        try {
+                            editorRewardDialog.show();
+                        } catch (Exception ignored) {}
+                    }
+                }
+            });
+        });
+
+        try {
+            editorRewardDialog.show();
+        } catch (Exception e) {
+            Log.e("AdTracker", "Error showing editor reward dialog: " + e.getMessage());
+        }
+    }
+
     @Override
     public void onResume() {
         if (listFragment == null) {
@@ -1554,16 +1941,24 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         }
 
         super.onResume();
+        if (editorRewardDialog == null || !editorRewardDialog.isShowing()) {
+            startEditAdTimer();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        stopEditAdTimer();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopEditAdTimer();
+        if (editorRewardDialog != null && editorRewardDialog.isShowing()) {
+            editorRewardDialog.dismiss();
+        }
     }
 
     public void setOverlayImg(String effect_name) {
@@ -1598,10 +1993,6 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mMaterialDialog = MailER_MaterialDialogUtils.getInstance().createAnimationDialog(MailER_PosterEditActivity.this);
-            Objects.requireNonNull(mMaterialDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-            mMaterialDialog.setCancelable(false);
-            mMaterialDialog.show();
         }
 
         @Override
@@ -1722,10 +2113,6 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mMaterialDialog = MailER_MaterialDialogUtils.getInstance().createAnimationDialog(MailER_PosterEditActivity.this);
-            Objects.requireNonNull(mMaterialDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-            mMaterialDialog.setCancelable(false);
-            mMaterialDialog.show();
         }
 
         @Override
@@ -2073,6 +2460,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                 } else {
                     savePath = MailER_BitmapUtils.saveBitmap(MailER_PosterEditActivity.this, MailER_BitmapUtils.viewToBitmap(MailER_PosterEditActivity.this, center_rel));//18042023
                     premiumPoster = false;
+                    MailER_BitmapUtils.savePremiumPath(MailER_PosterEditActivity.this, MailER_BitmapUtils.viewToBitmap(MailER_PosterEditActivity.this, main_rel));
                 }
 //                savePathWithWaterMark = BitmapUtils.saveBitmap(PosterEditActivity.this, BitmapUtils.viewToBitmap(PosterEditActivity.this, main_rel));//Add for next screen watermark show hide
 //                savePath = BitmapUtils.saveBitmap(PosterEditActivity.this, BitmapUtils.viewToBitmap(PosterEditActivity.this, center_rel));//Add for next screen watermark show hide
@@ -2121,7 +2509,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
             if (save) {
                 if (path != null) {
-                    MyApplication.showInterstitialAd(MailER_PosterEditActivity.this, MailER_PosterEditActivity.this::startIntent);
+                    startIntent();
                 } else {
                     Toast.makeText(MailER_PosterEditActivity.this, "Something went wrong!!!", Toast.LENGTH_SHORT).show();
                 }
