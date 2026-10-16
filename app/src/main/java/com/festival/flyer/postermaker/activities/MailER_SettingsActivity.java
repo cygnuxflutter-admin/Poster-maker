@@ -60,9 +60,7 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
         
         findViewById(R.id.ll_liked_auto_posters).setOnClickListener(v -> {
-            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
-                startActivity(new Intent(this, com.festival.flyer.postermaker.activities.MailER_LikedAutoPostersActivity.class));
-            });
+            android.widget.Toast.makeText(this, "Coming Soon! This feature will be available soon.", android.widget.Toast.LENGTH_SHORT).show();
         });
 
         findViewById(R.id.ll_liked_templates).setOnClickListener(v -> {

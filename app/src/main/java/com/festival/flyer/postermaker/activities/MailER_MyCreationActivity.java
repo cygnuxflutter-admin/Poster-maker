@@ -87,6 +87,26 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
             if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, this);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("my_creation")) {
+                        org.json.JSONObject mcObj = root.optJSONObject("my_creation");
+                        if (mcObj != null) {
+                            boolean mcEnabled = mcObj.optBoolean("enabled", false);
+                            if (mcObj.has("banner_ad")) {
+                                org.json.JSONObject bObj = mcObj.optJSONObject("banner_ad");
+                                if (bObj != null) {
+                                    isBannerEnabled = bObj.optBoolean("enabled", mcEnabled);
+                                    String bId = bObj.optString("ad_id", "");
+                                    if (!bId.trim().isEmpty()) customAdId = bId.trim();
+                                }
+                            } else {
+                                isBannerEnabled = mcEnabled;
+                            }
+                        }
+                    }
+                }
                 if (rc.getValue("my_creation_banner_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                     isBannerEnabled = rc.getBoolean("my_creation_banner_ad_enabled");
                 }
@@ -100,7 +120,7 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         if (!isBannerEnabled || !MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (btm != null) btm.setVisibility(View.GONE);
         } else {
-            if (btm != null) btm.setVisibility(View.VISIBLE);
+            if (btm != null) btm.setVisibility(View.GONE);
             loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
         }
     }

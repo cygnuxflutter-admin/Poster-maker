@@ -55,4 +55,32 @@ public class MailER_AnalyticsUtils {
         }
         FirebaseAnalytics.getInstance(context).logEvent(eventName, bundle);
     }
+
+    public static void setAcquisitionTypeUserProperty(Context context, String acquisitionType) {
+        if (context == null || acquisitionType == null) return;
+        try {
+            FirebaseAnalytics.getInstance(context).setUserProperty("acquisition_type", acquisitionType);
+            FirebaseAnalytics.getInstance(context).setUserProperty("user_type", acquisitionType);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void logAttributionEvent(Context context, String acquisitionType, String rawReferrer) {
+        if (context == null) return;
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putString("acquisition_type", acquisitionType != null ? acquisitionType : "unknown");
+            bundle.putString("user_type", acquisitionType != null ? acquisitionType : "unknown");
+            if (rawReferrer != null && !rawReferrer.isEmpty()) {
+                if (rawReferrer.length() > 100) {
+                    rawReferrer = rawReferrer.substring(0, 97) + "...";
+                }
+                bundle.putString("raw_referrer", rawReferrer);
+            }
+            FirebaseAnalytics.getInstance(context).logEvent("app_install_attribution", bundle);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

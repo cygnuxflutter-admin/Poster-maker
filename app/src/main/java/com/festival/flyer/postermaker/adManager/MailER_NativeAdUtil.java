@@ -54,6 +54,88 @@ public class MailER_NativeAdUtil {
         this.preferenceClass = new MailER_PreferenceClass(context);
     }
 
+    public static void hideParentAdCard(View v) {
+        if (v == null) return;
+        try {
+            v.setVisibility(View.GONE);
+            android.view.ViewParent parent = v.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int pid = pv.getId();
+                if (pid == com.festival.flyer.postermaker.R.id.ad_layout_container
+                        || pid == com.festival.flyer.postermaker.R.id.rl_native_ad
+                        || pid == com.festival.flyer.postermaker.R.id.rl_banner_ad
+                        || pid == com.festival.flyer.postermaker.R.id.ad_container_wrapper
+                        || pid == com.festival.flyer.postermaker.R.id.btm
+                        || pid == com.festival.flyer.postermaker.R.id.rl_collapsible
+                        || pid == com.festival.flyer.postermaker.R.id.ad_layout
+                        || pid == com.festival.flyer.postermaker.R.id.rlMain) {
+                    pv.setVisibility(View.GONE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    // Do NOT collapse if it's a dialog container containing buttons/title
+                    if (pv.findViewById(com.festival.flyer.postermaker.R.id.button1) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.button2) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.btn_dialog_watch) != null) {
+                        break;
+                    }
+                    pv.setVisibility(View.GONE);
+                    ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                    if (lp != null) {
+                        lp.width = 0;
+                        lp.height = 0;
+                        pv.setLayoutParams(lp);
+                    }
+                    break;
+                }
+                if (pid == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public static void showParentAdCard(View v, int fallbackHeight) {
+        if (v == null) return;
+        try {
+            v.setVisibility(View.VISIBLE);
+            android.view.ViewParent parent = v.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int pid = pv.getId();
+                if (pid == com.festival.flyer.postermaker.R.id.ad_layout_container
+                        || pid == com.festival.flyer.postermaker.R.id.rl_native_ad
+                        || pid == com.festival.flyer.postermaker.R.id.rl_banner_ad
+                        || pid == com.festival.flyer.postermaker.R.id.ad_container_wrapper
+                        || pid == com.festival.flyer.postermaker.R.id.btm
+                        || pid == com.festival.flyer.postermaker.R.id.rl_collapsible
+                        || pid == com.festival.flyer.postermaker.R.id.ad_layout
+                        || pid == com.festival.flyer.postermaker.R.id.rlMain) {
+                    pv.setVisibility(View.VISIBLE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    if (pv.findViewById(com.festival.flyer.postermaker.R.id.button1) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.button2) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.btn_dialog_watch) != null) {
+                        break;
+                    }
+                    ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                    if (lp != null && (lp.width <= 0 || lp.height <= 0)) {
+                        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        lp.height = fallbackHeight > 0 ? fallbackHeight : ViewGroup.LayoutParams.WRAP_CONTENT;
+                        pv.setLayoutParams(lp);
+                    }
+                    break;
+                }
+                if (pid == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
     public interface OnAdLoadListener {
         void onAdLoaded();
         void onAdFailed();
@@ -93,11 +175,16 @@ public class MailER_NativeAdUtil {
     }
 
     public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
+        if (shimmer_view_container != null) {
+            shimmer_view_container.setVisibility(View.VISIBLE);
+            shimmer_view_container.startShimmer();
+        }
         shimmerFrameLayout = shimmer_view_container;
         if (nativeAdContainer != null) {
             nativeAdContainer.setVisibility(View.VISIBLE);
         }
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
+        nativeAdUtil.mInstanceShimmer = shimmer_view_container;
         nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1, customAdUnitId);
     }
 
@@ -178,6 +265,7 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.TRANSPARENT);
             nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, 0);
             if (listener != null) listener.onAdLoaded();
         });
 
@@ -201,6 +289,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.VISIBLE);
                     }
+                    showParentAdCard(nativeAdContainer, 0);
                 } else {
                     if (mInstanceShimmer != null) {
                         mInstanceShimmer.stopShimmer();
@@ -215,6 +304,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.GONE);
                     }
+                    hideParentAdCard(nativeAdContainer);
                 }
                 if (listener != null) listener.onAdFailed();
             }
@@ -347,6 +437,7 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.TRANSPARENT);
             nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, 0);
             if (listener != null) listener.onAdLoaded();
         });
 
@@ -370,6 +461,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.VISIBLE);
                     }
+                    showParentAdCard(nativeAdContainer, 0);
                 } else {
                     if (mInstanceShimmer != null) {
                         mInstanceShimmer.stopShimmer();
@@ -384,6 +476,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.GONE);
                     }
+                    hideParentAdCard(nativeAdContainer);
                 }
                 if (listener != null) listener.onAdFailed();
             }
@@ -526,6 +619,7 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
             nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, height);
             if (shimmerFrameLayout != null) {
                 shimmerFrameLayout.stopShimmer();
                 shimmerFrameLayout.setVisibility(View.GONE);
@@ -561,6 +655,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.VISIBLE);
                     }
+                    showParentAdCard(nativeAdContainer, height);
                 } else {
                     if (shimmerFrameLayout != null) {
                         shimmerFrameLayout.stopShimmer();
@@ -575,6 +670,7 @@ public class MailER_NativeAdUtil {
                     if (nativeAdContainer != null) {
                         nativeAdContainer.setVisibility(View.GONE);
                     }
+                    hideParentAdCard(nativeAdContainer);
                 }
                 if (listener != null) {
                     listener.onAdFailed();

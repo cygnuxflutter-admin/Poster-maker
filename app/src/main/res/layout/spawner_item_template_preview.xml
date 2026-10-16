@@ -29,9 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:clickable="true"
-                android:focusable="true" />
+                android:adjustViewBounds="true" />
 
             <ProgressBar
                 android:id="@+id/pb_poster_loading"
@@ -80,7 +78,8 @@
                 android:elevation="6dp"
                 android:focusable="true"
                 android:padding="@dimen/_7sdp"
-                android:src="@drawable/spawner_ic_heart_outline" />
+                android:src="@drawable/spawner_ic_heart_outline"
+                android:visibility="gone" />
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>

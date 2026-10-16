@@ -327,11 +327,8 @@ public class MailER_TemplatePreviewActivity extends AppCompatActivity {
 
             if (customHeightDp > 0) {
                 int hPx = dpToPx(customHeightDp);
-                ViewGroup.LayoutParams lp = nativeAdContainer.getLayoutParams();
-                if (lp != null) {
-                    lp.height = hPx;
-                    nativeAdContainer.setLayoutParams(lp);
-                }
+                // Only set fixed height on shimmer skeleton placeholder;
+                // ad container stays wrap_content so ad fills its natural height
                 if (nativeShimmerContainer != null) {
                     ViewGroup.LayoutParams slp = nativeShimmerContainer.getLayoutParams();
                     if (slp != null) {
@@ -673,6 +670,10 @@ public class MailER_TemplatePreviewActivity extends AppCompatActivity {
                 });
             }
 
+            // Initially hide badges while poster image is loading
+            holder.ivLock.setVisibility(View.GONE);
+            holder.ivLike.setVisibility(View.GONE);
+
             // Load Poster Image
             holder.pbLoading.setVisibility(View.VISIBLE);
             Glide.with(MailER_TemplatePreviewActivity.this)
@@ -688,6 +689,8 @@ public class MailER_TemplatePreviewActivity extends AppCompatActivity {
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             holder.pbLoading.setVisibility(View.GONE);
+                            holder.ivLike.setVisibility(View.VISIBLE);
+                            holder.ivLock.setVisibility(item.getPremium() ? View.VISIBLE : View.GONE);
                             if (resource != null && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
                                 float realRatio = (float) resource.getIntrinsicWidth() / (float) resource.getIntrinsicHeight();
                                 int w = viewPager2 != null && viewPager2.getWidth() > 0 ? viewPager2.getWidth() : holder.itemView.getWidth();
@@ -699,10 +702,7 @@ public class MailER_TemplatePreviewActivity extends AppCompatActivity {
                     })
                     .into(holder.ivPoster);
 
-            // PRO Badge
-            holder.ivLock.setVisibility(item.getPremium() ? View.VISIBLE : View.GONE);
-
-            // Like Heart Button
+            // Like Heart Button setup
             holder.ivLike.setImageResource(likeManager.isLiked(item.getPost_id()) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
             holder.ivLike.setOnClickListener(v -> {
                 int targetCat = item.getCat_id() != 0 ? item.getCat_id() : catId;
@@ -711,9 +711,11 @@ public class MailER_TemplatePreviewActivity extends AppCompatActivity {
                 holder.ivLike.setImageResource(likeManager.isLiked(item.getPost_id()) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
             });
 
-            // Poster Click to Edit (both image and card container)
-            holder.ivPoster.setOnClickListener(v -> onPosterSelectedForEdit(item));
-            holder.cardPoster.setOnClickListener(v -> onPosterSelectedForEdit(item));
+            // Edit is only triggered via bottom "Edit Template" button
+            holder.ivPoster.setOnClickListener(null);
+            holder.ivPoster.setClickable(false);
+            holder.cardPoster.setOnClickListener(null);
+            holder.cardPoster.setClickable(false);
         }
 
         @Override

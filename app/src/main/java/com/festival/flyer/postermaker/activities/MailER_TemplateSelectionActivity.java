@@ -102,12 +102,10 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
 
         int BannerAdStatus = preferenceClass.getAdsStatus("ReadymadePoste_BannerAD");
+        if (btm != null) btm.setVisibility(View.GONE);
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (BannerAdStatus == 1) {
-                btm.setVisibility(View.VISIBLE);
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
-            } else {
-                btm.setVisibility(View.GONE);
             }
         }
 

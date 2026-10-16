@@ -41,6 +41,10 @@ android {
             languageVersion = JavaLanguageVersion.of(17)
         }
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -110,5 +114,6 @@ dependencies {
     implementation 'com.github.yalantis:ucrop:2.2.10'
     implementation("com.google.android.ump:user-messaging-platform:3.1.0")
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
 
 }

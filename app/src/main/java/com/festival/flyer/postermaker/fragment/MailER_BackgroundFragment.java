@@ -76,6 +76,23 @@ public class MailER_BackgroundFragment extends Fragment {
         int cellHeight = (700 * cellWidth) / 507;
 
         boolean isNativeEnabled = preferenceClass.getInt("backgrounds_native_enabled", 1) == 1;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, getActivity());
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("backgrounds")) {
+                        org.json.JSONObject bgObj = root.optJSONObject("backgrounds");
+                        if (bgObj != null && bgObj.has("native_ad")) {
+                            isNativeEnabled = bgObj.getJSONObject("native_ad").optBoolean("enabled", isNativeEnabled);
+                        }
+                    }
+                } else if (rc.getValue("backgrounds_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isNativeEnabled = rc.getBoolean("backgrounds_native_enabled");
+                }
+            }
+        } catch (Exception ignored) {}
         int firstAdCount = preferenceClass.getInt("bg_first_ad_count", preferenceClass.getInt("First_rv_count", 4));
         int repeatAdCount = preferenceClass.getInt("bg_repeat_ad_count", preferenceClass.getInt("rv_count", 6));
         int itemsSinceLastAd = 0;

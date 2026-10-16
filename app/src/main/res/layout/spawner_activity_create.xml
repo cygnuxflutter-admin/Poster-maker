@@ -343,7 +343,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_50sdp"
                 android:background="@color/teal_200"
-                app:shimmer_auto_start="true">
+                app:shimmer_auto_start="false">
 
                 <TextView
                     android:id="@+id/CollapsibleTextView"
@@ -362,7 +362,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/ad_space"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/rl_ad"
@@ -374,7 +374,7 @@
                 android:id="@+id/shimmer_view_container"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_50sdp"
-                app:shimmer_auto_start="true">
+                app:shimmer_auto_start="false">
 
                 <TextView
                     android:layout_width="wrap_content"

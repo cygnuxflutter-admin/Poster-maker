@@ -139,7 +139,7 @@
                 <RelativeLayout
                     android:id="@+id/native_ad_container"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="wrap_content"
                     android:visibility="visible" />
 
                 <!-- Shimmer Loading Placeholder -->

@@ -124,15 +124,14 @@ public class MailER_CreateActivity extends AppCompatActivity {
         android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
         com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
 
+        if (btm != null) btm.setVisibility(android.view.View.GONE);
         if ("collapsible".equalsIgnoreCase(bannerType) && collapsibleContainer != null) {
-            btm.setVisibility(android.view.View.VISIBLE);
             if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.GONE);
-            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.VISIBLE);
+            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.GONE);
             com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadCollapsibleBanner(this, collapsibleContainer, rl_ad, shimmerCollapsible, customAdId);
         } else {
-            btm.setVisibility(android.view.View.VISIBLE);
             if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.GONE);
-            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.VISIBLE);
+            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.GONE);
             com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
         }
     }

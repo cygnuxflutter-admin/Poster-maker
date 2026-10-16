@@ -28,10 +28,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.view.ViewGroup;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import com.onesignal.OneSignal;
+import com.onesignal.Continue;
 
 import androidx.cardview.widget.CardView;
 
@@ -235,6 +241,51 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
         ((MyApplication) getApplication()).loadInterstitialAd();
 
         updateUI();
+
+        // Prompt permissions as soon as the first onboarding screen appears
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!isFinishing() && !isDestroyed()) {
+                requestOnboardingPermissions();
+            }
+        }, 500);
+    }
+
+    private void requestOnboardingPermissions() {
+        try {
+            // 1. OneSignal Notification Permission (handles Android 13+ POST_NOTIFICATIONS)
+            OneSignal.getNotifications().requestPermission(true, Continue.none());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. System Permissions
+        ArrayList<String> permissionsNeeded = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_MEDIA_IMAGES);
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.CAMERA);
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.CAMERA);
+            }
+        }
+
+        if (!permissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 101);
+        }
     }
 
     private float dpToPx(float dp) {

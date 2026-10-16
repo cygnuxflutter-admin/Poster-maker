@@ -623,7 +623,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_2sdp"
-                    android:text="Festival Flyer &amp; Poster Maker"
+                    android:text="Poster Maker"
                     android:textColor="#BDBDBD"
                     android:textSize="@dimen/_9ssp"
                     android:fontFamily="@font/spawner_visbyroundcf_medium" />

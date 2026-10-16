@@ -119,7 +119,14 @@ public class MailER_SplashScreen extends AppCompatActivity {
         
         MyApplication.isAdsSplash = true;
 
-        fetchRemoteConfig();
+        startAttributionAndInit();
+    }
+
+    private boolean isInitializationStarted = false;
+
+    private void startAttributionAndInit() {
+        if (isInitializationStarted) return;
+        isInitializationStarted = true;
 
         networkListener = isConnected -> {
             if (isConnected && !isDataLoaded && !isFinishing() && !isDestroyed()) {
@@ -130,12 +137,18 @@ public class MailER_SplashScreen extends AppCompatActivity {
         };
         MailER_NetworkMonitor.getInstance().addListener(networkListener);
 
-        if (MailER_NetworkUtils.isNetworkAvailable(MailER_SplashScreen.this)) {
-            getData();
-        } else {
-            startIntent();
-        }
+        com.festival.flyer.postermaker.utils.MailER_InstallReferrerHelper.resolveAttribution(this, acquisitionType -> {
+            if (isFinishing() || isDestroyed()) return;
+            Log.d("SplashScreen", "Attribution complete: " + acquisitionType + ". Fetching Remote Config...");
 
+            fetchRemoteConfig();
+
+            if (MailER_NetworkUtils.isNetworkAvailable(MailER_SplashScreen.this)) {
+                getData();
+            } else {
+                startIntent();
+            }
+        });
     }
 
     @Override
@@ -1025,15 +1038,17 @@ public class MailER_SplashScreen extends AppCompatActivity {
     private void applyAllRemoteConfig(FirebaseRemoteConfig remoteConfig) {
         if (remoteConfig == null) return;
         try {
-            String masterConfigStr = null;
-            if (remoteConfig.getValue("postermaker").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
-                masterConfigStr = remoteConfig.getString("postermaker");
-            } else if (remoteConfig.getValue("app_ad_config").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
-                masterConfigStr = remoteConfig.getString("app_ad_config");
-            } else {
-                masterConfigStr = remoteConfig.getString("postermaker");
-                if (masterConfigStr == null || masterConfigStr.trim().isEmpty()) {
+            String masterConfigStr = MailER_PreferenceClass.getMasterConfigJson(remoteConfig, this);
+            if (masterConfigStr == null || masterConfigStr.trim().isEmpty()) {
+                if (remoteConfig.getValue("postermaker").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    masterConfigStr = remoteConfig.getString("postermaker");
+                } else if (remoteConfig.getValue("app_ad_config").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                     masterConfigStr = remoteConfig.getString("app_ad_config");
+                } else {
+                    masterConfigStr = remoteConfig.getString("postermaker");
+                    if (masterConfigStr == null || masterConfigStr.trim().isEmpty()) {
+                        masterConfigStr = remoteConfig.getString("app_ad_config");
+                    }
                 }
             }
             boolean hasMasterConfig = (masterConfigStr != null && !masterConfigStr.trim().isEmpty());
@@ -2048,8 +2063,28 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 bannerShimmerOnFail = root.optBoolean("banner_show_shimmer_on_fail", true);
             } else if (root.has("banner_shimmer_on_fail")) {
                 bannerShimmerOnFail = root.optBoolean("banner_shimmer_on_fail", true);
+            } else if (root.has("show_banner_shimmer_on_fail")) {
+                bannerShimmerOnFail = root.optBoolean("show_banner_shimmer_on_fail", true);
+            } else if (root.has("banner_shimmer_load")) {
+                bannerShimmerOnFail = root.optBoolean("banner_shimmer_load", true);
+            } else if (root.has("banner_show_shimmer")) {
+                bannerShimmerOnFail = root.optBoolean("banner_show_shimmer", true);
+            } else if (root.has("banner_shimmer")) {
+                bannerShimmerOnFail = root.optBoolean("banner_shimmer", true);
+            } else if (root.has("shimmer_load")) {
+                bannerShimmerOnFail = root.optBoolean("shimmer_load", true);
+            } else if (root.has("show_shimmer")) {
+                bannerShimmerOnFail = root.optBoolean("show_shimmer", true);
             } else if (root.has("banner") && root.getJSONObject("banner").has("show_shimmer_on_fail")) {
                 bannerShimmerOnFail = root.getJSONObject("banner").optBoolean("show_shimmer_on_fail", true);
+            } else if (root.has("banner") && root.getJSONObject("banner").has("shimmer_load")) {
+                bannerShimmerOnFail = root.getJSONObject("banner").optBoolean("shimmer_load", true);
+            } else if (root.has("banner") && root.getJSONObject("banner").has("shimmer")) {
+                bannerShimmerOnFail = root.getJSONObject("banner").optBoolean("shimmer", true);
+            } else if (root.has("banner_ad") && root.getJSONObject("banner_ad").has("shimmer_load")) {
+                bannerShimmerOnFail = root.getJSONObject("banner_ad").optBoolean("shimmer_load", true);
+            } else if (root.has("banner_ad") && root.getJSONObject("banner_ad").has("shimmer")) {
+                bannerShimmerOnFail = root.getJSONObject("banner_ad").optBoolean("shimmer", true);
             }
             preferenceClass.setBoolean("banner_show_shimmer_on_fail", bannerShimmerOnFail);
 
@@ -2058,8 +2093,24 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 nativeShimmerOnFail = root.optBoolean("native_show_shimmer_on_fail", true);
             } else if (root.has("native_shimmer_on_fail")) {
                 nativeShimmerOnFail = root.optBoolean("native_shimmer_on_fail", true);
+            } else if (root.has("show_native_shimmer_on_fail")) {
+                nativeShimmerOnFail = root.optBoolean("show_native_shimmer_on_fail", true);
+            } else if (root.has("native_shimmer_load")) {
+                nativeShimmerOnFail = root.optBoolean("native_shimmer_load", true);
+            } else if (root.has("native_show_shimmer")) {
+                nativeShimmerOnFail = root.optBoolean("native_show_shimmer", true);
+            } else if (root.has("native_shimmer")) {
+                nativeShimmerOnFail = root.optBoolean("native_shimmer", true);
             } else if (root.has("native") && root.getJSONObject("native").has("show_shimmer_on_fail")) {
                 nativeShimmerOnFail = root.getJSONObject("native").optBoolean("show_shimmer_on_fail", true);
+            } else if (root.has("native") && root.getJSONObject("native").has("shimmer_load")) {
+                nativeShimmerOnFail = root.getJSONObject("native").optBoolean("shimmer_load", true);
+            } else if (root.has("native") && root.getJSONObject("native").has("shimmer")) {
+                nativeShimmerOnFail = root.getJSONObject("native").optBoolean("shimmer", true);
+            } else if (root.has("native_ad") && root.getJSONObject("native_ad").has("shimmer_load")) {
+                nativeShimmerOnFail = root.getJSONObject("native_ad").optBoolean("shimmer_load", true);
+            } else if (root.has("native_ad") && root.getJSONObject("native_ad").has("shimmer")) {
+                nativeShimmerOnFail = root.getJSONObject("native_ad").optBoolean("shimmer", true);
             }
             preferenceClass.setBoolean("native_show_shimmer_on_fail", nativeShimmerOnFail);
 

@@ -157,11 +157,37 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
             nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position, null, new MailER_NativeAdUtil.OnAdLoadListener() {
                 @Override
                 public void onAdLoaded() {
+                    if (holder.itemView != null) {
+                        holder.itemView.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+                        if (lp != null) {
+                            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                            lp.height = cellHeight;
+                            holder.itemView.setLayoutParams(lp);
+                        }
+                    }
+                    if (holder.rlMain != null) holder.rlMain.setVisibility(View.VISIBLE);
+                    if (holder.ad_layout != null) holder.ad_layout.setVisibility(View.VISIBLE);
+                    if (holder.native_banner_ad_container != null) holder.native_banner_ad_container.setVisibility(View.VISIBLE);
                 }
 
                 @Override
                 public void onAdFailed() {
-                    // Keep the shimmer card intact so poster grid never shifts or breaks
+                    boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(activity);
+                    if (!showShimmerOnFail) {
+                        if (holder.itemView != null) {
+                            holder.itemView.setVisibility(View.GONE);
+                            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+                            if (lp != null) {
+                                lp.width = 0;
+                                lp.height = 0;
+                                holder.itemView.setLayoutParams(lp);
+                            }
+                        }
+                        if (holder.rlMain != null) holder.rlMain.setVisibility(View.GONE);
+                        if (holder.ad_layout != null) holder.ad_layout.setVisibility(View.GONE);
+                        if (holder.native_banner_ad_container != null) holder.native_banner_ad_container.setVisibility(View.GONE);
+                    }
                 }
             });
         }

@@ -55,6 +55,73 @@ public class MailER_LoadAds {
         return false;
     }
 
+    public static void hideParentBannerContainer(View view) {
+        if (view == null) return;
+        try {
+            view.setVisibility(View.GONE);
+            android.view.ViewParent parent = view.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int id = pv.getId();
+                if (id == R.id.btm || id == R.id.rl_banner_ad || id == R.id.rl_collapsible
+                        || id == R.id.ad_container_wrapper || id == R.id.ad_layout_container
+                        || id == R.id.rl_native_ad || id == R.id.ad_layout || id == R.id.rlMain) {
+                    pv.setVisibility(View.GONE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    if (pv.findViewById(R.id.button1) == null
+                            && pv.findViewById(R.id.button2) == null
+                            && pv.findViewById(R.id.btn_dialog_watch) == null) {
+                        pv.setVisibility(View.GONE);
+                        android.view.ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                        if (lp != null) {
+                            lp.width = 0;
+                            lp.height = 0;
+                            pv.setLayoutParams(lp);
+                        }
+                    }
+                }
+                if (id == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public static void showParentBannerContainer(View view) {
+        if (view == null) return;
+        try {
+            android.view.ViewParent parent = view.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int id = pv.getId();
+                if (id == R.id.btm || id == R.id.rl_banner_ad || id == R.id.rl_collapsible
+                        || id == R.id.ad_container_wrapper || id == R.id.ad_layout_container
+                        || id == R.id.rl_native_ad || id == R.id.ad_layout || id == R.id.rlMain) {
+                    pv.setVisibility(View.VISIBLE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    if (pv.findViewById(R.id.button1) == null
+                            && pv.findViewById(R.id.button2) == null
+                            && pv.findViewById(R.id.btn_dialog_watch) == null) {
+                        pv.setVisibility(View.VISIBLE);
+                        android.view.ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                        if (lp != null && (lp.width <= 0 || lp.height <= 0)) {
+                            lp.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+                            lp.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+                            pv.setLayoutParams(lp);
+                        }
+                    }
+                }
+                if (id == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
     public static void loadCollapsibleBanner(Activity activity, FrameLayout mainLayout,RelativeLayout relativeLayout, ShimmerFrameLayout shimmer_view_container) {
         loadCollapsibleBanner(activity, mainLayout, relativeLayout, shimmer_view_container, null);
     }
@@ -65,6 +132,13 @@ public class MailER_LoadAds {
                 shimmer_view_container.stopShimmer();
                 shimmer_view_container.setVisibility(android.view.View.GONE);
             }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            if (relativeLayout != null) {
+                relativeLayout.setVisibility(View.GONE);
+            }
+            hideParentBannerContainer(mainLayout);
             return;
         }
         String CollapsiblebannerID = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
@@ -77,15 +151,49 @@ public class MailER_LoadAds {
         CollapsiblebannerID = MailER_PreferenceClass.getSafeAdUnitId(CollapsiblebannerID, "collapsible");
 
         shimmerFrameLayout = shimmer_view_container;
+        boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+        if (showShimmerOnFail) {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.setVisibility(View.VISIBLE);
+                shimmer_view_container.startShimmer();
+            }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            if (relativeLayout != null) {
+                relativeLayout.setVisibility(View.VISIBLE);
+            }
+            showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
+        } else {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            if (relativeLayout != null) {
+                relativeLayout.setVisibility(View.GONE);
+            }
+            hideParentBannerContainer(mainLayout);
+        }
+
         // Skip reload if banner already loaded in this container
         if (hasLoadedAdView(mainLayout)) {
             Log.d("[ADS_LOG]", "♻️ Collapsible Banner already loaded in container. Skipping reload.");
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            if (mainLayout != null) mainLayout.setVisibility(View.VISIBLE);
+            if (relativeLayout != null) relativeLayout.setVisibility(View.VISIBLE);
+            showParentBannerContainer(mainLayout);
             return;
         }
         destroyExistingBannerView(mainLayout);
         mainLayout.removeAllViews();
         String bannerAdunitID = CollapsiblebannerID ;
-        if (bannerAdunitID != null) {
+        if (bannerAdunitID != null && !bannerAdunitID.trim().isEmpty()) {
             AdView adView = new AdView(activity);
             AdSize adSize = getAdSize(activity,mainLayout);
             adView.setAdSize(adSize);
@@ -105,15 +213,19 @@ public class MailER_LoadAds {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Collapsible Banner Ad Failed to Load: " + loadAdError.getMessage());
                     Log.d("AdTracker", "Collapsible Banner (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                    boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
-                    if (showShimmerOnFail) {
+                    boolean showShimmer = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+                    if (showShimmer) {
                         if (shimmer_view_container != null) {
                             shimmer_view_container.startShimmer();
                             shimmer_view_container.setVisibility(View.VISIBLE);
                         }
                         if (mainLayout != null) {
-                            mainLayout.setVisibility(View.VISIBLE);
+                            mainLayout.setVisibility(View.GONE);
                         }
+                        if (relativeLayout != null) {
+                            relativeLayout.setVisibility(View.VISIBLE);
+                        }
+                        showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
                     } else {
                         if (shimmer_view_container != null) {
                             shimmer_view_container.stopShimmer();
@@ -126,6 +238,7 @@ public class MailER_LoadAds {
                         if (relativeLayout != null) {
                             relativeLayout.setVisibility(View.GONE);
                         }
+                        hideParentBannerContainer(mainLayout);
                     }
                 }
                 @Override
@@ -133,12 +246,18 @@ public class MailER_LoadAds {
                     Log.d("[ADS_LOG]", "🟢 Collapsible Banner Ad Loaded & Displayed Successfully!");
                     Log.d("AdTracker", "AdMob Collapsible Banner Ad Loaded Successfully!");
                     super.onAdLoaded();
-                    mainLayout.setVisibility(View.VISIBLE);
-                    if (shimmer_view_container!= null) {
+                    if (shimmer_view_container != null) {
                         shimmer_view_container.stopShimmer();
                         shimmer_view_container.setVisibility(View.GONE);
                         shimmer_view_container.hideShimmer();
                     }
+                    if (mainLayout != null) {
+                        mainLayout.setVisibility(View.VISIBLE);
+                    }
+                    if (relativeLayout != null) {
+                        relativeLayout.setVisibility(View.VISIBLE);
+                    }
+                    showParentBannerContainer(mainLayout);
                 }
                 @Override
                 public void onAdImpression() {
@@ -163,6 +282,33 @@ public class MailER_LoadAds {
                 adView.loadAd(adRequest);
             } catch (Exception e) {
                 Log.e("TAG", "loadCollapsibleBanner: Catch"+ e.getMessage() );
+            }
+        } else {
+            boolean showShimmer = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+            if (showShimmer) {
+                if (shimmer_view_container != null) {
+                    shimmer_view_container.startShimmer();
+                    shimmer_view_container.setVisibility(View.VISIBLE);
+                }
+                if (mainLayout != null) {
+                    mainLayout.setVisibility(View.GONE);
+                }
+                if (relativeLayout != null) {
+                    relativeLayout.setVisibility(View.VISIBLE);
+                }
+                showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
+            } else {
+                if (shimmer_view_container != null) {
+                    shimmer_view_container.stopShimmer();
+                    shimmer_view_container.setVisibility(View.GONE);
+                }
+                if (mainLayout != null) {
+                    mainLayout.setVisibility(View.GONE);
+                }
+                if (relativeLayout != null) {
+                    relativeLayout.setVisibility(View.GONE);
+                }
+                hideParentBannerContainer(mainLayout);
             }
         }
 
@@ -197,12 +343,44 @@ public class MailER_LoadAds {
                 shimmer_view_container.stopShimmer();
                 shimmer_view_container.setVisibility(android.view.View.GONE);
             }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            hideParentBannerContainer(mainLayout);
             return;
         }
         shimmerFrameLayout = shimmer_view_container;
+
+        boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+        if (showShimmerOnFail) {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.setVisibility(View.VISIBLE);
+                shimmer_view_container.startShimmer();
+            }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
+        } else {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            if (mainLayout != null) {
+                mainLayout.setVisibility(View.GONE);
+            }
+            hideParentBannerContainer(mainLayout);
+        }
+
         // Skip reload if banner already loaded in this container
         if (hasLoadedAdView(mainLayout)) {
             Log.d("[ADS_LOG]", "♻️ Banner Ad already loaded in container. Skipping reload.");
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
+            mainLayout.setVisibility(View.VISIBLE);
+            showParentBannerContainer(mainLayout);
             return;
         }
         destroyExistingBannerView(mainLayout);
@@ -233,15 +411,16 @@ public class MailER_LoadAds {
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Banner Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
-                    boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
-                    if (showShimmerOnFail) {
+                    boolean showShimmer = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+                    if (showShimmer) {
                         if (shimmer_view_container != null) {
-                            shimmer_view_container.startShimmer();
                             shimmer_view_container.setVisibility(View.VISIBLE);
+                            shimmer_view_container.startShimmer();
                         }
                         if (mainLayout != null) {
-                            mainLayout.setVisibility(View.VISIBLE);
+                            mainLayout.setVisibility(View.GONE);
                         }
+                        showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
                     } else {
                         if (shimmer_view_container != null) {
                             shimmer_view_container.stopShimmer();
@@ -251,18 +430,23 @@ public class MailER_LoadAds {
                         if (mainLayout != null) {
                             mainLayout.setVisibility(View.GONE);
                         }
+                        hideParentBannerContainer(mainLayout);
                     }
                 }
                 @Override
                 public void onAdLoaded() {
                     Log.d("[ADS_LOG]", "🟢 AdMob Banner Ad Loaded & Displayed Successfully!");
                     super.onAdLoaded();
-                    mainLayout.setVisibility(View.VISIBLE);
+                    // Ad loaded — now show the container cleanly
                     if (shimmer_view_container!= null) {
                         shimmer_view_container.stopShimmer();
                         shimmer_view_container.setVisibility(View.GONE);
                         shimmer_view_container.hideShimmer();
                     }
+                    if (mainLayout != null) {
+                        mainLayout.setVisibility(View.VISIBLE);
+                    }
+                    showParentBannerContainer(mainLayout);
                 }
                 @Override
                 public void onAdImpression() {
@@ -287,6 +471,27 @@ public class MailER_LoadAds {
                 adView.loadAd(adRequest);
             } catch (Exception e) {
 
+            }
+        } else {
+            boolean showShimmer = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+            if (showShimmer) {
+                if (shimmer_view_container != null) {
+                    shimmer_view_container.setVisibility(View.VISIBLE);
+                    shimmer_view_container.startShimmer();
+                }
+                if (mainLayout != null) {
+                    mainLayout.setVisibility(View.GONE);
+                }
+                showParentBannerContainer(shimmer_view_container != null ? shimmer_view_container : mainLayout);
+            } else {
+                if (shimmer_view_container != null) {
+                    shimmer_view_container.stopShimmer();
+                    shimmer_view_container.setVisibility(View.GONE);
+                }
+                if (mainLayout != null) {
+                    mainLayout.setVisibility(View.GONE);
+                }
+                hideParentBannerContainer(mainLayout);
             }
         }
     }

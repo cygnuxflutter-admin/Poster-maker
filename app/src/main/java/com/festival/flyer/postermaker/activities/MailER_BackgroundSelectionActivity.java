@@ -94,12 +94,10 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
 
 
         int BannerAdStatus = preferenceClass.getAdsStatus("BGSelectScreen_BannerAD");
+        if (btm != null) btm.setVisibility(View.GONE);
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (BannerAdStatus == 1) {
-                btm.setVisibility(View.VISIBLE);
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
-            } else {
-                btm.setVisibility(View.GONE);
             }
         }
 

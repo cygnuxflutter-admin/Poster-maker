@@ -129,9 +129,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
 
-        // OneSignal Permission Request
-        OneSignal.getNotifications().requestPermission(true, Continue.none());
-
         // OneSignal Token Logging
         if (OneSignal.getUser().getPushSubscription() != null) {
             String pushToken = OneSignal.getUser().getPushSubscription().getToken();
@@ -182,8 +179,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                 });
             }
         });
-
-        checkAccess();
 
 //        ConsentDebugSettings debugSettings = new ConsentDebugSettings.Builder(this)
 //                .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
@@ -465,35 +460,27 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
         ShimmerFrameLayout shimmer_view_container_banner = findViewById(R.id.shimmer_view_container_banner);
 
-        RelativeLayout rl_banner_ad = this.findViewById(R.id.rl_banner_ad);
-        RelativeLayout rl_native_ad = this.findViewById(R.id.rl_native_ad);
-        RelativeLayout rl_ad_banner = this.findViewById(R.id.rl_ad);
-        RelativeLayout rl_collapsible = this.findViewById(R.id.rl_collapsible);
-
+        RelativeLayout ad_container_wrapper = findViewById(R.id.ad_container_wrapper);
+        RelativeLayout rl_banner_ad = findViewById(R.id.rl_banner_ad);
+        RelativeLayout rl_native_ad = findViewById(R.id.rl_native_ad);
+        RelativeLayout rl_ad_banner = findViewById(R.id.rl_ad);
+        RelativeLayout rl_collapsible = findViewById(R.id.rl_collapsible);
         bannerContainer = findViewById(R.id.CollapsibleContainer);
         shimmerFrameLayout = findViewById(R.id.shimmer_view_CollapsibleContainer);
+
+        if (ad_container_wrapper != null) ad_container_wrapper.setVisibility(View.GONE);
+        if (rl_banner_ad != null) rl_banner_ad.setVisibility(View.GONE);
+        if (rl_native_ad != null) rl_native_ad.setVisibility(View.GONE);
+        if (rl_collapsible != null) rl_collapsible.setVisibility(View.GONE);
 
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             int adMode = preferenceClass.getInt("MainScreen_Native", 2);
             if (adMode == 1) {
-                rl_collapsible.setVisibility(View.VISIBLE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.GONE);
                 MailER_LoadAds.loadCollapsibleBanner(this, bannerContainer, findViewById(R.id.rl_ad), shimmerFrameLayout);
             } else if (adMode == 2) {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.VISIBLE);
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad_banner, shimmer_view_container_banner);
             } else if (adMode == 3) {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.VISIBLE);
-                rl_banner_ad.setVisibility(View.GONE);
                 loadNativeAd(native_banner_ad_container, this, shimmer_view_container);
-            } else {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.GONE);
             }
         }
     }

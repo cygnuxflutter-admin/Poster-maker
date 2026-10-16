@@ -187,18 +187,14 @@ public class MailER_CustomCategoryActivity extends AppCompatActivity {
         android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
         com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
 
+        if (btm != null) btm.setVisibility(android.view.View.GONE);
+        if (rl_ad != null) rl_ad.setVisibility(android.view.View.GONE);
+        if (shimmer_view_container != null) {
+            shimmer_view_container.stopShimmer();
+            shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
         if (com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(this) && isBannerEnabled) {
-            if (btm != null) btm.setVisibility(android.view.View.VISIBLE);
-            if (rl_ad != null) rl_ad.setVisibility(android.view.View.VISIBLE);
-            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.VISIBLE);
             com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, bannerAdId);
-        } else {
-            if (btm != null) btm.setVisibility(android.view.View.GONE);
-            if (rl_ad != null) rl_ad.setVisibility(android.view.View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.stopShimmer();
-                shimmer_view_container.setVisibility(android.view.View.GONE);
-            }
         }
     }
 

@@ -658,7 +658,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_above="@+id/bottom_nav_bar"
-                        android:visibility="visible">
+                        android:visibility="gone">
 
                         <RelativeLayout
                             android:id="@+id/rl_native_ad"
@@ -689,7 +689,7 @@
                                 android:layout_below="@id/native_ad_sep"
                                 android:layout_marginHorizontal="@dimen/_16sdp"
                                 android:minHeight="@dimen/_100sdp"
-                                app:shimmer_auto_start="true">
+                                app:shimmer_auto_start="false">
 
                                 <include layout="@layout/spawner_native_ad_layout" />
 
@@ -722,7 +722,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/_50sdp"
                                 android:layout_below="@id/ad_sep"
-                                app:shimmer_auto_start="true">
+                                app:shimmer_auto_start="false">
 
                                 <TextView
                                     android:id="@+id/yourTextView"

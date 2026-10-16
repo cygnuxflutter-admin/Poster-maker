@@ -79,8 +79,19 @@ public class MailER_TemplateFragment extends Fragment {
         boolean isNativeEnabled = preferenceClass.getInt("templates_native_enabled", 1) == 1;
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getValue("templates_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
-                isNativeEnabled = rc.getBoolean("templates_native_enabled");
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, getActivity());
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("templates")) {
+                        org.json.JSONObject tObj = root.optJSONObject("templates");
+                        if (tObj != null && tObj.has("native_ad")) {
+                            isNativeEnabled = tObj.getJSONObject("native_ad").optBoolean("enabled", isNativeEnabled);
+                        }
+                    }
+                } else if (rc.getValue("templates_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isNativeEnabled = rc.getBoolean("templates_native_enabled");
+                }
             }
         } catch (Exception ignored) {}
         int firstAdCount = preferenceClass.getInt("First_rv_count", 4);

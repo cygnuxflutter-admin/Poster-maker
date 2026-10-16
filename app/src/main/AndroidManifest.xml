@@ -43,7 +43,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PosterMaker"
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="false">
 
         <activity
             android:name=".activities.MailER_AllBackgroundsActivity"

@@ -220,13 +220,14 @@
             <RelativeLayout
                 android:id="@+id/rl_ad"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmer_view_container"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_50sdp"
-                app:shimmer_auto_start="true">
+                app:shimmer_auto_start="false">
 
                 <TextView
                     android:id="@+id/yourTextView"

@@ -315,11 +315,8 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
 
             if (customHeightDp > 0) {
                 int hPx = dpToPx(customHeightDp);
-                ViewGroup.LayoutParams lp = nativeAdContainer.getLayoutParams();
-                if (lp != null) {
-                    lp.height = hPx;
-                    nativeAdContainer.setLayoutParams(lp);
-                }
+                // Only set fixed height on shimmer skeleton placeholder;
+                // ad container stays wrap_content so ad fills its natural height
                 if (nativeShimmerContainer != null) {
                     ViewGroup.LayoutParams slp = nativeShimmerContainer.getLayoutParams();
                     if (slp != null) {
@@ -599,6 +596,10 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                 });
             }
 
+            // Initially hide badges while background image is loading
+            holder.ivLock.setVisibility(View.GONE);
+            holder.ivLike.setVisibility(View.GONE);
+
             // Load Background Image
             holder.pbLoading.setVisibility(View.VISIBLE);
             String imageUrl = item.getImage_url() != null && !item.getImage_url().isEmpty() ? item.getImage_url() : item.getThumb_url();
@@ -615,6 +616,8 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             holder.pbLoading.setVisibility(View.GONE);
+                            holder.ivLike.setVisibility(View.VISIBLE);
+                            holder.ivLock.setVisibility(item.isPremium() ? View.VISIBLE : View.GONE);
                             if (resource != null && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
                                 float realRatio = (float) resource.getIntrinsicWidth() / (float) resource.getIntrinsicHeight();
                                 int w = viewPager2 != null && viewPager2.getWidth() > 0 ? viewPager2.getWidth() : holder.itemView.getWidth();
@@ -626,10 +629,7 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                     })
                     .into(holder.ivBg);
 
-            // PRO Badge
-            holder.ivLock.setVisibility(item.isPremium() ? View.VISIBLE : View.GONE);
-
-            // Like Heart Button
+            // Like Heart Button setup
             String bgUrl = item.getImage_url();
             holder.ivLike.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
             holder.ivLike.setOnClickListener(v -> {
@@ -637,9 +637,11 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                 holder.ivLike.setImageResource(likeManager.isLiked(bgUrl) ? R.drawable.spawner_ic_heart_filled : R.drawable.spawner_ic_heart_outline);
             });
 
-            // Background Click to Edit (both image and card container)
-            holder.ivBg.setOnClickListener(v -> onBgSelectedForEdit(item));
-            holder.cardBg.setOnClickListener(v -> onBgSelectedForEdit(item));
+            // Edit is only triggered via bottom "Use Background" button
+            holder.ivBg.setOnClickListener(null);
+            holder.ivBg.setClickable(false);
+            holder.cardBg.setOnClickListener(null);
+            holder.cardBg.setClickable(false);
         }
 
         @Override

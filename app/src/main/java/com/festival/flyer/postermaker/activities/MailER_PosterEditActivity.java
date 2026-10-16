@@ -1254,14 +1254,74 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         LinearLayout img_camera = dialog.findViewById(R.id.img_camera);
         LinearLayout img_gallery = dialog.findViewById(R.id.img_gallery);
 
+        View ad_layout_container = dialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_container);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
-        if (new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
-            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+
+        boolean isNativeEnabled = new MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1;
+        String customAdId = null;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, this);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("editor")) {
+                        org.json.JSONObject edObj = root.optJSONObject("editor");
+                        if (edObj != null && edObj.has("exit_dialog_native")) {
+                            org.json.JSONObject exObj = edObj.optJSONObject("exit_dialog_native");
+                            if (exObj != null) {
+                                isNativeEnabled = exObj.optBoolean("enabled", isNativeEnabled);
+                                String adId = exObj.optString("ad_id", "");
+                                if (!adId.trim().isEmpty()) customAdId = adId.trim();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (isNativeEnabled && MailER_NetworkUtils.isNetworkAvailable(this)) {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.setVisibility(View.VISIBLE);
+                shimmer_view_container.startShimmer();
+            }
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, customAdId, new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+                    if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.VISIBLE);
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onAdFailed() {
+                    if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+                    if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+            });
         } else {
-            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
-            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(View.GONE);
+            }
         }
+
+        dialog.setOnDismissListener(d -> {
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+            }
+        });
 
         img_camera.setOnClickListener(v -> {
 
