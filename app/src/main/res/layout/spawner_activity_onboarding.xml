@@ -1466,54 +1466,7 @@
                     android:textColor="#6B7280"
                     android:textSize="@dimen/_11sdp" />
 
-                <!-- Features tag line -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_6sdp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:text="⚡ 1-Tap HD Save"
-                        android:textColor="#7B2FF7"
-                        android:textSize="@dimen/_9sdp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/_5sdp"
-                        android:text="•"
-                        android:textColor="#CBD5E1"
-                        android:textSize="@dimen/_11sdp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:text="📲 Direct WhatsApp &amp; Insta"
-                        android:textColor="#7B2FF7"
-                        android:textSize="@dimen/_9sdp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/_5sdp"
-                        android:text="•"
-                        android:textColor="#CBD5E1"
-                        android:textSize="@dimen/_11sdp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:text="✨ Zero Watermark"
-                        android:textColor="#7B2FF7"
-                        android:textSize="@dimen/_9sdp" />
-                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 
@@ -1549,10 +1502,66 @@
                 android:minHeight="@dimen/_55sdp"
                 android:visibility="gone">
 
-                <View
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_55sdp"
-                    android:background="#E2E8F0" />
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="@dimen/_12sdp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="@dimen/_6sdp">
+
+                        <!-- Shimmer Top Row: Icon + Headline -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <View
+                                android:layout_width="@dimen/_28sdp"
+                                android:layout_height="@dimen/_28sdp"
+                                android:background="#E2E8F0" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_8sdp"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:layout_width="120dp"
+                                    android:layout_height="@dimen/_10sdp"
+                                    android:background="#E2E8F0" />
+
+                                <View
+                                    android:layout_width="80dp"
+                                    android:layout_height="@dimen/_8sdp"
+                                    android:layout_marginTop="@dimen/_4sdp"
+                                    android:background="#E2E8F0" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="@dimen/_50sdp"
+                                android:layout_height="@dimen/_22sdp"
+                                android:background="#E2E8F0" />
+                        </LinearLayout>
+
+                        <!-- Shimmer Media View Box -->
+                        <View
+                            android:id="@+id/shimmer_media_box"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_marginTop="@dimen/_6sdp"
+                            android:layout_weight="1"
+                            android:background="#CBD5E1" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
             </com.facebook.shimmer.ShimmerFrameLayout>
         </RelativeLayout>
 

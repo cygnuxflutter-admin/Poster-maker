@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:paddingHorizontal="@dimen/_16sdp"
+            android:paddingHorizontal="@dimen/_12sdp"
             android:paddingTop="@dimen/_20sdp"
             android:paddingBottom="@dimen/_18sdp">
 
@@ -67,7 +67,8 @@
             <TextView
                 android:id="@+id/btn_remove_watermark"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_34sdp"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/_44sdp"
                 android:layout_marginTop="@dimen/_16sdp"
                 android:background="@drawable/spawner_btn_rounded_text_bg"
                 android:clickable="true"
@@ -75,9 +76,12 @@
                 android:fontFamily="@font/spawner_visbyroundcf_bold"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center"
+                android:paddingVertical="@dimen/_10sdp"
+                android:paddingHorizontal="@dimen/_12sdp"
+                android:lineSpacingExtra="@dimen/_3sdp"
                 android:text="Watch Ad to Download (No Watermark)"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_12ssp"
+                android:textSize="@dimen/_13ssp"
                 android:textStyle="bold" />
 
             <!-- Cancel Button -->

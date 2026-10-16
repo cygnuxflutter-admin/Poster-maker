@@ -232,21 +232,6 @@
                                 android:src="@drawable/spawner_bt_duplicate" />
                         </RelativeLayout>
 
-                        <RelativeLayout
-                            android:id="@+id/btn_remove_bg"
-                            android:layout_width="match_parent"
-                            android:layout_height="37dp"
-                            android:background="?attr/selectableItemBackground">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:text="Erase BG"
-                                android:textColor="@color/white"
-                                android:textSize="14sp"
-                                android:gravity="center"
-                                android:fontFamily="@font/spawner_visbyroundcf_semibold" />
-                        </RelativeLayout>
 
                         <RelativeLayout
                             android:id="@+id/lay_str_delete"

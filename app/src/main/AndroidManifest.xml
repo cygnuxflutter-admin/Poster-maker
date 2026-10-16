@@ -191,6 +191,14 @@
         <activity
             android:name=".makeityours.auto.MailER_AutoPersonalizationActivity"
             android:screenOrientation="portrait" />
+
+        <!-- Override Google AdMob AdActivity theme to remove default system title bar ("Poster Maker") and fit ads perfectly from the top edge -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme" />
     </application>
 
 </manifest>

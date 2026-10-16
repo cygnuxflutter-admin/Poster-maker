@@ -74,6 +74,8 @@ public class MailER_LoadAds {
             CollapsiblebannerID = new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
         }
 
+        CollapsiblebannerID = MailER_PreferenceClass.getSafeAdUnitId(CollapsiblebannerID, "collapsible");
+
         shimmerFrameLayout = shimmer_view_container;
         // Skip reload if banner already loaded in this container
         if (hasLoadedAdView(mainLayout)) {
@@ -103,23 +105,28 @@ public class MailER_LoadAds {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Collapsible Banner Ad Failed to Load: " + loadAdError.getMessage());
                     Log.d("AdTracker", "Collapsible Banner (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                    if (shimmer_view_container != null) {
-                        shimmer_view_container.stopShimmer();
-                        shimmer_view_container.setVisibility(View.GONE);
-                        shimmer_view_container.hideShimmer();
-                    }
-                    if (mainLayout != null) {
-                        mainLayout.setVisibility(View.GONE);
-                    }
-                    if (activity != null && !activity.isFinishing()) {
-                        View colView = activity.findViewById(R.id.rl_collapsible);
-                        if (colView != null) colView.setVisibility(View.GONE);
-                        View btmView = activity.findViewById(R.id.btm);
-                        if (btmView != null && (mainLayout == null || mainLayout.getId() == R.id.CollapsibleContainer || mainLayout.getId() == R.id.rl_ad)) {
-                            btmView.setVisibility(View.GONE);
+                    boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+                    if (showShimmerOnFail) {
+                        if (shimmer_view_container != null) {
+                            shimmer_view_container.startShimmer();
+                            shimmer_view_container.setVisibility(View.VISIBLE);
+                        }
+                        if (mainLayout != null) {
+                            mainLayout.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (shimmer_view_container != null) {
+                            shimmer_view_container.stopShimmer();
+                            shimmer_view_container.setVisibility(View.GONE);
+                            shimmer_view_container.hideShimmer();
+                        }
+                        if (mainLayout != null) {
+                            mainLayout.setVisibility(View.GONE);
+                        }
+                        if (relativeLayout != null) {
+                            relativeLayout.setVisibility(View.GONE);
                         }
                     }
-                    Log.e("TAG", "onAdFailedToLoad: Collapse Fail="+ loadAdError.getMessage() );
                 }
                 @Override
                 public void onAdLoaded() {
@@ -137,6 +144,16 @@ public class MailER_LoadAds {
                 public void onAdImpression() {
                     super.onAdImpression();
                     Log.d("[ADS_LOG]", "🟢 SUCCESS: Collapsible Banner Ad IMPRESSION Logged!");
+                }
+                @Override
+                public void onAdClicked() {
+                    super.onAdClicked();
+                    MailER_AppOpenManager.notifyAdClicked();
+                }
+                @Override
+                public void onAdOpened() {
+                    super.onAdOpened();
+                    MailER_AppOpenManager.notifyAdClicked();
                 }
             });
 
@@ -193,6 +210,7 @@ public class MailER_LoadAds {
         String bannerAdunitID = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
                 ? customAdUnitId.trim()
                 : new MailER_PreferenceClass(activity).getAdsId("BannerAdunitID");
+        bannerAdunitID = MailER_PreferenceClass.getSafeAdUnitId(bannerAdunitID, "banner");
         if (bannerAdunitID != null && !bannerAdunitID.trim().isEmpty()) {
             AdView adView = new AdView(activity);
             AdSize adSize = getAdSize(activity);
@@ -215,22 +233,23 @@ public class MailER_LoadAds {
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
                     Log.d("[ADS_LOG]", "🔴 Banner Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
-                    if (shimmer_view_container != null) {
-                        shimmer_view_container.stopShimmer();
-                        shimmer_view_container.setVisibility(View.GONE);
-                        shimmer_view_container.hideShimmer();
-                    }
-                    if (mainLayout != null) {
-                        mainLayout.setVisibility(View.GONE);
-                    }
-                    if (activity != null && !activity.isFinishing()) {
-                        View btm = activity.findViewById(R.id.btm);
-                        if (btm != null && mainLayout != null && (mainLayout.getId() == R.id.rl_ad || mainLayout.getId() == R.id.rl_banner_ad)) {
-                            btm.setVisibility(View.GONE);
+                    boolean showShimmerOnFail = MailER_PreferenceClass.isBannerShimmerOnFail(activity);
+                    if (showShimmerOnFail) {
+                        if (shimmer_view_container != null) {
+                            shimmer_view_container.startShimmer();
+                            shimmer_view_container.setVisibility(View.VISIBLE);
                         }
-                        View bannerLayout = activity.findViewById(R.id.rl_banner_ad);
-                        if (bannerLayout != null && mainLayout != null && mainLayout.getId() == R.id.rl_ad) {
-                            bannerLayout.setVisibility(View.GONE);
+                        if (mainLayout != null) {
+                            mainLayout.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (shimmer_view_container != null) {
+                            shimmer_view_container.stopShimmer();
+                            shimmer_view_container.setVisibility(View.GONE);
+                            shimmer_view_container.hideShimmer();
+                        }
+                        if (mainLayout != null) {
+                            mainLayout.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -249,6 +268,16 @@ public class MailER_LoadAds {
                 public void onAdImpression() {
                     super.onAdImpression();
                     Log.d("[ADS_LOG]", "🟢 SUCCESS: Banner Ad IMPRESSION Logged!");
+                }
+                @Override
+                public void onAdClicked() {
+                    super.onAdClicked();
+                    MailER_AppOpenManager.notifyAdClicked();
+                }
+                @Override
+                public void onAdOpened() {
+                    super.onAdOpened();
+                    MailER_AppOpenManager.notifyAdClicked();
                 }
             });
 
@@ -293,6 +322,16 @@ public class MailER_LoadAds {
                         shimmerFrameLayout.hideShimmer();
                     }
                 }
+                @Override
+                public void onAdClicked() {
+                    super.onAdClicked();
+                    MailER_AppOpenManager.notifyAdClicked();
+                }
+                @Override
+                public void onAdOpened() {
+                    super.onAdOpened();
+                    MailER_AppOpenManager.notifyAdClicked();
+                }
             });
 
             RelativeLayout.LayoutParams bannerParameters =
@@ -336,6 +375,7 @@ public class MailER_LoadAds {
 
             @Override
             public void onAdClicked(Ad ad) {
+                MailER_AppOpenManager.notifyAdClicked();
             }
 
             @Override

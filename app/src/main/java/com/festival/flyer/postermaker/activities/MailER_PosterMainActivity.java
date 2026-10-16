@@ -153,6 +153,28 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(MailER_PosterMainActivity.this);
+                boolean showExitDialog = preferenceClass.getBoolean("app_exit_dialog_enabled", true);
+                try {
+                    com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+                    if (rc != null) {
+                        String masterJson = com.festival.flyer.postermaker.utils.MailER_PreferenceClass.getMasterConfigJson(rc);
+                        if (masterJson != null && !masterJson.isEmpty()) {
+                            org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                            if (root.has("app_exit_dialog")) {
+                                showExitDialog = root.getJSONObject("app_exit_dialog").optBoolean("enabled", showExitDialog);
+                            }
+                        } else if (rc.getValue("app_exit_dialog_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                            showExitDialog = rc.getBoolean("app_exit_dialog_enabled");
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                if (!showExitDialog) {
+                    MailER_PosterMainActivity.this.finish();
+                    System.exit(0);
+                    return;
+                }
                 MailER_MaterialDialogUtils.getInstance().exitAlertDialog(MailER_PosterMainActivity.this, "Exit Alert", "Do you really want to exit?", materialDialog -> {
                     materialDialog.dismiss();
                     MailER_PosterMainActivity.this.finish();
@@ -286,6 +308,10 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         findViewById(R.id.lay_design).setOnClickListener(v -> {
             com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_RateUs", "HomeScreen");
             
+            // Coming Soon:
+            android.widget.Toast.makeText(MailER_PosterMainActivity.this, "Coming Soon! This feature will be available soon.", android.widget.Toast.LENGTH_SHORT).show();
+
+            /*
             MyApplication.showInterstitialAd(MailER_PosterMainActivity.this, () -> {
                 android.content.SharedPreferences prefs = getSharedPreferences("BusinessProfile", android.content.Context.MODE_PRIVATE);
                 String savedName = prefs.getString("business_name", "");
@@ -298,6 +324,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                     startActivity(new android.content.Intent(MailER_PosterMainActivity.this, com.festival.flyer.postermaker.activities.MailER_CustomCategoryActivity.class));
                 }
             });
+            */
         });
 
         findViewById(R.id.lay_creation).setOnClickListener(v -> {

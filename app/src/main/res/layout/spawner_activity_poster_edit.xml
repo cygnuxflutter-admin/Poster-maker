@@ -436,7 +436,12 @@
                         android:text="@string/text"
                         android:layout_marginTop="@dimen/_2sdp"
                         android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
 
                 </LinearLayout>
 
@@ -463,7 +468,12 @@
                         android:layout_marginTop="@dimen/_2sdp"
                         android:text="@string/stickers"
                         android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
 
                 </LinearLayout>
 
@@ -483,7 +493,6 @@
                         android:src="@drawable/spawner_effect_press" />
 
                     <TextView
-
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/spawner_visbyroundcf_bold"
@@ -491,7 +500,12 @@
                         android:text="@string/effects"
                         android:layout_marginTop="@dimen/_2sdp"
                         android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
 
                 </LinearLayout>
 
@@ -517,7 +531,12 @@
                         android:text="@string/image"
                         android:layout_marginTop="@dimen/_2sdp"
                         android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
 
                 </LinearLayout>
 
@@ -543,7 +562,12 @@
                         android:text="@string/background"
                         android:layout_marginTop="@dimen/_2sdp"
                         android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
 
                 </LinearLayout>
 

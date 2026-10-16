@@ -52,4 +52,17 @@ public class MailER_PosterModel implements Serializable {
         this.poster_list = poster_list;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MailER_PosterModel that = (MailER_PosterModel) o;
+        return cat_id == that.cat_id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(cat_id);
+    }
 }
+

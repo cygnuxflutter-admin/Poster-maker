@@ -81,22 +81,21 @@ public class MailER_MyCreationActivity extends AppCompatActivity {
         RelativeLayout rl_ad = findViewById(R.id.rl_ad);
 
         MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(this);
-        boolean isBannerEnabled = false; // default false for cleaner UX as discussed
-        String customAdId = "";
+        boolean isBannerEnabled = preferenceClass.getBoolean("my_creation_banner_ad_enabled", false);
+        String customAdId = preferenceClass.getAdsId("my_creation_banner_ad_id");
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isBannerEnabled = rc.getBoolean("my_creation_banner_ad_enabled");
-                customAdId = rc.getString("my_creation_banner_ad_id");
-            } else {
-                isBannerEnabled = preferenceClass.getBoolean("my_creation_banner_ad_enabled", false);
-                customAdId = preferenceClass.getAdsId("my_creation_banner_ad_id");
+            if (rc != null) {
+                if (rc.getValue("my_creation_banner_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isBannerEnabled = rc.getBoolean("my_creation_banner_ad_enabled");
+                }
+                if (rc.getValue("my_creation_banner_ad_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("my_creation_banner_ad_id");
+                    if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                }
             }
-        } catch (Exception e) {
-            isBannerEnabled = preferenceClass.getBoolean("my_creation_banner_ad_enabled", false);
-            customAdId = preferenceClass.getAdsId("my_creation_banner_ad_id");
-        }
+        } catch (Exception ignored) {}
 
         if (!isBannerEnabled || !MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (btm != null) btm.setVisibility(View.GONE);

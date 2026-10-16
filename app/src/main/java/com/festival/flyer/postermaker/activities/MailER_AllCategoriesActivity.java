@@ -69,19 +69,43 @@ public class MailER_AllCategoriesActivity extends AppCompatActivity {
         allCategoriesList = new ArrayList<>();
         filteredList = new ArrayList<>();
 
-        if (MailER_TemplateSelectionController.allCategoriesData != null) {
+        if (MailER_TemplateSelectionController.allCategoriesData != null && !MailER_TemplateSelectionController.allCategoriesData.isEmpty()) {
             for (MailER_PosterModel model : MailER_TemplateSelectionController.allCategoriesData) {
                 if (!"More".equalsIgnoreCase(model.getCat_name())) {
                     allCategoriesList.add(model);
                     filteredList.add(model);
                 }
             }
+        } else {
+            String cached = com.festival.flyer.postermaker.utils.MailER_AppCacheManager.getTemplates(this);
+            if (cached != null && !cached.isEmpty()) {
+                try {
+                    org.json.JSONObject obj = new org.json.JSONObject(cached);
+                    org.json.JSONArray arr = obj.getJSONArray(new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getDataType("field_4"));
+                    for (int i = 0; i < arr.length(); i++) {
+                        org.json.JSONObject c = arr.getJSONObject(i);
+                        String id = c.getString(new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getDataType("field_46"));
+                        String name = c.getString(new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getDataType("field_5"));
+                        String thumb = c.optString(new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getDataType("field_6"), "");
+                        MailER_PosterModel model = new MailER_PosterModel(id, thumb, name, new ArrayList<>());
+                        allCategoriesList.add(model);
+                        filteredList.add(model);
+                    }
+                } catch (Exception ignored) {}
+            }
         }
 
         adapter = new MailER_CategoryTabAdapter(this, filteredList, true, (position, model) -> {
             int actualIndex = -1;
             if (MailER_TemplateSelectionController.allCategoriesData != null) {
-                actualIndex = MailER_TemplateSelectionController.allCategoriesData.indexOf(model);
+                for (int i = 0; i < MailER_TemplateSelectionController.allCategoriesData.size(); i++) {
+                    MailER_PosterModel pm = MailER_TemplateSelectionController.allCategoriesData.get(i);
+                    if (pm.getCat_id() == model.getCat_id() ||
+                        (pm.getCat_name() != null && pm.getCat_name().equalsIgnoreCase(model.getCat_name()))) {
+                        actualIndex = i;
+                        break;
+                    }
+                }
             }
             if (MailER_TemplateSelectionController.globalSelectionListener != null && actualIndex != -1) {
                 MailER_TemplateSelectionController.globalSelectionListener.onCategorySelected(actualIndex);
@@ -93,9 +117,11 @@ public class MailER_AllCategoriesActivity extends AppCompatActivity {
         if (selectedIndex != -1 && MailER_TemplateSelectionController.allCategoriesData != null) {
             if (selectedIndex >= 0 && selectedIndex < MailER_TemplateSelectionController.allCategoriesData.size()) {
                 MailER_PosterModel selectedModel = MailER_TemplateSelectionController.allCategoriesData.get(selectedIndex);
-                int mappedIndex = filteredList.indexOf(selectedModel);
-                if (mappedIndex != -1) {
-                    adapter.setSelectedPosition(mappedIndex);
+                for (int i = 0; i < filteredList.size(); i++) {
+                    if (filteredList.get(i).getCat_id() == selectedModel.getCat_id()) {
+                        adapter.setSelectedPosition(i);
+                        break;
+                    }
                 }
             }
         }
@@ -133,12 +159,14 @@ public class MailER_AllCategoriesActivity extends AppCompatActivity {
         int selectedIndex = getIntent().getIntExtra("selected_index", -1);
         if (selectedIndex != -1 && MailER_TemplateSelectionController.allCategoriesData != null && selectedIndex < MailER_TemplateSelectionController.allCategoriesData.size()) {
             MailER_PosterModel selectedModel = MailER_TemplateSelectionController.allCategoriesData.get(selectedIndex);
-            int mappedIndex = filteredList.indexOf(selectedModel);
-            if (mappedIndex != -1) {
-                adapter.setSelectedPosition(mappedIndex);
-            } else {
-                adapter.setSelectedPosition(-1);
+            int mappedIndex = -1;
+            for (int i = 0; i < filteredList.size(); i++) {
+                if (filteredList.get(i).getCat_id() == selectedModel.getCat_id()) {
+                    mappedIndex = i;
+                    break;
+                }
             }
+            adapter.setSelectedPosition(mappedIndex);
         }
         adapter.notifyDataSetChanged();
     }

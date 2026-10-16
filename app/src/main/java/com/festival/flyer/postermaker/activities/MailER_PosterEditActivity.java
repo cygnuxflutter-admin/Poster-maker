@@ -153,6 +153,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     private String permission_type = "";
     private String savePath = null;
     private String savePathWithWaterMark = null;
+    private boolean isPosterSaved = false;
 
     private boolean isRewarded = false;
     private com.afollestad.materialdialogs.MaterialDialog progressDialog;
@@ -186,21 +187,38 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                     hideStickerControl();
                     return;
                 }
+                if (isPosterSaved) {
+                    finish();
+                    return;
+                }
                 leaveDialog();
             }
         });
 
         findById();
 
-        main_rel.setOnTouchListener((v, event) -> {
-            hideEffectControl();
-            hideAllControls();
-            hideListControl();
-            removeScroll();
+        View.OnTouchListener canvasTouchListener = (v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                hideEffectControl();
+                hideAllControls();
+                hideListControl();
+                removeScroll();
+            }
             return false;
-        });
+        };
 
-        lay_scroll.setOnTouchListener((v, event) -> true);
+        main_rel.setOnTouchListener(canvasTouchListener);
+        txt_stkr_rel.setOnTouchListener(canvasTouchListener);
+
+        lay_scroll.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                hideEffectControl();
+                hideAllControls();
+                hideListControl();
+                removeScroll();
+            }
+            return true;
+        });
 
         boolean loadUserFrame = getIntent().getBooleanExtra("loadUserFrame", true);
 
@@ -442,6 +460,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     }
 
     public void notifyUndoRedo(String type, String operation, int position) {
+        isPosterSaved = false;
         new saveTempUndoRedoTaskAsync(type, operation, position).execute();
     }
 
@@ -561,9 +580,17 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         view_rotation = view.getRotation();
 
         lay_effects.setVisibility(View.GONE);
-        lay_StkrMain.setVisibility(View.GONE);
-        lay_TextMain.setVisibility(View.GONE);
         hideListControl();
+
+        if (view instanceof MailER_AutofitTextRel) {
+            lay_StkrMain.setVisibility(View.GONE);
+            lay_TextMain.setVisibility(View.VISIBLE);
+            textController.setAutofitTextRel((MailER_AutofitTextRel) view, guideline);
+        } else if (view instanceof MailER_ResizableStickerView) {
+            lay_TextMain.setVisibility(View.GONE);
+            lay_StkrMain.setVisibility(View.VISIBLE);
+            stickerController.setResizableStickerView((MailER_ResizableStickerView) view, guideline);
+        }
 
         if (guideline.getVisibility() == View.GONE) {
             guideline.setVisibility(View.VISIBLE);
@@ -590,8 +617,6 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
         this.lay_effects.setVisibility(View.GONE);
 //        img_effect.setImageTintList(getResources().getColorStateList(R.color.white));
-        this.lay_TextMain.setVisibility(View.GONE);
-        this.lay_StkrMain.setVisibility(View.GONE);
         hideListControl();
     }
 
@@ -610,18 +635,13 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
 
         if (v instanceof MailER_AutofitTextRel) {
-            if (this.lay_TextMain.getVisibility() == View.GONE) {
-                this.lay_TextMain.setVisibility(View.VISIBLE);
-                textController.setAutofitTextRel((MailER_AutofitTextRel) v, guideline);
-//                this.lay_TextMain.startAnimation(AnimClass.getAnimUp(this));
-            }
-        }
-        if (v instanceof MailER_ResizableStickerView) {
-            if (this.lay_StkrMain.getVisibility() == View.GONE) {
-                this.lay_StkrMain.setVisibility(View.VISIBLE);
-                stickerController.setResizableStickerView((MailER_ResizableStickerView) v, guideline);
-//                this.lay_StkrMain.startAnimation(AnimClass.getAnimUp(this));
-            }
+            this.lay_StkrMain.setVisibility(View.GONE);
+            this.lay_TextMain.setVisibility(View.VISIBLE);
+            textController.setAutofitTextRel((MailER_AutofitTextRel) v, guideline);
+        } else if (v instanceof MailER_ResizableStickerView) {
+            this.lay_TextMain.setVisibility(View.GONE);
+            this.lay_StkrMain.setVisibility(View.VISIBLE);
+            stickerController.setResizableStickerView((MailER_ResizableStickerView) v, guideline);
         }
         if (this.guideline.getVisibility() == View.VISIBLE) {
             this.guideline.setVisibility(View.GONE);
@@ -702,6 +722,9 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         autofitTextRel.setId(View.generateViewId());
         autofitTextRel.setOnTouchCallbackListener(this);
         autofitTextRel.setBorderVisibility(true);
+        this.lay_StkrMain.setVisibility(View.GONE);
+        this.lay_TextMain.setVisibility(View.VISIBLE);
+        textController.setAutofitTextRel(autofitTextRel, guideline);
     }
 
     public void addNewResizableStickerView(MailER_ResizableStickerView resizableStickerView, MailER_StickerInfo stickerInfo, boolean show) {
@@ -841,9 +864,14 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             if (btn_watermark_remove != null) {
                 btn_watermark_remove.setVisibility(View.GONE);
             }
-            MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+            boolean isDownloadAdEnabled = prefManager != null ? prefManager.getBoolean("editor_download_ad_enabled", true) : true;
+            if (!isDownloadAdEnabled) {
                 new saveTemplateAsync(false).execute();
-            });
+            } else {
+                MyApplication.showInterstitialAdWithOutCount(MailER_PosterEditActivity.this, () -> {
+                    new saveTemplateAsync(false).execute();
+                });
+            }
         } else if (id == R.id.btn_save_poster) {
             hideAllControls();
             hideStickerControl();
@@ -852,7 +880,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             if (btn_watermark_remove != null) {
                 btn_watermark_remove.setVisibility(View.GONE);
             }
-            showWatermarkDownloadPromptDialog(true);
+            startDownloadProcess(true);
         } else if (id == R.id.btn_reset) {
             MyApplication.showEditInterstitialAd(this, () -> {
                 MailER_MaterialDialogUtils.getInstance().resetDialog(this, materialDialog -> {
@@ -903,34 +931,26 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             prefManager = new MailER_PreferenceClass(this);
         }
 
-        boolean isUndoRedoAdEnabled = true;
+        boolean isUndoRedoAdEnabled = prefManager.getBoolean("editor_undo_redo_ad_enabled", true);
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+            if (rc != null && rc.getValue("editor_undo_redo_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                 isUndoRedoAdEnabled = rc.getBoolean("editor_undo_redo_ad_enabled");
-            } else {
-                isUndoRedoAdEnabled = prefManager.getBoolean("editor_undo_redo_ad_enabled", true);
             }
-        } catch (Exception e) {
-            isUndoRedoAdEnabled = prefManager.getBoolean("editor_undo_redo_ad_enabled", true);
-        }
+        } catch (Exception ignored) {}
 
         if (!isUndoRedoAdEnabled) {
             performUndoRedoAction(isUndo);
             return;
         }
 
-        int freeAllowed = 3;
+        int freeAllowed = prefManager.getInt("editor_free_undo_redo_allowed", 3);
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getLong("editor_free_undo_redo_allowed") >= 0) {
+            if (rc != null && rc.getValue("editor_free_undo_redo_allowed").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                 freeAllowed = (int) rc.getLong("editor_free_undo_redo_allowed");
-            } else {
-                freeAllowed = prefManager.getInt("editor_free_undo_redo_allowed", 3);
             }
-        } catch (Exception e) {
-            freeAllowed = prefManager.getInt("editor_free_undo_redo_allowed", 3);
-        }
+        } catch (Exception ignored) {}
 
         if (undoRedoActionCount < freeAllowed) {
             undoRedoActionCount++;
@@ -1022,28 +1042,72 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             prefManager = new MailER_PreferenceClass(this);
         }
 
-        boolean askWatermark = true;
+        boolean isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
+        boolean askWatermark = prefManager.getBoolean("editor_ask_watermark_removal", true);
+        int freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
+
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                askWatermark = rc.getBoolean("editor_ask_watermark_removal");
-            } else {
-                askWatermark = prefManager.getBoolean("editor_ask_watermark_removal", true);
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject obj = new org.json.JSONObject(masterJson);
+                    if (obj.has("editor")) {
+                        org.json.JSONObject edObj = obj.getJSONObject("editor");
+                        if (edObj.has("download")) {
+                            org.json.JSONObject dlObj = edObj.getJSONObject("download");
+                            isDownloadAdEnabled = dlObj.optBoolean("enabled", isDownloadAdEnabled);
+                            askWatermark = dlObj.optBoolean("ask_watermark_removal", askWatermark);
+                            freeAllowed = dlObj.optInt("free_downloads_allowed", freeAllowed);
+                        }
+                    }
+                } else {
+                    if (rc.getValue("editor_download_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        isDownloadAdEnabled = rc.getBoolean("editor_download_ad_enabled");
+                    }
+                    if (rc.getValue("editor_ask_watermark_removal").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        askWatermark = rc.getBoolean("editor_ask_watermark_removal");
+                    }
+                    if (rc.getValue("editor_free_downloads_allowed").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        freeAllowed = (int) rc.getLong("editor_free_downloads_allowed");
+                    }
+                }
             }
-        } catch (Exception e) {
-            askWatermark = prefManager.getBoolean("editor_ask_watermark_removal", true);
+        } catch (Exception ignored) {}
+
+        // 1. If download ads are completely disabled via Remote Config ("enabled": false)
+        // Direct save with NO ADS and NO POPUP!
+        if (!isDownloadAdEnabled) {
+            new saveTemplateAsync(isPoster).execute();
+            return;
         }
 
-        // Check if watermark removal prompt should be shown
+        // 2. Check if user still has free downloads remaining
+        int totalDownloads = prefManager.getInt("TotalDownloadsCount", 0);
+        if (totalDownloads < freeAllowed) {
+            prefManager.setInt("TotalDownloadsCount", totalDownloads + 1);
+            new saveTemplateAsync(isPoster).execute();
+            return;
+        }
+
+        // 3. Free downloads exhausted: prompt for watermark removal ad or download ad
         if (askWatermark && rl_watermark != null && rl_watermark.getVisibility() == View.VISIBLE) {
             showWatermarkDownloadPromptDialog(isPoster);
         } else {
-            proceedDownloadAfterWatermark(isPoster);
+            showDownloadAdDialog(isPoster);
         }
     }
 
     private void showWatermarkRemoveDialog() {
         if (isFinishing() || isDestroyed()) return;
+        boolean isDownloadAdEnabled = prefManager != null ? prefManager.getBoolean("editor_download_ad_enabled", true) : true;
+        if (!isDownloadAdEnabled) {
+            if (rl_watermark != null) {
+                rl_watermark.setVisibility(View.GONE);
+            }
+            Toast.makeText(MailER_PosterEditActivity.this, "Watermark removed", Toast.LENGTH_SHORT).show();
+            return;
+        }
         MailER_MaterialDialogUtils.getInstance().rewardDialog(MailER_PosterEditActivity.this,
                 "Remove Watermark(One Time)", "Remove Watermark by watching Ads", materialDialog -> {
                     rewardType = "remWatermark";
@@ -1122,47 +1186,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
     }
 
     private void proceedDownloadAfterWatermark(boolean isPoster) {
-        if (prefManager == null) {
-            prefManager = new MailER_PreferenceClass(this);
-        }
-
-        boolean isDownloadAdEnabled = true;
-        try {
-            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isDownloadAdEnabled = rc.getBoolean("editor_download_ad_enabled");
-            } else {
-                isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
-            }
-        } catch (Exception e) {
-            isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
-        }
-
-        if (!isDownloadAdEnabled) {
-            new saveTemplateAsync(isPoster).execute();
-            return;
-        }
-
-        int freeAllowed = 2;
-        try {
-            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getLong("editor_free_downloads_allowed") >= 0) {
-                freeAllowed = (int) rc.getLong("editor_free_downloads_allowed");
-            } else {
-                freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
-            }
-        } catch (Exception e) {
-            freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
-        }
-
-        int totalDownloads = prefManager.getInt("TotalDownloadsCount", 0);
-
-        if (totalDownloads < freeAllowed) {
-            prefManager.setInt("TotalDownloadsCount", totalDownloads + 1);
-            new saveTemplateAsync(isPoster).execute();
-        } else {
-            showDownloadAdDialog(isPoster);
-        }
+        startDownloadProcess(isPoster);
     }
 
     private void showDownloadAdDialog(boolean isPoster) {
@@ -1276,6 +1300,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
                     startActivity(intent);
                 }
             } else {
+                com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
                 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
                 camera_file = new File(getCacheDir(), ".temp.jpg");
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", camera_file));
@@ -1302,6 +1327,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 //            }
 
             dialog.dismiss();
+            com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction("android.intent.action.PICK");
@@ -1405,6 +1431,9 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         if (autofitTextRel != null) {
             autofitTextRel.setText(text);
             autofitTextRel.setBorderVisibility(true);
+            this.lay_StkrMain.setVisibility(View.GONE);
+            this.lay_TextMain.setVisibility(View.VISIBLE);
+            textController.setAutofitTextRel(autofitTextRel, guideline);
         } else {
             MailER_AutofitTextRel rl = new MailER_AutofitTextRel(this);
             txt_stkr_rel.addView(rl);
@@ -1413,6 +1442,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             rl.setMainLayoutWH((float) this.main_rel.getWidth(), (float) this.main_rel.getHeight());
             rl.setOnTouchCallbackListener(this);
             rl.setBorderVisibility(true);
+            this.lay_StkrMain.setVisibility(View.GONE);
             this.lay_TextMain.setVisibility(View.VISIBLE);
             textController.setAutofitTextRel(rl, guideline);
 //            this.lay_TextMain.startAnimation(AnimClass.getAnimUp(this));
@@ -1533,7 +1563,7 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         dialog.setContentView(R.layout.spawner_leave_dialog);
         dialog.setCancelable(true);
 
-        RelativeLayout rl_native_ad_wrapper = dialog.findViewById(R.id.rl_native_ad_wrapper);
+        RelativeLayout ad_layout_container = dialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
 
@@ -1541,30 +1571,44 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             prefManager = new MailER_PreferenceClass(this);
         }
 
-        boolean isNativeEnabled = true;
-        String customAdId = "";
+        boolean isNativeEnabled = prefManager.getBoolean("editor_exit_dialog_native_enabled", prefManager.getAdsStatus("ExitDialog_NativeAD") == 1);
+        String customAdId = prefManager.getAdsId("editor_exit_dialog_native_id");
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isNativeEnabled = rc.getBoolean("editor_exit_dialog_native_enabled");
-                customAdId = rc.getString("editor_exit_dialog_native_id");
-            } else {
-                isNativeEnabled = prefManager.getBoolean("editor_exit_dialog_native_enabled", prefManager.getAdsStatus("ExitDialog_NativeAD") == 1);
-                customAdId = prefManager.getAdsId("editor_exit_dialog_native_id");
+            if (rc != null) {
+                if (rc.getValue("editor_exit_dialog_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isNativeEnabled = rc.getBoolean("editor_exit_dialog_native_enabled");
+                }
+                if (rc.getValue("editor_exit_dialog_native_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("editor_exit_dialog_native_id");
+                    if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                }
             }
-        } catch (Exception e) {
-            isNativeEnabled = prefManager.getBoolean("editor_exit_dialog_native_enabled", prefManager.getAdsStatus("ExitDialog_NativeAD") == 1);
-            customAdId = prefManager.getAdsId("editor_exit_dialog_native_id");
-        }
+        } catch (Exception ignored) {}
 
         if (isNativeEnabled && MailER_NetworkUtils.isNetworkAvailable(this)) {
-            if (rl_native_ad_wrapper != null) rl_native_ad_wrapper.setVisibility(View.VISIBLE);
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
             if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.VISIBLE);
-            if (shimmer_view_container != null) shimmer_view_container.setVisibility(View.VISIBLE);
-            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, customAdId);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.setVisibility(View.VISIBLE);
+                shimmer_view_container.startShimmer();
+            }
+            MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, customAdId, new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onAdFailed() {
+                }
+            });
         } else {
-            if (rl_native_ad_wrapper != null) rl_native_ad_wrapper.setVisibility(View.GONE);
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
             if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
             if (shimmer_view_container != null) shimmer_view_container.setVisibility(View.GONE);
         }
@@ -1793,17 +1837,13 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
         }
 
         // Check Remote Config directly, fallback to PreferenceClass
-        boolean isTimerEnabled = true;
+        boolean isTimerEnabled = prefManager.getBoolean("editor_reward_timer_enabled", true);
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
+            if (rc != null && rc.getValue("editor_reward_timer_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                 isTimerEnabled = rc.getBoolean("editor_reward_timer_enabled");
-            } else {
-                isTimerEnabled = prefManager.getBoolean("editor_reward_timer_enabled", true);
             }
-        } catch (Exception e) {
-            isTimerEnabled = prefManager.getBoolean("editor_reward_timer_enabled", true);
-        }
+        } catch (Exception ignored) {}
 
         // If Remote Config says FALSE, user continues editing freely without any popup or timer
         if (!isTimerEnabled) {
@@ -1815,17 +1855,13 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
             return;
         }
 
-        int timerSeconds = 60;
+        int timerSeconds = prefManager.getInt("editor_reward_timer_seconds", 60);
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getLong("editor_reward_timer_seconds") > 0) {
+            if (rc != null && rc.getValue("editor_reward_timer_seconds").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
                 timerSeconds = (int) rc.getLong("editor_reward_timer_seconds");
-            } else {
-                timerSeconds = prefManager.getInt("editor_reward_timer_seconds", 60);
             }
-        } catch (Exception e) {
-            timerSeconds = prefManager.getInt("editor_reward_timer_seconds", 60);
-        }
+        } catch (Exception ignored) {}
 
         if (timerSeconds <= 0) {
             return;
@@ -2509,12 +2545,14 @@ public class MailER_PosterEditActivity extends AppCompatActivity implements View
 
             if (save) {
                 if (path != null) {
+                    isPosterSaved = true;
                     startIntent();
                 } else {
                     Toast.makeText(MailER_PosterEditActivity.this, "Something went wrong!!!", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
+            isPosterSaved = true;
             saveDialog();
         }
     }

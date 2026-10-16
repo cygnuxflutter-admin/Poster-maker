@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import com.festival.flyer.postermaker.MyApplication;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.adManager.MailER_InterstitialAdManager;
 import com.festival.flyer.postermaker.adManager.MailER_LoadAds;
+import com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil;
 import com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager;
 import com.festival.flyer.postermaker.model.MailER_BgImage;
 import com.festival.flyer.postermaker.threadTask.MailER_DlBgAsync;
@@ -43,8 +45,11 @@ import com.festival.flyer.postermaker.utils.MailER_LikeManager;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
 import com.festival.flyer.postermaker.utils.MailER_NetworkUtils;
 import com.festival.flyer.postermaker.utils.MailER_PreferenceClass;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.model.AspectRatio;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -57,7 +62,7 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
     private TextView tvTitle, tvSubtitle, tvEditText;
     private ImageView ivEditIcon;
     private ProgressBar pbEditLoading;
-    private LinearLayout btnEditTop;
+    private LinearLayout btnEditBottom;
 
     private ArrayList<MailER_BgImage> bgList = new ArrayList<>();
     private String catName;
@@ -130,7 +135,15 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
         }
 
         initViews();
-        setupBannerAd();
+        setupPreviewNativeAd();
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
     }
 
     private void initViews() {
@@ -148,7 +161,7 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
 
         tvTitle = findViewById(R.id.tv_title);
         tvSubtitle = findViewById(R.id.tv_subtitle);
-        btnEditTop = findViewById(R.id.btn_edit_top);
+        btnEditBottom = findViewById(R.id.btn_edit_bottom);
         ivEditIcon = findViewById(R.id.iv_edit_icon);
         tvEditText = findViewById(R.id.tv_edit_text);
         pbEditLoading = findViewById(R.id.pb_edit_loading);
@@ -201,8 +214,8 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
             }
         }
 
-        if (btnEditTop != null) {
-            btnEditTop.setOnClickListener(v -> {
+        if (btnEditBottom != null) {
+            btnEditBottom.setOnClickListener(v -> {
                 if (isLoadingBg) return;
                 int currentPos = viewPager2.getCurrentItem();
                 if (currentPos >= 0 && currentPos < bgList.size()) {
@@ -223,22 +236,118 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
         }
     }
 
-    private void setupBannerAd() {
-        RelativeLayout btm = findViewById(R.id.btm);
-        ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
-        RelativeLayout rl_ad = findViewById(R.id.rl_ad);
+    private void setupPreviewNativeAd() {
+        CardView cardNativeAd = findViewById(R.id.card_native_ad);
+        RelativeLayout nativeAdContainer = findViewById(R.id.native_ad_container);
+        ShimmerFrameLayout nativeShimmerContainer = findViewById(R.id.native_shimmer_container);
 
-        int BannerAdStatus = preferenceClass.getAdsStatus("BGSelectScreen_BannerAD");
-        boolean isPreviewBannerEnabled = preferenceClass.getBoolean("preview_bg_banner_enabled", BannerAdStatus == 1);
-        String customAdId = preferenceClass.getAdsId("preview_bg_banner_ad_id");
-        if (MailER_NetworkUtils.isNetworkAvailable(this) && isPreviewBannerEnabled) {
-            if (btm != null) btm.setVisibility(View.VISIBLE);
-            MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
+        if (cardNativeAd == null || nativeAdContainer == null) return;
+
+        boolean isNativeEnabled = true;
+        String customAdId = "";
+        String adType = "compact"; // Default: Compact Native Ad (height 100dp)
+        int customHeightDp = 100;
+
+        try {
+            FirebaseRemoteConfig rc = FirebaseRemoteConfig.getInstance();
+            String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc);
+            if (masterJson != null && !masterJson.trim().isEmpty()) {
+                JSONObject root = new JSONObject(masterJson);
+                if (root.has("backgrounds")) {
+                    JSONObject bgObj = root.getJSONObject("backgrounds");
+                    if (bgObj.has("preview_native_ad")) {
+                        JSONObject nObj = bgObj.getJSONObject("preview_native_ad");
+                        isNativeEnabled = nObj.optBoolean("enabled", nObj.optBoolean("is_show", true));
+                        customAdId = nObj.optString("ad_id", nObj.optString("native_ad_id", ""));
+                        adType = nObj.optString("type", nObj.optString("ad_type", adType));
+                        int configuredHeight = nObj.optInt("height", -1);
+                        if (configuredHeight > 0) {
+                            customHeightDp = configuredHeight;
+                        }
+                    } else if (bgObj.has("preview_ad")) {
+                        JSONObject nObj = bgObj.getJSONObject("preview_ad");
+                        isNativeEnabled = nObj.optBoolean("enabled", nObj.optBoolean("is_show", true));
+                        customAdId = nObj.optString("ad_id", nObj.optString("native_ad_id", ""));
+                        adType = nObj.optString("type", nObj.optString("ad_type", adType));
+                        int configuredHeight = nObj.optInt("height", -1);
+                        if (configuredHeight > 0) {
+                            customHeightDp = configuredHeight;
+                        }
+                    }
+                }
+            } else {
+                if (rc.getKeysByPrefix("").contains("preview_bg_native_enabled")) {
+                    isNativeEnabled = rc.getBoolean("preview_bg_native_enabled");
+                }
+                if (rc.getKeysByPrefix("").contains("preview_bg_native_ad_id")) {
+                    customAdId = rc.getString("preview_bg_native_ad_id");
+                }
+                if (rc.getKeysByPrefix("").contains("preview_bg_native_type")) {
+                    adType = rc.getString("preview_bg_native_type");
+                }
+                if (rc.getKeysByPrefix("").contains("preview_bg_native_height")) {
+                    long h = rc.getLong("preview_bg_native_height");
+                    if (h > 0) customHeightDp = (int) h;
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("BgPreview", "Error reading remote config preview native ad: " + e.getMessage());
+        }
+
+        if (preferenceClass != null) {
+            isNativeEnabled = preferenceClass.getBoolean("preview_bg_native_enabled", isNativeEnabled);
+            String savedId = preferenceClass.getAdsId("preview_bg_native_ad_id");
+            if (customAdId.isEmpty() && savedId != null && !savedId.isEmpty()) {
+                customAdId = savedId;
+            }
+            String savedType = preferenceClass.getDataType("preview_bg_native_type", "");
+            if (!savedType.isEmpty()) {
+                adType = savedType;
+            }
+            int savedH = preferenceClass.getInt("preview_bg_native_height", -1);
+            if (savedH > 0) {
+                customHeightDp = savedH;
+            }
+        }
+
+        if (MailER_NetworkUtils.isNetworkAvailable(this) && isNativeEnabled) {
+            cardNativeAd.setVisibility(View.VISIBLE);
+
+            if (customHeightDp > 0) {
+                int hPx = dpToPx(customHeightDp);
+                ViewGroup.LayoutParams lp = nativeAdContainer.getLayoutParams();
+                if (lp != null) {
+                    lp.height = hPx;
+                    nativeAdContainer.setLayoutParams(lp);
+                }
+                if (nativeShimmerContainer != null) {
+                    ViewGroup.LayoutParams slp = nativeShimmerContainer.getLayoutParams();
+                    if (slp != null) {
+                        slp.height = hPx;
+                        nativeShimmerContainer.setLayoutParams(slp);
+                    }
+                }
+            }
+
+            if (nativeShimmerContainer != null) {
+                nativeShimmerContainer.setVisibility(View.VISIBLE);
+                nativeShimmerContainer.startShimmer();
+            }
+
+            if ("compact".equalsIgnoreCase(adType)) {
+                MailER_NativeAdUtil.loadCompactNativeAd(nativeAdContainer, this, nativeShimmerContainer, customAdId.isEmpty() ? null : customAdId);
+            } else if ("medium".equalsIgnoreCase(adType)) {
+                MailER_NativeAdUtil.loadMediumNativeAd(nativeAdContainer, this, nativeShimmerContainer, customAdId.isEmpty() ? null : customAdId);
+            } else if ("banner".equalsIgnoreCase(adType)) {
+                MailER_LoadAds.loadAdmobBannerAd(this, nativeAdContainer, nativeShimmerContainer, customAdId.isEmpty() ? null : customAdId);
+            } else {
+                MailER_NativeAdUtil.loadNativeAd(nativeAdContainer, this, nativeShimmerContainer, customAdId.isEmpty() ? null : customAdId);
+            }
         } else {
-            if (btm != null) btm.setVisibility(View.GONE);
-            if (shimmer_view_container != null) {
-                shimmer_view_container.stopShimmer();
-                shimmer_view_container.setVisibility(View.GONE);
+            cardNativeAd.setVisibility(View.GONE);
+            if (nativeShimmerContainer != null) {
+                nativeShimmerContainer.stopShimmer();
+                nativeShimmerContainer.setVisibility(View.GONE);
             }
         }
     }
@@ -252,7 +361,7 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
         }
 
         if (bg.isPremium()) {
-            boolean isPremiumAdEnabled = preferenceClass.getBoolean("premium_ad_enabled", true);
+            boolean isPremiumAdEnabled = preferenceClass.getBoolean("background_premium_ad_enabled", preferenceClass.getBoolean("premium_ad_enabled", true));
             if (!isPremiumAdEnabled) {
                 downloadAndOpen(bg.getImage_url());
                 return;
@@ -261,9 +370,10 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                 if (materialDialog != null && materialDialog.isShowing()) {
                     materialDialog.dismiss();
                 }
-                String pAdType = preferenceClass.getDataType("PremiumAdType", "reward");
+                String pAdType = preferenceClass.getDataType("background_premium_ad_type", preferenceClass.getDataType("PremiumAdType", "reward"));
+                String customRwId = preferenceClass.getAdsId("background_reward_ad_id");
                 if (pAdType != null && pAdType.equalsIgnoreCase("Reward")) {
-                    MailER_RewardVideoManager.showRewardVideoAd(MailER_BackgroundPreviewActivity.this, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
+                    MailER_RewardVideoManager.showRewardVideoAd(MailER_BackgroundPreviewActivity.this, customRwId, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
                         @Override
                         public void onAdClose() {
                             isRewarded = true;
@@ -281,6 +391,7 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
                     materialDialog.dismiss();
                 }
             });
+            return;
         } else {
             downloadAndOpen(bg.getImage_url());
         }
@@ -288,17 +399,17 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
 
     private void setLoadingState(boolean loading) {
         isLoadingBg = loading;
-        if (pbEditLoading != null && ivEditIcon != null && tvEditText != null && btnEditTop != null) {
+        if (pbEditLoading != null && ivEditIcon != null && tvEditText != null && btnEditBottom != null) {
             if (loading) {
                 pbEditLoading.setVisibility(View.VISIBLE);
                 ivEditIcon.setVisibility(View.GONE);
                 tvEditText.setText("Opening...");
-                btnEditTop.setEnabled(false);
+                btnEditBottom.setEnabled(false);
             } else {
                 pbEditLoading.setVisibility(View.GONE);
                 ivEditIcon.setVisibility(View.VISIBLE);
-                tvEditText.setText("Edit");
-                btnEditTop.setEnabled(true);
+                tvEditText.setText("Use Background");
+                btnEditBottom.setEnabled(true);
             }
         }
     }
@@ -403,6 +514,10 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         tempBgList = null;
+        ShimmerFrameLayout nativeShimmerContainer = findViewById(R.id.native_shimmer_container);
+        if (nativeShimmerContainer != null) {
+            nativeShimmerContainer.stopShimmer();
+        }
     }
 
     // =========================================================================
@@ -412,10 +527,11 @@ public class MailER_BackgroundPreviewActivity extends AppCompatActivity {
         if (cardView == null || parentW <= 0 || parentH <= 0) return;
         if (ratio <= 0.05f) ratio = 1.0f;
 
-        int marginH = cardView.getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._28sdp);
-        int marginV = cardView.getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._32sdp);
+        // Zero horizontal margin so background spans 100% full width with NO side white space
+        int marginH = 0;
+        int marginV = cardView.getResources().getDimensionPixelSize(com.intuit.sdp.R.dimen._8sdp);
 
-        int maxW = Math.max(100, parentW - marginH);
+        int maxW = parentW;
         int maxH = Math.max(100, parentH - marginV);
 
         int finalW;

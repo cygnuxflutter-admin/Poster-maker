@@ -43,6 +43,11 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
         setupSettingsOptions();
 
+        TextView tvAppVersion = findViewById(R.id.tv_app_version);
+        if (tvAppVersion != null) {
+            tvAppVersion.setText("Version " + com.festival.flyer.postermaker.BuildConfig.VERSION_NAME);
+        }
+
         findViewById(R.id.btn_back).setOnClickListener(v -> onBackPressed());
     }
 
@@ -86,6 +91,7 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
         findViewById(R.id.ll_help).setOnClickListener(v -> {
             // Placeholder for Help
+            com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "support@cygnux.in", null));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Support - Poster Maker App");
             startActivity(Intent.createChooser(emailIntent, "Send email..."));

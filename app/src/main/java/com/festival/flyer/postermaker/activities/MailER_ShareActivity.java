@@ -197,6 +197,7 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void printImage() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         PrintHelper photoPrinter = new PrintHelper(this);
         photoPrinter.setScaleMode(PrintHelper.SCALE_MODE_FIT);
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
@@ -206,6 +207,7 @@ public class MailER_ShareActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void shareIntent(String package_name, String error_msg, boolean more) {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
 
         String shareBody = "I'm using amazing Poster maker App, I just created a new poster within 2 min and it's completely free. I recommend you to try this app. \n\n" +
                 "https://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName();

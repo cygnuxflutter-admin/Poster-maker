@@ -47,9 +47,6 @@ public class MailER_CreateActivity extends AppCompatActivity {
     public File camera_file;
     public int CAMERA_INTENT = 1001;
     public int GALLERY_INTENT = 1002;
-    
-    // Bottom nav tabs
-    private LinearLayout tabHome, tabExplore, tabCreate, tabCreations, tabSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +75,6 @@ public class MailER_CreateActivity extends AppCompatActivity {
         });
 
                 loadRemoteConfigAds();
-        setupBottomNavigation();
     }
 
     private void loadRemoteConfigAds() {
@@ -91,26 +87,25 @@ public class MailER_CreateActivity extends AppCompatActivity {
         }
 
         com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
-        boolean isBannerEnabled = true;
-        String bannerType = "banner";
-        String customAdId = "";
+        boolean isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
+        String bannerType = preferenceClass.getDataType("create_banner_ad_type", "banner");
+        String customAdId = preferenceClass.getAdsId("create_banner_ad_id");
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isBannerEnabled = rc.getBoolean("create_banner_ad_enabled");
-                bannerType = rc.getString("create_banner_ad_type");
-                customAdId = rc.getString("create_banner_ad_id");
-            } else {
-                isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
-                bannerType = preferenceClass.getDataType("create_banner_ad_type");
-                customAdId = preferenceClass.getAdsId("create_banner_ad_id");
+            if (rc != null) {
+                if (rc.getValue("create_banner_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isBannerEnabled = rc.getBoolean("create_banner_ad_enabled");
+                }
+                if (rc.getValue("create_banner_ad_type").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    bannerType = rc.getString("create_banner_ad_type");
+                }
+                if (rc.getValue("create_banner_ad_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("create_banner_ad_id");
+                    if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                }
             }
-        } catch (Exception e) {
-            isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
-            bannerType = preferenceClass.getDataType("create_banner_ad_type");
-            customAdId = preferenceClass.getAdsId("create_banner_ad_id");
-        }
+        } catch (Exception ignored) {}
 
         if (bannerType == null || bannerType.trim().isEmpty()) {
             bannerType = "banner";
@@ -143,11 +138,13 @@ public class MailER_CreateActivity extends AppCompatActivity {
     }
 
     public void openPhotoGallery() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, GALLERY_INTENT);
     }
 
     public void openCamera() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
         camera_file = new File(getCacheDir(), ".temp.jpg");
         intent.putExtra(MediaStore.EXTRA_OUTPUT,
@@ -238,39 +235,6 @@ public class MailER_CreateActivity extends AppCompatActivity {
                 new AspectRatio("5:4", 5, 4),
                 new AspectRatio("4:5", 4, 5));
         uCrop.withOptions(options).start(this);
-    }
-
-    private void setupBottomNavigation() {
-        tabHome = findViewById(R.id.tab_home);
-        tabExplore = findViewById(R.id.tab_explore);
-        tabCreate = findViewById(R.id.tab_create);
-        tabCreations = findViewById(R.id.tab_creations);
-        tabSettings = findViewById(R.id.tab_settings);
-
-        tabHome.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_PosterMainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-            finish();
-        });
-
-        tabExplore.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
-        tabCreations.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_BackgroundSelectionActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
-        tabSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_SettingsActivity.class);
-            startActivity(intent);
-            finish();
-        });
     }
 
     @Override

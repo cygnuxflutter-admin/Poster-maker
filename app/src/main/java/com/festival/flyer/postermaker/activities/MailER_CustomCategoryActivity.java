@@ -167,22 +167,21 @@ public class MailER_CustomCategoryActivity extends AppCompatActivity {
 
     private void loadBannerAd() {
         MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(this);
-        boolean isBannerEnabled = true;
-        String bannerAdId = "";
+        boolean isBannerEnabled = preferenceClass.getBoolean("custom_category_banner_ad_enabled", preferenceClass.getAdsStatus("BrandPoster_BannerAD") == 1);
+        String bannerAdId = preferenceClass.getAdsId("custom_category_banner_ad_id");
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isBannerEnabled = rc.getBoolean("custom_category_banner_ad_enabled");
-                bannerAdId = rc.getString("custom_category_banner_ad_id");
-            } else {
-                isBannerEnabled = preferenceClass.getBoolean("custom_category_banner_ad_enabled", preferenceClass.getAdsStatus("BrandPoster_BannerAD") == 1);
-                bannerAdId = preferenceClass.getAdsId("custom_category_banner_ad_id");
+            if (rc != null) {
+                if (rc.getValue("custom_category_banner_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isBannerEnabled = rc.getBoolean("custom_category_banner_ad_enabled");
+                }
+                if (rc.getValue("custom_category_banner_ad_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("custom_category_banner_ad_id");
+                    if (!remoteId.trim().isEmpty()) bannerAdId = remoteId.trim();
+                }
             }
-        } catch (Exception e) {
-            isBannerEnabled = preferenceClass.getBoolean("custom_category_banner_ad_enabled", preferenceClass.getAdsStatus("BrandPoster_BannerAD") == 1);
-            bannerAdId = preferenceClass.getAdsId("custom_category_banner_ad_id");
-        }
+        } catch (Exception ignored) {}
 
         android.widget.RelativeLayout btm = findViewById(R.id.btm);
         android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
@@ -494,7 +493,8 @@ public class MailER_CustomCategoryActivity extends AppCompatActivity {
                             JSONArray uniquePosters = new JSONArray();
                             java.util.HashSet<String> seenDesignIds = new java.util.HashSet<>();
                             MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(MailER_CustomCategoryActivity.this);
-                            int premiumCount = preferenceClass.getInt("PremiumPostCount", 3);
+                            boolean premiumEnabled = preferenceClass.getBoolean("branding_premium_enabled", preferenceClass.getBoolean("premium_enabled", true));
+                            int premiumCount = preferenceClass.getInt("branding_premium_interval", preferenceClass.getInt("PremiumPostCount", 3));
                             int uniqueIndex = 0;
 
                             for (int i = 0; i < data.length(); i++) {
@@ -503,7 +503,7 @@ public class MailER_CustomCategoryActivity extends AppCompatActivity {
                                 if (!seenDesignIds.contains(designId)) {
                                     seenDesignIds.add(designId);
 
-                                    boolean isPremium = (premiumCount > 0) && (uniqueIndex != 0) && (uniqueIndex % premiumCount == 0);
+                                    boolean isPremium = premiumEnabled && (premiumCount > 0) && (uniqueIndex != 0) && (uniqueIndex % premiumCount == 0);
                                     poster.put("is_premium_local", isPremium);
                                     uniquePosters.put(poster);
                                     uniqueIndex++;

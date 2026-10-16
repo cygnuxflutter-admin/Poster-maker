@@ -125,6 +125,7 @@ public class MailER_BusinessProfileActivity extends AppCompatActivity {
     }
 
     private void openImagePicker() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, "Select Logo"), PICK_IMAGE_REQUEST);

@@ -65,33 +65,31 @@ public class MailER_AutoPosterAdapter extends RecyclerView.Adapter<RecyclerView.
         nativeAdUtil = new com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil(context);
 
         MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(context);
-        boolean isNativeEnabled = true;
-        int firstAdCount = 4;
-        int repeatAdCount = 6;
+        boolean isNativeEnabled = preferenceClass.getBoolean("custom_category_native_enabled", true);
+        String customNativeAdId = preferenceClass.getAdsId("custom_category_native_ad_id");
+        int firstAdCount = preferenceClass.getInt("custom_category_first_rv_count", preferenceClass.getInt("First_rv_count", 4));
+        int repeatAdCount = preferenceClass.getInt("custom_category_rv_count", preferenceClass.getInt("rv_count", 6));
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isNativeEnabled = rc.getBoolean("custom_category_native_enabled");
-                customNativeAdId = rc.getString("custom_category_native_ad_id");
-                if (rc.getLong("custom_category_first_rv_count") > 0) {
-                    firstAdCount = (int) rc.getLong("custom_category_first_rv_count");
+            if (rc != null) {
+                if (rc.getValue("custom_category_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isNativeEnabled = rc.getBoolean("custom_category_native_enabled");
                 }
-                if (rc.getLong("custom_category_rv_count") > 0) {
-                    repeatAdCount = (int) rc.getLong("custom_category_rv_count");
+                if (rc.getValue("custom_category_native_ad_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("custom_category_native_ad_id");
+                    if (!remoteId.trim().isEmpty()) customNativeAdId = remoteId.trim();
                 }
-            } else {
-                isNativeEnabled = preferenceClass.getBoolean("custom_category_native_enabled", true);
-                customNativeAdId = preferenceClass.getAdsId("custom_category_native_ad_id");
-                firstAdCount = preferenceClass.getInt("custom_category_first_rv_count", preferenceClass.getInt("First_rv_count", 4));
-                repeatAdCount = preferenceClass.getInt("custom_category_rv_count", preferenceClass.getInt("rv_count", 6));
+                if (rc.getValue("custom_category_first_rv_count").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    long count = rc.getLong("custom_category_first_rv_count");
+                    if (count > 0) firstAdCount = (int) count;
+                }
+                if (rc.getValue("custom_category_rv_count").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    long count = rc.getLong("custom_category_rv_count");
+                    if (count > 0) repeatAdCount = (int) count;
+                }
             }
-        } catch (Exception e) {
-            isNativeEnabled = preferenceClass.getBoolean("custom_category_native_enabled", true);
-            customNativeAdId = preferenceClass.getAdsId("custom_category_native_ad_id");
-            firstAdCount = preferenceClass.getInt("custom_category_first_rv_count", preferenceClass.getInt("First_rv_count", 4));
-            repeatAdCount = preferenceClass.getInt("custom_category_rv_count", preferenceClass.getInt("rv_count", 6));
-        }
+        } catch (Exception ignored) {}
 
         this.displayList = new java.util.ArrayList<>();
         int itemsSinceLastAd = 0;
@@ -191,9 +189,9 @@ public class MailER_AutoPosterAdapter extends RecyclerView.Adapter<RecyclerView.
             String ratio = posterObj.optString("ratio", "1:1"); // e.g., "1:1" or "9:16"
             
             MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(context);
-            int premiumCount = preferenceClass.getInt("PremiumPostCount", 3);
-            boolean premiumEnabled = preferenceClass.getBoolean("premium_enabled", true);
-            boolean isPremium = premiumEnabled && (premiumCount > 0) && (position != 0) && (position % premiumCount == 0);
+            boolean premiumEnabled = preferenceClass.getBoolean("branding_premium_enabled", preferenceClass.getBoolean("premium_enabled", true));
+            int premiumCount = preferenceClass.getInt("branding_premium_interval", preferenceClass.getInt("PremiumPostCount", 3));
+            boolean isPremium = posterObj.has("is_premium_local") ? posterObj.optBoolean("is_premium_local", false) : (premiumEnabled && (premiumCount > 0) && (position != 0) && (position % premiumCount == 0));
             
             String idStr = posterObj.optString("id", "0");
             MailER_PosterImage posterImage = new MailER_PosterImage(idStr, thumbUrl, ratio, isPremium);
@@ -302,7 +300,7 @@ public class MailER_AutoPosterAdapter extends RecyclerView.Adapter<RecyclerView.
 
                     if (isPremium && context instanceof Activity) {
                         Activity activity = (Activity) context;
-                        boolean isPremiumAdEnabled = preferenceClass.getBoolean("premium_ad_enabled", true);
+                        boolean isPremiumAdEnabled = preferenceClass.getBoolean("branding_premium_ad_enabled", preferenceClass.getBoolean("premium_ad_enabled", true));
                         if (!isPremiumAdEnabled) {
                             openEditor.run();
                             return;
@@ -311,9 +309,10 @@ public class MailER_AutoPosterAdapter extends RecyclerView.Adapter<RecyclerView.
                             if (materialDialog != null && materialDialog.isShowing()) {
                                 materialDialog.dismiss();
                             }
-                            String pAdType = preferenceClass.getDataType("PremiumAdType", "reward");
+                            String pAdType = preferenceClass.getDataType("branding_premium_ad_type", preferenceClass.getDataType("PremiumAdType", "reward"));
+                            String customRwId = preferenceClass.getAdsId("branding_reward_ad_id");
                             if (pAdType != null && pAdType.equalsIgnoreCase("Reward")) {
-                                MailER_RewardVideoManager.showRewardVideoAd(activity, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
+                                MailER_RewardVideoManager.showRewardVideoAd(activity, customRwId, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
                                     @Override
                                     public void onAdClose() {
                                         openEditor.run();
@@ -329,6 +328,7 @@ public class MailER_AutoPosterAdapter extends RecyclerView.Adapter<RecyclerView.
                                 materialDialog.dismiss();
                             }
                         });
+                        return;
                     } else {
                         openEditor.run();
                     }

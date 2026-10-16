@@ -195,6 +195,9 @@ public class MailER_SplashScreen extends AppCompatActivity {
                             preferenceClass.setDataType(key, getSnapshotString(snapshot, key, ""));
                         }
 
+                        // Asynchronously prefetch & warm cache for Hero Banners and Trending Festivals
+                        com.festival.flyer.postermaker.utils.MailER_AppCacheManager.prefetchHomeData(getApplicationContext());
+
                         Log.e("---API_DATA---", "Base URL (field_1): " + preferenceClass.getDataType("field_51"));
                         Log.e("---API_DATA---", "API Path (field_34): " + preferenceClass.getDataType("field_34"));
 
@@ -332,25 +335,16 @@ public class MailER_SplashScreen extends AppCompatActivity {
                                         }
                                     }
 
-                                    // Remote Config Master Override: ensure Remote Config has precedence over Realtime DB
+                                    // Remote Config Master Override: ensure Remote Config has 100% precedence over Realtime DB
                                     try {
                                         com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-                                        String masterConfigStr = rc.getString("app_ad_config");
-                                        if (masterConfigStr != null && !masterConfigStr.trim().isEmpty()) {
-                                            parseMasterConfig(masterConfigStr);
-                                        }
+                                        applyAllRemoteConfig(rc);
                                     } catch (Exception e) {
                                         Log.e("RemoteConfig", "Override error: " + e.getMessage());
                                     }
 
                                     // Mark Firebase ads as loaded - fallback IDs will no longer be used
                                     preferenceClass.setFirebaseAdsLoaded();
-                                    
-                                    // Start loading ads immediately after Firebase gives us the IDs
-                                    ((com.festival.flyer.postermaker.MyApplication) getApplicationContext()).sendRequest();
-                                    ((com.festival.flyer.postermaker.MyApplication) getApplicationContext()).loadInterstitialAd();
-
-
 
                                     save_token(true);
                                 } catch (Exception e) {
@@ -381,7 +375,13 @@ public class MailER_SplashScreen extends AppCompatActivity {
     }
 
     private void save_token(boolean update) {
-        try { ((MyApplication) getApplicationContext()).appOpenManager.fetchAd(); } catch (Exception e) {}
+        boolean isSplashAppOpenEnabled = preferenceClass.getBoolean("splash_app_open_enabled", true)
+                && (preferenceClass.getInt("SplashAppOpen", 1) == 1)
+                && (MailER_AppOpenManager.AppOpenAdShow == 1);
+        if (isSplashAppOpenEnabled) {
+            try { ((MyApplication) getApplicationContext()).appOpenManager.fetchAd(); } catch (Exception e) {}
+        }
+        try { ((MyApplication) getApplicationContext()).getInterstitialAdManager().loadAd(); } catch (Exception ignored) {}
 
         isDataLoaded = true;
         if (update) {
@@ -395,6 +395,12 @@ public class MailER_SplashScreen extends AppCompatActivity {
         if (preferenceClass.isFirstTimeLaunch()) {
             preferenceClass.setFirstTimeLaunch(false);
         }
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            applyAllRemoteConfig(rc);
+        } catch (Exception ignored) {}
+
         String firebaseVerStr = preferenceClass.getDataType("UpdateVersionName", "0");
         boolean isUpdateRequired = isVersionHigher(firebaseVerStr, BuildConfig.VERSION_NAME);
 
@@ -426,10 +432,17 @@ public class MailER_SplashScreen extends AppCompatActivity {
             TextView msgTextView = dialog.findViewById(R.id.titleTextView);
             Button okBtn = dialog.findViewById(R.id.dialogOkButton);
             descriptionTextView.setTextColor(getResources().getColor(R.color.black));
-            String updateMsg = "A huge new update (Version " + firebaseVerStr + ") is available!\n\nPlease update the app immediately to unlock New Posters, Backgrounds, and all latest features. The old version will no longer receive new data.";
+            String customDesc = preferenceClass.getDataType("update_dialog_desc", "");
+            String updateMsg;
+            if (!customDesc.trim().isEmpty()) {
+                updateMsg = customDesc.replace("{version}", firebaseVerStr);
+            } else {
+                updateMsg = "A huge new update (Version " + firebaseVerStr + ") is available!\n\nPlease update the app immediately to unlock New Posters, Backgrounds, and all latest features. The old version will no longer receive new data.";
+            }
             descriptionTextView.setText(updateMsg);
             msgTextView.setTextColor(getResources().getColor(R.color.black));
-            msgTextView.setText("Update Available");
+            String customTitle = preferenceClass.getDataType("update_dialog_title", "Update Available");
+            msgTextView.setText(customTitle.trim().isEmpty() ? "Update Available" : customTitle);
             okBtn.setText("Update");
             cancelBtn.setText("Cancel");
 
@@ -510,15 +523,16 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
     private void performNavigation() {
         MyApplication.isAdsSplash = false;
-        ((MyApplication) getApplicationContext()).sendRequest();
-        ((MyApplication) getApplicationContext()).loadInterstitialAd();
 
-        boolean isAppOpenEnabled = true;
-        boolean isFallbackInterEnabled = true;
+        boolean isAppOpenEnabled = preferenceClass.getBoolean("splash_app_open_enabled", true)
+                && (preferenceClass.getInt("SplashAppOpen", 1) == 1)
+                && (MailER_AppOpenManager.AppOpenAdShow == 1);
+        boolean isFallbackInterEnabled = preferenceClass.getBoolean("splash_fallback_interstitial_enabled", true)
+                && (preferenceClass.getInt("SplashFallbackInter", 1) == 1);
 
         try {
             FirebaseRemoteConfig rc = FirebaseRemoteConfig.getInstance();
-            String masterConfigStr = rc.getString("app_ad_config");
+            String masterConfigStr = MailER_PreferenceClass.getMasterConfigJson(rc);
             if (masterConfigStr != null && !masterConfigStr.trim().isEmpty()) {
                 org.json.JSONObject root = new org.json.JSONObject(masterConfigStr);
                 if (root.has("splash")) {
@@ -687,6 +701,11 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "    \"fallback_interstitial_ad\": {\n" +
                     "      \"enabled\": true,\n" +
                     "      \"ad_id\": \"\"\n" +
+                    "    },\n" +
+                    "    \"foreground_app_open\": {\n" +
+                    "      \"enabled\": true,\n" +
+                    "      \"ad_id\": \"\",\n" +
+                    "      \"cooldown_seconds\": 60\n" +
                     "    }\n" +
                     "  }\n" +
                     "}";
@@ -708,14 +727,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "    \"show_native_ad\": true,\n" +
                     "    \"native_ad_id\": \"\",\n" +
                     "    \"ad_type\": \"medium\",\n" +
+                    "    \"height\": 140,\n" +
                     "    \"next_interstitial\": true\n" +
-                    "  },\n" +
-                    "  \"onboarding_4\": {\n" +
-                    "    \"next_interstitial\": false\n" +
-                    "  },\n" +
-                    "  \"cold_start\": {\n" +
-                    "    \"enabled\": true,\n" +
-                    "    \"timer_seconds\": 3\n" +
                     "  }\n" +
                     "}";
 
@@ -724,25 +737,32 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "    \"app_open_ad\": { \"enabled\": true, \"ad_id\": \"\" },\n" +
                     "    \"fallback_interstitial_ad\": { \"enabled\": true, \"ad_id\": \"\" }\n" +
                     "  },\n" +
+                    "  \"foreground_app_open\": {\n" +
+                    "    \"enabled\": true,\n" +
+                    "    \"ad_id\": \"\",\n" +
+                    "    \"cooldown_seconds\": 60,\n" +
+                    "    \"suppress_on_ad_click\": true,\n" +
+                    "    \"suppress_on_intent\": true\n" +
+                    "  },\n" +
                     "  \"onboarding\": {\n" +
-                    "    \"onboarding_1\": { \"show_native_ad\": true, \"ad_type\": \"compact\", \"native_ad_id\": \"\", \"next_interstitial\": true },\n" +
-                    "    \"onboarding_2\": { \"show_native_ad\": true, \"ad_type\": \"medium\", \"native_ad_id\": \"\", \"next_interstitial\": true },\n" +
-                    "    \"onboarding_3\": { \"show_native_ad\": true, \"ad_type\": \"medium\", \"native_ad_id\": \"\", \"next_interstitial\": true },\n" +
-                    "    \"onboarding_4\": { \"next_interstitial\": false },\n" +
-                    "    \"cold_start\": { \"enabled\": true, \"timer_seconds\": 3 }\n" +
+                    "    \"is_interstitial_enabled\": true,\n" +
+                    "    \"onboarding_1\": { \"show_native_ad\": true, \"ad_type\": \"compact\", \"height\": 90, \"native_ad_id\": \"\", \"next_interstitial\": true },\n" +
+                    "    \"onboarding_2\": { \"show_native_ad\": true, \"ad_type\": \"medium\", \"height\": 140, \"native_ad_id\": \"\", \"next_interstitial\": true },\n" +
+                    "    \"onboarding_3\": { \"show_native_ad\": true, \"ad_type\": \"medium\", \"height\": 140, \"native_ad_id\": \"\", \"next_interstitial\": true }\n" +
                     "  },\n" +
                     "  \"home\": {\n" +
                     "    \"enabled\": true,\n" +
                     "    \"ad_type\": \"banner\",\n" +
-                    "    \"ad_id\": \"\",\n" +
-                    "    \"banner_ad\": { \"enabled\": true, \"ad_id\": \"\" }\n" +
+                    "    \"ad_id\": \"\"\n" +
                     "  },\n" +
                     "  \"templates\": {\n" +
                     "    \"banner_ad\": { \"enabled\": true, \"ad_id\": \"\" },\n" +
+                    "    \"preview_banner_ad\": { \"enabled\": true, \"ad_id\": \"\" },\n" +
                     "    \"native_ad\": { \"enabled\": true, \"first_ad_after\": 4, \"repeat_ad_after\": 6, \"ad_id\": \"\" }\n" +
                     "  },\n" +
                     "  \"backgrounds\": {\n" +
                     "    \"banner_ad\": { \"enabled\": true, \"ad_id\": \"\" },\n" +
+                    "    \"preview_banner_ad\": { \"enabled\": true, \"ad_id\": \"\" },\n" +
                     "    \"native_ad\": { \"enabled\": true, \"first_ad_after\": 4, \"repeat_ad_after\": 6, \"ad_id\": \"\" }\n" +
                     "  },\n" +
                     "  \"create\": {\n" +
@@ -780,11 +800,6 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "      \"free_actions_allowed\": 3,\n" +
                     "      \"ad_type\": \"reward\",\n" +
                     "      \"ad_id\": \"\"\n" +
-                    "    },\n" +
-                    "    \"timer_interstitial\": {\n" +
-                    "      \"enabled\": false,\n" +
-                    "      \"timer_seconds\": 180,\n" +
-                    "      \"ad_id\": \"\"\n" +
                     "    }\n" +
                     "  },\n" +
                     "  \"interstitial\": {\n" +
@@ -800,6 +815,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "    \"timer_seconds\": 4,\n" +
                     "    \"native_ad\": {\n" +
                     "      \"enabled\": true,\n" +
+                    "      \"height\": 280,\n" +
+                    "      \"type\": \"video\",\n" +
                     "      \"ad_id\": \"\"\n" +
                     "    }\n" +
                     "  },\n" +
@@ -811,24 +828,82 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     "    \"banner_ad\": { \"enabled\": true, \"ad_id\": \"\" }\n" +
                     "  },\n" +
                     "  \"premium_config\": {\n" +
+                    "    \"templates\": {\n" +
+                    "      \"enabled\": true,\n" +
+                    "      \"interval\": 3,\n" +
+                    "      \"ad_type\": \"reward\",\n" +
+                    "      \"ad_enabled\": true,\n" +
+                    "      \"reward_ad_id\": \"\",\n" +
+                    "      \"interstitial_ad_id\": \"\"\n" +
+                    "    },\n" +
+                    "    \"background\": {\n" +
+                    "      \"enabled\": true,\n" +
+                    "      \"interval\": 3,\n" +
+                    "      \"ad_type\": \"reward\",\n" +
+                    "      \"ad_enabled\": true,\n" +
+                    "      \"reward_ad_id\": \"\",\n" +
+                    "      \"interstitial_ad_id\": \"\"\n" +
+                    "    },\n" +
+                    "    \"branding_poster\": {\n" +
+                    "      \"enabled\": true,\n" +
+                    "      \"interval\": 3,\n" +
+                    "      \"ad_type\": \"reward\",\n" +
+                    "      \"ad_enabled\": true,\n" +
+                    "      \"reward_ad_id\": \"\",\n" +
+                    "      \"interstitial_ad_id\": \"\"\n" +
+                    "    }\n" +
+                    "  },\n" +
+                    "  \"app_exit_dialog\": {\n" +
                     "    \"enabled\": true,\n" +
-                    "    \"post_interval\": 3,\n" +
-                    "    \"ad_type\": \"reward\",\n" +
-                    "    \"ad_enabled\": true,\n" +
-                    "    \"reward_ad_id\": \"\",\n" +
-                    "    \"interstitial_ad_id\": \"\"\n" +
+                    "    \"native_ad\": {\n" +
+                    "      \"enabled\": true,\n" +
+                    "      \"ad_id\": \"\",\n" +
+                    "      \"ad_type\": \"medium\"\n" +
+                    "    }\n" +
+                    "  },\n" +
+                    "  \"suppress_app_open_on_ad_click\": true,\n" +
+                    "  \"suppress_app_open_on_intent\": true,\n" +
+                    "  \"banner_show_shimmer_on_fail\": true,\n" +
+                    "  \"native_show_shimmer_on_fail\": true,\n" +
+                    "  \"screenshot_enabled\": true,\n" +
+                    "  \"app_update\": {\n" +
+                    "    \"update_available\": false,\n" +
+                    "    \"force_update\": false,\n" +
+                    "    \"update_version_name\": \"1.0\",\n" +
+                    "    \"update_title\": \"Update Available\",\n" +
+                    "    \"update_description\": \"\"\n" +
                     "  }\n" +
                     "}";
 
             Map<String, Object> defaults = new HashMap<>();
             defaults.put("app_ad_config", defaultMasterJson);
+            defaults.put("postermaker", defaultMasterJson);
             defaults.put("splash_ad_config", defaultSplashJson);
             defaults.put("onboarding_config", defaultOnboardingJson);
+            defaults.put("app_exit_dialog_enabled", true);
+            defaults.put("app_exit_native_enabled", true);
+            defaults.put("app_exit_native_id", "");
+            defaults.put("app_exit_native_type", "medium");
             defaults.put("interstitial_enabled", true);
             defaults.put("interstitial_count", 4);
             defaults.put("interstitial_click_interval", 4);
             defaults.put("interstitial_ad_type", "interstitial");
             defaults.put("interstitial_ad_id", "");
+            defaults.put("templates_premium_enabled", true);
+            defaults.put("templates_premium_interval", 3);
+            defaults.put("templates_premium_ad_type", "reward");
+            defaults.put("templates_premium_ad_enabled", true);
+            defaults.put("templates_reward_ad_id", "");
+            defaults.put("background_premium_enabled", true);
+            defaults.put("background_premium_interval", 3);
+            defaults.put("background_premium_ad_type", "reward");
+            defaults.put("background_premium_ad_enabled", true);
+            defaults.put("background_reward_ad_id", "");
+            defaults.put("branding_premium_enabled", true);
+            defaults.put("branding_premium_interval", 3);
+            defaults.put("branding_premium_ad_type", "reward");
+            defaults.put("branding_premium_ad_enabled", true);
+            defaults.put("branding_reward_ad_id", "");
             defaults.put("premium_enabled", true);
             defaults.put("premium_post_interval", 3);
             defaults.put("PremiumPostCount", 3);
@@ -837,12 +912,22 @@ public class MailER_SplashScreen extends AppCompatActivity {
             defaults.put("premium_ad_enabled", true);
             defaults.put("premium_reward_ad_id", "");
             defaults.put("premium_interstitial_ad_id", "");
+            defaults.put("premium_dialog_native_enabled", true);
+            defaults.put("premium_dialog_native_id", "");
             defaults.put("share_banner_ad_enabled", true);
             defaults.put("share_banner_ad_id", "");
             defaults.put("preview_poster_banner_enabled", true);
             defaults.put("preview_poster_banner_ad_id", "");
+            defaults.put("preview_poster_native_enabled", true);
+            defaults.put("preview_poster_native_ad_id", "");
+            defaults.put("preview_poster_native_type", "compact");
+            defaults.put("preview_poster_native_height", 100L);
             defaults.put("preview_bg_banner_enabled", true);
             defaults.put("preview_bg_banner_ad_id", "");
+            defaults.put("preview_bg_native_enabled", true);
+            defaults.put("preview_bg_native_ad_id", "");
+            defaults.put("preview_bg_native_type", "compact");
+            defaults.put("preview_bg_native_height", 100L);
             defaults.put("is_onboarding_inter_enabled", true);
             defaults.put("onboarding_inter_step_1", true);
             defaults.put("onboarding_inter_step_2", true);
@@ -877,6 +962,20 @@ public class MailER_SplashScreen extends AppCompatActivity {
             defaults.put("custom_category_native_ad_id", "");
             defaults.put("custom_category_first_rv_count", 4);
             defaults.put("custom_category_rv_count", 6);
+            defaults.put("foreground_app_open_enabled", true);
+            defaults.put("foreground_app_open_ad_id", "");
+            defaults.put("foreground_app_open_cooldown", 60L);
+            defaults.put("suppress_app_open_on_ad_click", true);
+            defaults.put("suppress_app_open_on_intent", true);
+            defaults.put("screenshot_enabled", true);
+            defaults.put("banner_show_shimmer_on_fail", true);
+            defaults.put("native_show_shimmer_on_fail", true);
+            defaults.put("UpdateAvailable", 0);
+            defaults.put("ForceUpdate", 0);
+            defaults.put("UpdateVersionName", "1.0");
+            defaults.put("update_available", false);
+            defaults.put("force_update", false);
+            defaults.put("update_version_name", "1.0");
             remoteConfig.setDefaultsAsync(defaults);
 
             // Apply defaults immediately so preference flags are initialized safely
@@ -884,245 +983,548 @@ public class MailER_SplashScreen extends AppCompatActivity {
 
             remoteConfig.fetchAndActivate().addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
-                    String masterConfigStr = remoteConfig.getString("app_ad_config");
-                    if (masterConfigStr != null && !masterConfigStr.trim().isEmpty()) {
-                        parseMasterConfig(masterConfigStr);
-                    }
-                    String splashConfigStr = remoteConfig.getString("splash_ad_config");
-                    if (splashConfigStr != null && !splashConfigStr.trim().isEmpty()) {
-                        try {
-                            org.json.JSONObject splashObj = new org.json.JSONObject(splashConfigStr);
-                            if (splashObj.has("splash_screen")) {
-                                splashObj = splashObj.getJSONObject("splash_screen");
-                            }
-
-                            boolean appOpenEnabled = true;
-                            String appOpenId = "";
-                            if (splashObj.has("app_open_ad")) {
-                                org.json.JSONObject appOpenObj = splashObj.getJSONObject("app_open_ad");
-                                appOpenEnabled = appOpenObj.optBoolean("enabled", true);
-                                appOpenId = appOpenObj.optString("ad_id", "");
-                            } else {
-                                appOpenEnabled = splashObj.optBoolean("app_open_enabled", true);
-                                appOpenId = splashObj.optString("app_open_ad_id", "");
-                            }
-
-                            boolean fallbackInterEnabled = true;
-                            String interId = "";
-                            if (splashObj.has("fallback_interstitial_ad")) {
-                                org.json.JSONObject interObj = splashObj.getJSONObject("fallback_interstitial_ad");
-                                fallbackInterEnabled = interObj.optBoolean("enabled", true);
-                                interId = interObj.optString("ad_id", "");
-                            } else {
-                                fallbackInterEnabled = splashObj.optBoolean("fallback_interstitial_enabled", true);
-                                interId = splashObj.optString("interstitial_ad_id", "");
-                            }
-
-                            preferenceClass.setBoolean("splash_app_open_enabled", appOpenEnabled);
-                            preferenceClass.setBoolean("splash_fallback_interstitial_enabled", fallbackInterEnabled);
-                            MailER_AppOpenManager.AppOpenAdShow = appOpenEnabled ? 1 : 0;
-                            preferenceClass.setInt("SplashAppOpen", appOpenEnabled ? 1 : 0);
-                            preferenceClass.setInt("SplashFallbackInter", fallbackInterEnabled ? 1 : 0);
-
-                            if (!appOpenId.trim().isEmpty()) {
-                                preferenceClass.setAdsId("AppOpenID", appOpenId.trim());
-                            }
-                            if (!interId.trim().isEmpty()) {
-                                preferenceClass.setAdsId("InterstitalAdunitID", interId.trim());
-                            }
-                        } catch (Exception ex) {
-                            Log.e("RemoteConfig", "Error parsing splash_ad_config: " + ex.getMessage());
-                        }
-                    }
-
-                    String onboardingConfigStr = remoteConfig.getString("onboarding_config");
-                    if (onboardingConfigStr != null && !onboardingConfigStr.trim().isEmpty()) {
-                        preferenceClass.setDataType("onboarding_config", onboardingConfigStr);
-                    }
-
-                    boolean isInterEnabled = remoteConfig.getBoolean("is_onboarding_inter_enabled");
-                    boolean step1 = remoteConfig.getBoolean("onboarding_inter_step_1");
-                    boolean step2 = remoteConfig.getBoolean("onboarding_inter_step_2");
-                    boolean step3 = remoteConfig.getBoolean("onboarding_inter_step_3");
-                    String onboardingAdId = remoteConfig.getString("onboarding_inter_ad_id");
-
-                    preferenceClass.setBoolean("is_onboarding_inter_enabled", isInterEnabled);
-                    preferenceClass.setBoolean("onboarding_inter_step_1", step1);
-                    preferenceClass.setBoolean("onboarding_inter_step_2", step2);
-                    preferenceClass.setBoolean("onboarding_inter_step_3", step3);
-
-                    if (onboardingAdId != null && !onboardingAdId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("OnboardingInterAdID", onboardingAdId.trim());
-                    }
-
-                    boolean editorRewardEnabled = remoteConfig.getBoolean("editor_reward_timer_enabled");
-                    long editorRewardSeconds = remoteConfig.getLong("editor_reward_timer_seconds");
-                    String editorRewardAdId = remoteConfig.getString("editor_reward_ad_id");
-
-                    preferenceClass.setBoolean("editor_reward_timer_enabled", editorRewardEnabled);
-                    if (editorRewardSeconds > 0) {
-                        preferenceClass.setInt("editor_reward_timer_seconds", (int) editorRewardSeconds);
-                    }
-                    if (editorRewardAdId != null && !editorRewardAdId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("editor_reward_ad_id", editorRewardAdId.trim());
-                        preferenceClass.setAdsId("RewardVideoUnitID", editorRewardAdId.trim());
-                    }
-
-                    boolean dlEnabled = remoteConfig.getBoolean("editor_download_ad_enabled");
-                    long freeDownloads = remoteConfig.getLong("editor_free_downloads_allowed");
-                    boolean askWatermark = remoteConfig.getBoolean("editor_ask_watermark_removal");
-                    String dlAdType = remoteConfig.getString("editor_download_ad_type");
-                    String dlAdId = remoteConfig.getString("editor_download_ad_id");
-
-                    preferenceClass.setBoolean("editor_download_ad_enabled", dlEnabled);
-                    if (freeDownloads >= 0) {
-                        preferenceClass.setInt("editor_free_downloads_allowed", (int) freeDownloads);
-                    }
-                    preferenceClass.setBoolean("editor_ask_watermark_removal", askWatermark);
-                    if (dlAdType != null && !dlAdType.trim().isEmpty()) {
-                        preferenceClass.setDataType("editor_download_ad_type", dlAdType.trim());
-                    }
-                    if (dlAdId != null && !dlAdId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("editor_download_ad_id", dlAdId.trim());
-                    }
-
-                    boolean urEnabled = remoteConfig.getBoolean("editor_undo_redo_ad_enabled");
-                    long freeUndoRedo = remoteConfig.getLong("editor_free_undo_redo_allowed");
-                    String urAdType = remoteConfig.getString("editor_undo_redo_ad_type");
-                    String urAdId = remoteConfig.getString("editor_undo_redo_ad_id");
-
-                    preferenceClass.setBoolean("editor_undo_redo_ad_enabled", urEnabled);
-                    if (freeUndoRedo >= 0) {
-                        preferenceClass.setInt("editor_free_undo_redo_allowed", (int) freeUndoRedo);
-                    }
-                    if (urAdType != null && !urAdType.trim().isEmpty()) {
-                        preferenceClass.setDataType("editor_undo_redo_ad_type", urAdType.trim());
-                    }
-                    if (urAdId != null && !urAdId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("editor_undo_redo_ad_id", urAdId.trim());
-                    }
-
-                    boolean createBannerEnabled = remoteConfig.getBoolean("create_banner_ad_enabled");
-                    String createBannerType = remoteConfig.getString("create_banner_ad_type");
-                    String createBannerId = remoteConfig.getString("create_banner_ad_id");
-                    boolean createInterEnabled = remoteConfig.getBoolean("create_interstitial_enabled");
-                    long createInterInterval = remoteConfig.getLong("create_interstitial_interval");
-                    String createInterId = remoteConfig.getString("create_interstitial_ad_id");
-
-                    preferenceClass.setBoolean("create_banner_ad_enabled", createBannerEnabled);
-                    preferenceClass.setAdsStatus("CreateScreen_BannerAD", createBannerEnabled ? 1 : 0);
-                    if (createBannerType != null && !createBannerType.trim().isEmpty()) {
-                        preferenceClass.setDataType("create_banner_ad_type", createBannerType.trim());
-                    }
-                    if (createBannerId != null && !createBannerId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("create_banner_ad_id", createBannerId.trim());
-                    }
-                    preferenceClass.setBoolean("interstitial_create_enabled", createInterEnabled);
-                    if (createInterInterval > 0) {
-                        preferenceClass.setInt("interstitial_create_interval", (int) createInterInterval);
-                    }
-                    if (createInterId != null && !createInterId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("create_interstitial_ad_id", createInterId.trim());
-                    }
-
-                    boolean editorExitNativeEnabled = remoteConfig.getBoolean("editor_exit_dialog_native_enabled");
-                    String editorExitNativeId = remoteConfig.getString("editor_exit_dialog_native_id");
-                    String editorExitNativeType = remoteConfig.getString("editor_exit_dialog_native_type");
-
-                    preferenceClass.setBoolean("editor_exit_dialog_native_enabled", editorExitNativeEnabled);
-                    preferenceClass.setAdsStatus("ExitDialog_NativeAD", editorExitNativeEnabled ? 1 : 0);
-                    if (editorExitNativeId != null && !editorExitNativeId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("editor_exit_dialog_native_id", editorExitNativeId.trim());
-                    }
-                    if (editorExitNativeType != null && !editorExitNativeType.trim().isEmpty()) {
-                        preferenceClass.setDataType("editor_exit_dialog_native_type", editorExitNativeType.trim());
-                    }
-
-                    boolean myCreationBannerEnabled = remoteConfig.getBoolean("my_creation_banner_ad_enabled");
-                    String myCreationBannerId = remoteConfig.getString("my_creation_banner_ad_id");
-                    preferenceClass.setBoolean("my_creation_banner_ad_enabled", myCreationBannerEnabled);
-                    if (myCreationBannerId != null && !myCreationBannerId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("my_creation_banner_ad_id", myCreationBannerId.trim());
-                    }
-
-                    boolean customCatBannerEnabled = remoteConfig.getBoolean("custom_category_banner_ad_enabled");
-                    String customCatBannerId = remoteConfig.getString("custom_category_banner_ad_id");
-                    preferenceClass.setBoolean("custom_category_banner_ad_enabled", customCatBannerEnabled);
-                    preferenceClass.setAdsStatus("BrandPoster_BannerAD", customCatBannerEnabled ? 1 : 0);
-                    if (customCatBannerId != null && !customCatBannerId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("custom_category_banner_ad_id", customCatBannerId.trim());
-                    }
-
-                    boolean customCatNativeEnabled = remoteConfig.getBoolean("custom_category_native_enabled");
-                    String customCatNativeId = remoteConfig.getString("custom_category_native_ad_id");
-                    long customCatFirstRv = remoteConfig.getLong("custom_category_first_rv_count");
-                    long customCatRv = remoteConfig.getLong("custom_category_rv_count");
-                    preferenceClass.setBoolean("custom_category_native_enabled", customCatNativeEnabled);
-                    if (customCatNativeId != null && !customCatNativeId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("custom_category_native_ad_id", customCatNativeId.trim());
-                    }
-                    if (customCatFirstRv > 0) {
-                        preferenceClass.setInt("custom_category_first_rv_count", (int) customCatFirstRv);
-                    }
-                    if (customCatRv > 0) {
-                        preferenceClass.setInt("custom_category_rv_count", (int) customCatRv);
-                    }
-
-                    boolean premiumEnabled = remoteConfig.getBoolean("premium_enabled");
-                    long premiumInterval = remoteConfig.getLong("premium_post_interval");
-                    if (premiumInterval <= 0) {
-                        premiumInterval = remoteConfig.getLong("PremiumPostCount");
-                    }
-                    String premiumAdType = remoteConfig.getString("premium_ad_type");
-                    if (premiumAdType == null || premiumAdType.isEmpty()) {
-                        premiumAdType = remoteConfig.getString("PremiumAdType");
-                    }
-                    boolean premiumAdEnabled = remoteConfig.getBoolean("premium_ad_enabled");
-                    String premiumRwId = remoteConfig.getString("premium_reward_ad_id");
-                    String premiumIntId = remoteConfig.getString("premium_interstitial_ad_id");
-
-                    preferenceClass.setBoolean("premium_enabled", premiumEnabled);
-                    preferenceClass.setInt("PremiumPostCount", premiumEnabled ? (premiumInterval > 0 ? (int) premiumInterval : 3) : 0);
-                    if (premiumAdType != null && !premiumAdType.trim().isEmpty()) {
-                        preferenceClass.setDataType("PremiumAdType", premiumAdType.trim());
-                    }
-                    preferenceClass.setBoolean("premium_ad_enabled", premiumAdEnabled);
-                    if (premiumRwId != null && !premiumRwId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("premium_reward_ad_id", premiumRwId.trim());
-                    }
-                    if (premiumIntId != null && !premiumIntId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("premium_interstitial_ad_id", premiumIntId.trim());
-                    }
-
-                    boolean interEnabled = remoteConfig.getBoolean("interstitial_enabled");
-                    long interCount = remoteConfig.getLong("interstitial_count");
-                    if (interCount <= 0) {
-                        interCount = remoteConfig.getLong("interstitial_click_interval");
-                    }
-                    String interAdType = remoteConfig.getString("interstitial_ad_type");
-                    String interAdId = remoteConfig.getString("interstitial_ad_id");
-
-                    preferenceClass.setBoolean("interstitial_enabled", interEnabled);
-                    preferenceClass.setBoolean("interstitial_global_enabled", interEnabled);
-                    if (interCount > 0) {
-                        preferenceClass.setInt("interstitial_count", (int) interCount);
-                        preferenceClass.setAdsStatus("interstitalAdStatus", (int) interCount);
-                    }
-                    if (interAdType != null && !interAdType.trim().isEmpty()) {
-                        preferenceClass.setDataType("interstitial_ad_type", interAdType.trim());
-                    }
-                    if (interAdId != null && !interAdId.trim().isEmpty()) {
-                        preferenceClass.setAdsId("interstitial_ad_id", interAdId.trim());
-                        preferenceClass.setAdsId("InterstitalAdunitID", interAdId.trim());
-                    }
-
+                    applyAllRemoteConfig(remoteConfig);
                     Log.d("RemoteConfig", "Remote Config loaded successfully!");
                 } else {
                     Log.d("RemoteConfig", "Remote Config fetch failed or unchanged");
                 }
             });
+
+            remoteConfig.addOnConfigUpdateListener(new com.google.firebase.remoteconfig.ConfigUpdateListener() {
+                @Override
+                public void onUpdate(@NonNull com.google.firebase.remoteconfig.ConfigUpdate configUpdate) {
+                    Log.d("RemoteConfig", "Real-time config update received: " + configUpdate.getUpdatedKeys());
+                    remoteConfig.activate().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            applyAllRemoteConfig(remoteConfig);
+                            Log.d("RemoteConfig", "Real-time Remote Config activated and applied!");
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(@NonNull com.google.firebase.remoteconfig.FirebaseRemoteConfigException error) {
+                    Log.e("RemoteConfig", "Real-time config update error: " + error.getMessage());
+                }
+            });
         } catch (Exception e) {
             Log.e("RemoteConfig", "Remote Config exception: " + e.getMessage());
+        }
+    }
+
+    private boolean isRemoteKey(FirebaseRemoteConfig rc, String key, boolean isStandaloneAllowed) {
+        if (rc == null || key == null) return false;
+        try {
+            if (rc.getValue(key).getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                return true;
+            }
+        } catch (Exception ignored) {}
+        return isStandaloneAllowed;
+    }
+
+    private void applyAllRemoteConfig(FirebaseRemoteConfig remoteConfig) {
+        if (remoteConfig == null) return;
+        try {
+            String masterConfigStr = null;
+            if (remoteConfig.getValue("postermaker").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                masterConfigStr = remoteConfig.getString("postermaker");
+            } else if (remoteConfig.getValue("app_ad_config").getSource() == FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                masterConfigStr = remoteConfig.getString("app_ad_config");
+            } else {
+                masterConfigStr = remoteConfig.getString("postermaker");
+                if (masterConfigStr == null || masterConfigStr.trim().isEmpty()) {
+                    masterConfigStr = remoteConfig.getString("app_ad_config");
+                }
+            }
+            boolean hasMasterConfig = (masterConfigStr != null && !masterConfigStr.trim().isEmpty());
+            if (hasMasterConfig) {
+                Log.d("RemoteConfig", "Using Master Config: " + masterConfigStr);
+                parseMasterConfig(masterConfigStr);
+            }
+
+            // Standalone fallback/override: ONLY apply if key came from remote server (VALUE_SOURCE_REMOTE)
+            // or if masterConfigStr was absent (fallback to legacy individual keys).
+            boolean isStandaloneAllowed = !hasMasterConfig;
+
+            if (isRemoteKey(remoteConfig, "screenshot_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("screenshot_enabled", remoteConfig.getBoolean("screenshot_enabled"));
+                com.festival.flyer.postermaker.MyApplication.applyScreenshotSecurity(MailER_SplashScreen.this);
+            } else if (isRemoteKey(remoteConfig, "allow_screenshot", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("screenshot_enabled", remoteConfig.getBoolean("allow_screenshot"));
+                com.festival.flyer.postermaker.MyApplication.applyScreenshotSecurity(MailER_SplashScreen.this);
+            } else if (isRemoteKey(remoteConfig, "disable_screenshots", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("screenshot_enabled", !remoteConfig.getBoolean("disable_screenshots"));
+                com.festival.flyer.postermaker.MyApplication.applyScreenshotSecurity(MailER_SplashScreen.this);
+            }
+
+            if (!hasMasterConfig) {
+                String splashConfigStr = remoteConfig.getString("splash_ad_config");
+                if (splashConfigStr != null && !splashConfigStr.trim().isEmpty()) {
+                    try {
+                        org.json.JSONObject splashObj = new org.json.JSONObject(splashConfigStr);
+                        if (splashObj.has("splash_screen")) {
+                            splashObj = splashObj.getJSONObject("splash_screen");
+                        }
+
+                        boolean appOpenEnabled = true;
+                        String appOpenId = "";
+                        if (splashObj.has("app_open_ad")) {
+                            org.json.JSONObject appOpenObj = splashObj.getJSONObject("app_open_ad");
+                            appOpenEnabled = appOpenObj.optBoolean("enabled", true);
+                            appOpenId = appOpenObj.optString("ad_id", "");
+                        } else {
+                            appOpenEnabled = splashObj.optBoolean("app_open_enabled", true);
+                            appOpenId = splashObj.optString("app_open_ad_id", "");
+                        }
+
+                        boolean fallbackInterEnabled = true;
+                        String interId = "";
+                        if (splashObj.has("fallback_interstitial_ad")) {
+                            org.json.JSONObject interObj = splashObj.getJSONObject("fallback_interstitial_ad");
+                            fallbackInterEnabled = interObj.optBoolean("enabled", true);
+                            interId = interObj.optString("ad_id", "");
+                        } else {
+                            fallbackInterEnabled = splashObj.optBoolean("fallback_interstitial_enabled", true);
+                            interId = splashObj.optString("interstitial_ad_id", "");
+                        }
+
+                        if (splashObj.has("foreground_app_open")) {
+                            org.json.JSONObject fgObj = splashObj.getJSONObject("foreground_app_open");
+                            preferenceClass.setBoolean("foreground_app_open_enabled", fgObj.optBoolean("enabled", true));
+                            preferenceClass.setInt("foreground_app_open_cooldown", fgObj.optInt("cooldown_seconds", 60));
+                            if (fgObj.has("ad_id") && !fgObj.optString("ad_id").trim().isEmpty()) {
+                                preferenceClass.setAdsId("ForegroundAppOpenID", fgObj.optString("ad_id").trim());
+                            }
+                        } else if (splashObj.has("app_resume_ad")) {
+                            org.json.JSONObject fgObj = splashObj.getJSONObject("app_resume_ad");
+                            preferenceClass.setBoolean("foreground_app_open_enabled", fgObj.optBoolean("enabled", true));
+                            preferenceClass.setInt("foreground_app_open_cooldown", fgObj.optInt("cooldown_seconds", 60));
+                            if (fgObj.has("ad_id") && !fgObj.optString("ad_id").trim().isEmpty()) {
+                                preferenceClass.setAdsId("ForegroundAppOpenID", fgObj.optString("ad_id").trim());
+                            }
+                        }
+
+                        preferenceClass.setBoolean("splash_app_open_enabled", appOpenEnabled);
+                        preferenceClass.setBoolean("splash_fallback_interstitial_enabled", fallbackInterEnabled);
+                        MailER_AppOpenManager.AppOpenAdShow = appOpenEnabled ? 1 : 0;
+                        preferenceClass.setInt("SplashAppOpen", appOpenEnabled ? 1 : 0);
+                        preferenceClass.setInt("SplashFallbackInter", fallbackInterEnabled ? 1 : 0);
+
+                        if (!appOpenId.trim().isEmpty()) {
+                            preferenceClass.setAdsId("AppOpenID", appOpenId.trim());
+                        }
+                        if (!interId.trim().isEmpty()) {
+                            preferenceClass.setAdsId("InterstitalAdunitID", interId.trim());
+                        }
+                    } catch (Exception ex) {
+                        Log.e("RemoteConfig", "Error parsing splash_ad_config: " + ex.getMessage());
+                    }
+                }
+            }
+
+            // Standalone Foreground / Background App Open keys
+            if (isRemoteKey(remoteConfig, "foreground_app_open_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("foreground_app_open_enabled", remoteConfig.getBoolean("foreground_app_open_enabled"));
+            } else if (isRemoteKey(remoteConfig, "app_resume_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("foreground_app_open_enabled", remoteConfig.getBoolean("app_resume_ad_enabled"));
+            }
+
+            if (isRemoteKey(remoteConfig, "foreground_app_open_ad_id", isStandaloneAllowed)) {
+                String standaloneFgId = remoteConfig.getString("foreground_app_open_ad_id");
+                if (standaloneFgId.isEmpty()) {
+                    standaloneFgId = remoteConfig.getString("app_resume_ad_id");
+                }
+                if (!standaloneFgId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("ForegroundAppOpenID", standaloneFgId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "foreground_app_open_cooldown", isStandaloneAllowed)) {
+                long standaloneCooldown = remoteConfig.getLong("foreground_app_open_cooldown");
+                if (standaloneCooldown <= 0) {
+                    standaloneCooldown = remoteConfig.getLong("app_resume_cooldown_seconds");
+                }
+                if (standaloneCooldown > 0) {
+                    preferenceClass.setInt("foreground_app_open_cooldown", (int) standaloneCooldown);
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "suppress_app_open_on_ad_click", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("suppress_app_open_on_ad_click", remoteConfig.getBoolean("suppress_app_open_on_ad_click"));
+            }
+            if (isRemoteKey(remoteConfig, "suppress_app_open_on_intent", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("suppress_app_open_on_intent", remoteConfig.getBoolean("suppress_app_open_on_intent"));
+            }
+
+            if (!hasMasterConfig) {
+                String onboardingConfigStr = remoteConfig.getString("onboarding_config");
+                if (onboardingConfigStr != null && !onboardingConfigStr.trim().isEmpty()) {
+                    preferenceClass.setDataType("onboarding_config", onboardingConfigStr);
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "is_onboarding_inter_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("is_onboarding_inter_enabled", remoteConfig.getBoolean("is_onboarding_inter_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "onboarding_inter_step_1", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("onboarding_inter_step_1", remoteConfig.getBoolean("onboarding_inter_step_1"));
+            }
+            if (isRemoteKey(remoteConfig, "onboarding_inter_step_2", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("onboarding_inter_step_2", remoteConfig.getBoolean("onboarding_inter_step_2"));
+            }
+            if (isRemoteKey(remoteConfig, "onboarding_inter_step_3", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("onboarding_inter_step_3", remoteConfig.getBoolean("onboarding_inter_step_3"));
+            }
+            if (isRemoteKey(remoteConfig, "onboarding_inter_ad_id", isStandaloneAllowed)) {
+                String onboardingAdId = remoteConfig.getString("onboarding_inter_ad_id");
+                if (onboardingAdId != null && !onboardingAdId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("OnboardingInterAdID", onboardingAdId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "editor_reward_timer_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("editor_reward_timer_enabled", remoteConfig.getBoolean("editor_reward_timer_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "editor_reward_timer_seconds", isStandaloneAllowed)) {
+                long editorRewardSeconds = remoteConfig.getLong("editor_reward_timer_seconds");
+                if (editorRewardSeconds > 0) {
+                    preferenceClass.setInt("editor_reward_timer_seconds", (int) editorRewardSeconds);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_reward_ad_id", isStandaloneAllowed)) {
+                String editorRewardAdId = remoteConfig.getString("editor_reward_ad_id");
+                if (editorRewardAdId != null && !editorRewardAdId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("editor_reward_ad_id", editorRewardAdId.trim());
+                    preferenceClass.setAdsId("RewardVideoUnitID", editorRewardAdId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "editor_download_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("editor_download_ad_enabled", remoteConfig.getBoolean("editor_download_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "editor_free_downloads_allowed", isStandaloneAllowed)) {
+                long freeDownloads = remoteConfig.getLong("editor_free_downloads_allowed");
+                if (freeDownloads >= 0) {
+                    preferenceClass.setInt("editor_free_downloads_allowed", (int) freeDownloads);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_ask_watermark_removal", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("editor_ask_watermark_removal", remoteConfig.getBoolean("editor_ask_watermark_removal"));
+            }
+            if (isRemoteKey(remoteConfig, "editor_download_ad_type", isStandaloneAllowed)) {
+                String dlAdType = remoteConfig.getString("editor_download_ad_type");
+                if (dlAdType != null && !dlAdType.trim().isEmpty()) {
+                    preferenceClass.setDataType("editor_download_ad_type", dlAdType.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_download_ad_id", isStandaloneAllowed)) {
+                String dlAdId = remoteConfig.getString("editor_download_ad_id");
+                if (dlAdId != null && !dlAdId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("editor_download_ad_id", dlAdId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "editor_undo_redo_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("editor_undo_redo_ad_enabled", remoteConfig.getBoolean("editor_undo_redo_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "editor_free_undo_redo_allowed", isStandaloneAllowed)) {
+                long freeUndoRedo = remoteConfig.getLong("editor_free_undo_redo_allowed");
+                if (freeUndoRedo >= 0) {
+                    preferenceClass.setInt("editor_free_undo_redo_allowed", (int) freeUndoRedo);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_undo_redo_ad_type", isStandaloneAllowed)) {
+                String urAdType = remoteConfig.getString("editor_undo_redo_ad_type");
+                if (urAdType != null && !urAdType.trim().isEmpty()) {
+                    preferenceClass.setDataType("editor_undo_redo_ad_type", urAdType.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_undo_redo_ad_id", isStandaloneAllowed)) {
+                String urAdId = remoteConfig.getString("editor_undo_redo_ad_id");
+                if (urAdId != null && !urAdId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("editor_undo_redo_ad_id", urAdId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "create_banner_ad_enabled", isStandaloneAllowed)) {
+                boolean createBannerEnabled = remoteConfig.getBoolean("create_banner_ad_enabled");
+                preferenceClass.setBoolean("create_banner_ad_enabled", createBannerEnabled);
+                preferenceClass.setAdsStatus("CreateScreen_BannerAD", createBannerEnabled ? 1 : 0);
+            }
+            if (isRemoteKey(remoteConfig, "create_banner_ad_type", isStandaloneAllowed)) {
+                String createBannerType = remoteConfig.getString("create_banner_ad_type");
+                if (createBannerType != null && !createBannerType.trim().isEmpty()) {
+                    preferenceClass.setDataType("create_banner_ad_type", createBannerType.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "create_banner_ad_id", isStandaloneAllowed)) {
+                String createBannerId = remoteConfig.getString("create_banner_ad_id");
+                if (createBannerId != null && !createBannerId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("create_banner_ad_id", createBannerId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "create_interstitial_enabled", isStandaloneAllowed)) {
+                boolean createInterEnabled = remoteConfig.getBoolean("create_interstitial_enabled");
+                preferenceClass.setBoolean("interstitial_create_enabled", createInterEnabled);
+            }
+            if (isRemoteKey(remoteConfig, "create_interstitial_interval", isStandaloneAllowed)) {
+                long createInterInterval = remoteConfig.getLong("create_interstitial_interval");
+                if (createInterInterval > 0) {
+                    preferenceClass.setInt("interstitial_create_interval", (int) createInterInterval);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "create_interstitial_ad_id", isStandaloneAllowed)) {
+                String createInterId = remoteConfig.getString("create_interstitial_ad_id");
+                if (createInterId != null && !createInterId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("create_interstitial_ad_id", createInterId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "editor_exit_dialog_native_enabled", isStandaloneAllowed)) {
+                boolean editorExitNativeEnabled = remoteConfig.getBoolean("editor_exit_dialog_native_enabled");
+                preferenceClass.setBoolean("editor_exit_dialog_native_enabled", editorExitNativeEnabled);
+                preferenceClass.setAdsStatus("ExitDialog_NativeAD", editorExitNativeEnabled ? 1 : 0);
+            }
+            if (isRemoteKey(remoteConfig, "editor_exit_dialog_native_id", isStandaloneAllowed)) {
+                String editorExitNativeId = remoteConfig.getString("editor_exit_dialog_native_id");
+                if (editorExitNativeId != null && !editorExitNativeId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("editor_exit_dialog_native_id", editorExitNativeId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "editor_exit_dialog_native_type", isStandaloneAllowed)) {
+                String editorExitNativeType = remoteConfig.getString("editor_exit_dialog_native_type");
+                if (editorExitNativeType != null && !editorExitNativeType.trim().isEmpty()) {
+                    preferenceClass.setDataType("editor_exit_dialog_native_type", editorExitNativeType.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "my_creation_banner_ad_enabled", isStandaloneAllowed)) {
+                boolean myCreationBannerEnabled = remoteConfig.getBoolean("my_creation_banner_ad_enabled");
+                preferenceClass.setBoolean("my_creation_banner_ad_enabled", myCreationBannerEnabled);
+            }
+            if (isRemoteKey(remoteConfig, "my_creation_banner_ad_id", isStandaloneAllowed)) {
+                String myCreationBannerId = remoteConfig.getString("my_creation_banner_ad_id");
+                if (myCreationBannerId != null && !myCreationBannerId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("my_creation_banner_ad_id", myCreationBannerId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "custom_category_banner_ad_enabled", isStandaloneAllowed)) {
+                boolean customCatBannerEnabled = remoteConfig.getBoolean("custom_category_banner_ad_enabled");
+                preferenceClass.setBoolean("custom_category_banner_ad_enabled", customCatBannerEnabled);
+                preferenceClass.setAdsStatus("BrandPoster_BannerAD", customCatBannerEnabled ? 1 : 0);
+            }
+            if (isRemoteKey(remoteConfig, "custom_category_banner_ad_id", isStandaloneAllowed)) {
+                String customCatBannerId = remoteConfig.getString("custom_category_banner_ad_id");
+                if (customCatBannerId != null && !customCatBannerId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("custom_category_banner_ad_id", customCatBannerId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "custom_category_native_enabled", isStandaloneAllowed)) {
+                boolean customCatNativeEnabled = remoteConfig.getBoolean("custom_category_native_enabled");
+                preferenceClass.setBoolean("custom_category_native_enabled", customCatNativeEnabled);
+            }
+            if (isRemoteKey(remoteConfig, "custom_category_native_ad_id", isStandaloneAllowed)) {
+                String customCatNativeId = remoteConfig.getString("custom_category_native_ad_id");
+                if (customCatNativeId != null && !customCatNativeId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("custom_category_native_ad_id", customCatNativeId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "custom_category_first_rv_count", isStandaloneAllowed)) {
+                long customCatFirstRv = remoteConfig.getLong("custom_category_first_rv_count");
+                if (customCatFirstRv > 0) {
+                    preferenceClass.setInt("custom_category_first_rv_count", (int) customCatFirstRv);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "custom_category_rv_count", isStandaloneAllowed)) {
+                long customCatRv = remoteConfig.getLong("custom_category_rv_count");
+                if (customCatRv > 0) {
+                    preferenceClass.setInt("custom_category_rv_count", (int) customCatRv);
+                }
+            }
+
+            // Templates Standalone Keys
+            if (isRemoteKey(remoteConfig, "templates_premium_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("templates_premium_enabled", remoteConfig.getBoolean("templates_premium_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "templates_premium_interval", isStandaloneAllowed)) {
+                long tInterval = remoteConfig.getLong("templates_premium_interval");
+                if (tInterval > 0) preferenceClass.setInt("templates_premium_interval", (int) tInterval);
+            }
+            if (isRemoteKey(remoteConfig, "templates_premium_ad_type", isStandaloneAllowed)) {
+                String tAdType = remoteConfig.getString("templates_premium_ad_type");
+                if (tAdType != null && !tAdType.trim().isEmpty()) preferenceClass.setDataType("templates_premium_ad_type", tAdType.trim());
+            }
+            if (isRemoteKey(remoteConfig, "templates_premium_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("templates_premium_ad_enabled", remoteConfig.getBoolean("templates_premium_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "templates_reward_ad_id", isStandaloneAllowed)) {
+                String tRwId = remoteConfig.getString("templates_reward_ad_id");
+                if (tRwId != null && !tRwId.trim().isEmpty()) preferenceClass.setAdsId("templates_reward_ad_id", tRwId.trim());
+            }
+
+            // Background Standalone Keys
+            if (isRemoteKey(remoteConfig, "background_premium_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("background_premium_enabled", remoteConfig.getBoolean("background_premium_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "background_premium_interval", isStandaloneAllowed)) {
+                long bInterval = remoteConfig.getLong("background_premium_interval");
+                if (bInterval > 0) preferenceClass.setInt("background_premium_interval", (int) bInterval);
+            }
+            if (isRemoteKey(remoteConfig, "background_premium_ad_type", isStandaloneAllowed)) {
+                String bAdType = remoteConfig.getString("background_premium_ad_type");
+                if (bAdType != null && !bAdType.trim().isEmpty()) preferenceClass.setDataType("background_premium_ad_type", bAdType.trim());
+            }
+            if (isRemoteKey(remoteConfig, "background_premium_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("background_premium_ad_enabled", remoteConfig.getBoolean("background_premium_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "background_reward_ad_id", isStandaloneAllowed)) {
+                String bRwId = remoteConfig.getString("background_reward_ad_id");
+                if (bRwId != null && !bRwId.trim().isEmpty()) preferenceClass.setAdsId("background_reward_ad_id", bRwId.trim());
+            }
+
+            // Branding Poster Standalone Keys
+            if (isRemoteKey(remoteConfig, "branding_premium_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("branding_premium_enabled", remoteConfig.getBoolean("branding_premium_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "branding_premium_interval", isStandaloneAllowed)) {
+                long brInterval = remoteConfig.getLong("branding_premium_interval");
+                if (brInterval > 0) preferenceClass.setInt("branding_premium_interval", (int) brInterval);
+            }
+            if (isRemoteKey(remoteConfig, "branding_premium_ad_type", isStandaloneAllowed)) {
+                String brAdType = remoteConfig.getString("branding_premium_ad_type");
+                if (brAdType != null && !brAdType.trim().isEmpty()) preferenceClass.setDataType("branding_premium_ad_type", brAdType.trim());
+            }
+            if (isRemoteKey(remoteConfig, "branding_premium_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("branding_premium_ad_enabled", remoteConfig.getBoolean("branding_premium_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "branding_reward_ad_id", isStandaloneAllowed)) {
+                String brRwId = remoteConfig.getString("branding_reward_ad_id");
+                if (brRwId != null && !brRwId.trim().isEmpty()) preferenceClass.setAdsId("branding_reward_ad_id", brRwId.trim());
+            }
+
+            // Legacy Common Premium Standalone Keys
+            if (isRemoteKey(remoteConfig, "premium_enabled", isStandaloneAllowed)) {
+                boolean premiumEnabled = remoteConfig.getBoolean("premium_enabled");
+                preferenceClass.setBoolean("premium_enabled", premiumEnabled);
+            }
+            if (isRemoteKey(remoteConfig, "premium_post_interval", isStandaloneAllowed) || isRemoteKey(remoteConfig, "PremiumPostCount", isStandaloneAllowed)) {
+                long premiumInterval = remoteConfig.getLong("premium_post_interval");
+                if (premiumInterval <= 0) {
+                    premiumInterval = remoteConfig.getLong("PremiumPostCount");
+                }
+                boolean pEn = preferenceClass.getBoolean("premium_enabled", true);
+                preferenceClass.setInt("PremiumPostCount", pEn ? (premiumInterval > 0 ? (int) premiumInterval : 3) : 0);
+            }
+            if (isRemoteKey(remoteConfig, "premium_ad_type", isStandaloneAllowed) || isRemoteKey(remoteConfig, "PremiumAdType", isStandaloneAllowed)) {
+                String premiumAdType = remoteConfig.getString("premium_ad_type");
+                if (premiumAdType == null || premiumAdType.isEmpty()) {
+                    premiumAdType = remoteConfig.getString("PremiumAdType");
+                }
+                if (premiumAdType != null && !premiumAdType.trim().isEmpty()) {
+                    preferenceClass.setDataType("PremiumAdType", premiumAdType.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "premium_ad_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("premium_ad_enabled", remoteConfig.getBoolean("premium_ad_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "premium_reward_ad_id", isStandaloneAllowed)) {
+                String premiumRwId = remoteConfig.getString("premium_reward_ad_id");
+                if (premiumRwId != null && !premiumRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_reward_ad_id", premiumRwId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "premium_interstitial_ad_id", isStandaloneAllowed)) {
+                String premiumIntId = remoteConfig.getString("premium_interstitial_ad_id");
+                if (premiumIntId != null && !premiumIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_interstitial_ad_id", premiumIntId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "premium_dialog_native_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("premium_dialog_native_enabled", remoteConfig.getBoolean("premium_dialog_native_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "premium_dialog_native_id", isStandaloneAllowed)) {
+                String pDnId = remoteConfig.getString("premium_dialog_native_id");
+                if (pDnId != null && !pDnId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_dialog_native_id", pDnId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "app_exit_dialog_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("app_exit_dialog_enabled", remoteConfig.getBoolean("app_exit_dialog_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "app_exit_native_enabled", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("app_exit_native_enabled", remoteConfig.getBoolean("app_exit_native_enabled"));
+            }
+            if (isRemoteKey(remoteConfig, "app_exit_native_id", isStandaloneAllowed)) {
+                String appExitId = remoteConfig.getString("app_exit_native_id");
+                if (appExitId != null && !appExitId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("app_exit_native_id", appExitId.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "app_exit_native_type", isStandaloneAllowed)) {
+                String appExitType = remoteConfig.getString("app_exit_native_type");
+                if (appExitType != null && !appExitType.trim().isEmpty()) {
+                    preferenceClass.setDataType("app_exit_native_type", appExitType.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "interstitial_enabled", isStandaloneAllowed)) {
+                boolean interEnabled = remoteConfig.getBoolean("interstitial_enabled");
+                preferenceClass.setBoolean("interstitial_enabled", interEnabled);
+                preferenceClass.setBoolean("interstitial_global_enabled", interEnabled);
+            }
+            if (isRemoteKey(remoteConfig, "interstitial_count", isStandaloneAllowed) || isRemoteKey(remoteConfig, "interstitial_click_interval", isStandaloneAllowed)) {
+                long interCount = remoteConfig.getLong("interstitial_count");
+                if (interCount <= 0) {
+                    interCount = remoteConfig.getLong("interstitial_click_interval");
+                }
+                if (interCount > 0) {
+                    preferenceClass.setInt("interstitial_count", (int) interCount);
+                    preferenceClass.setAdsStatus("interstitalAdStatus", (int) interCount);
+                }
+            }
+            if (isRemoteKey(remoteConfig, "interstitial_ad_type", isStandaloneAllowed)) {
+                String interAdType = remoteConfig.getString("interstitial_ad_type");
+                if (interAdType != null && !interAdType.trim().isEmpty()) {
+                    preferenceClass.setDataType("interstitial_ad_type", interAdType.trim());
+                }
+            }
+            if (isRemoteKey(remoteConfig, "interstitial_ad_id", isStandaloneAllowed)) {
+                String interAdId = remoteConfig.getString("interstitial_ad_id");
+                if (interAdId != null && !interAdId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("interstitial_ad_id", interAdId.trim());
+                    preferenceClass.setAdsId("InterstitalAdunitID", interAdId.trim());
+                }
+            }
+
+            if (isRemoteKey(remoteConfig, "banner_show_shimmer_on_fail", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("banner_show_shimmer_on_fail", remoteConfig.getBoolean("banner_show_shimmer_on_fail"));
+            }
+            if (isRemoteKey(remoteConfig, "native_show_shimmer_on_fail", isStandaloneAllowed)) {
+                preferenceClass.setBoolean("native_show_shimmer_on_fail", remoteConfig.getBoolean("native_show_shimmer_on_fail"));
+            }
+
+            if (isRemoteKey(remoteConfig, "UpdateAvailable", isStandaloneAllowed)) {
+                preferenceClass.setInt("UpdateAvailable", (int) remoteConfig.getLong("UpdateAvailable"));
+            } else if (isRemoteKey(remoteConfig, "update_available", isStandaloneAllowed)) {
+                preferenceClass.setInt("UpdateAvailable", remoteConfig.getBoolean("update_available") ? 1 : 0);
+            }
+            if (isRemoteKey(remoteConfig, "ForceUpdate", isStandaloneAllowed)) {
+                preferenceClass.setInt("ForceUpdate", (int) remoteConfig.getLong("ForceUpdate"));
+            } else if (isRemoteKey(remoteConfig, "force_update", isStandaloneAllowed)) {
+                preferenceClass.setInt("ForceUpdate", remoteConfig.getBoolean("force_update") ? 1 : 0);
+            }
+            if (isRemoteKey(remoteConfig, "UpdateVersionName", isStandaloneAllowed)) {
+                String uvn = remoteConfig.getString("UpdateVersionName");
+                if (uvn != null && !uvn.trim().isEmpty()) preferenceClass.setDataType("UpdateVersionName", uvn.trim());
+            } else if (isRemoteKey(remoteConfig, "update_version_name", isStandaloneAllowed)) {
+                String uvn = remoteConfig.getString("update_version_name");
+                if (uvn != null && !uvn.trim().isEmpty()) preferenceClass.setDataType("UpdateVersionName", uvn.trim());
+            }
+        } catch (Exception e) {
+            Log.e("RemoteConfig", "applyAllRemoteConfig error: " + e.getMessage());
         }
     }
 
@@ -1161,10 +1563,86 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 }
             }
 
+            // 1b. Foreground / Background App Open Ad (App Resume)
+            boolean foregroundAppOpenEnabled = true;
+            String foregroundAppOpenId = "";
+            int foregroundAppOpenCooldown = 60;
+
+            org.json.JSONObject resumeObj = null;
+            if (root.has("foreground_app_open")) {
+                resumeObj = root.optJSONObject("foreground_app_open");
+            } else if (root.has("background_app_open")) {
+                resumeObj = root.optJSONObject("background_app_open");
+            } else if (root.has("app_open_resume")) {
+                resumeObj = root.optJSONObject("app_open_resume");
+            } else if (root.has("app_resume_ad")) {
+                resumeObj = root.optJSONObject("app_resume_ad");
+            } else if (root.has("app_resume")) {
+                resumeObj = root.optJSONObject("app_resume");
+            } else if (root.has("splash") && root.getJSONObject("splash").has("foreground_app_open")) {
+                resumeObj = root.getJSONObject("splash").optJSONObject("foreground_app_open");
+            } else if (root.has("splash") && root.getJSONObject("splash").has("background_app_open")) {
+                resumeObj = root.getJSONObject("splash").optJSONObject("background_app_open");
+            } else if (root.has("splash") && root.getJSONObject("splash").has("app_resume_ad")) {
+                resumeObj = root.getJSONObject("splash").optJSONObject("app_resume_ad");
+            }
+
+            boolean suppressOnAdClick = true;
+            boolean suppressOnIntent = true;
+            if (resumeObj != null) {
+                foregroundAppOpenEnabled = resumeObj.optBoolean("enabled", true);
+                foregroundAppOpenId = resumeObj.optString("ad_id", "");
+                foregroundAppOpenCooldown = resumeObj.optInt("cooldown_seconds", 60);
+                if (resumeObj.has("suppress_on_ad_click")) {
+                    suppressOnAdClick = resumeObj.optBoolean("suppress_on_ad_click", true);
+                } else if (resumeObj.has("suppress_app_open_on_ad_click")) {
+                    suppressOnAdClick = resumeObj.optBoolean("suppress_app_open_on_ad_click", true);
+                }
+                if (resumeObj.has("suppress_on_intent")) {
+                    suppressOnIntent = resumeObj.optBoolean("suppress_on_intent", true);
+                } else if (resumeObj.has("suppress_app_open_on_intent")) {
+                    suppressOnIntent = resumeObj.optBoolean("suppress_app_open_on_intent", true);
+                }
+            }
+            if (root.has("suppress_app_open_on_ad_click")) {
+                suppressOnAdClick = root.optBoolean("suppress_app_open_on_ad_click", true);
+            }
+            if (root.has("suppress_app_open_on_intent")) {
+                suppressOnIntent = root.optBoolean("suppress_app_open_on_intent", true);
+            }
+
+            preferenceClass.setBoolean("foreground_app_open_enabled", foregroundAppOpenEnabled);
+            preferenceClass.setInt("foreground_app_open_cooldown", foregroundAppOpenCooldown);
+            preferenceClass.setBoolean("suppress_app_open_on_ad_click", suppressOnAdClick);
+            preferenceClass.setBoolean("suppress_app_open_on_intent", suppressOnIntent);
+            if (!foregroundAppOpenId.trim().isEmpty()) {
+                preferenceClass.setAdsId("ForegroundAppOpenID", foregroundAppOpenId.trim());
+            }
+
             // 2. Onboarding
             if (root.has("onboarding")) {
                 org.json.JSONObject onboardingObj = root.getJSONObject("onboarding");
                 preferenceClass.setDataType("onboarding_config", onboardingObj.toString());
+                boolean onboardingInterEnabled = onboardingObj.optBoolean("is_interstitial_enabled", onboardingObj.optBoolean("interstitial_enabled", true));
+                preferenceClass.setBoolean("is_onboarding_inter_enabled", onboardingInterEnabled);
+                if (onboardingObj.has("onboarding_1")) {
+                    org.json.JSONObject s1 = onboardingObj.getJSONObject("onboarding_1");
+                    preferenceClass.setBoolean("onboarding_inter_step_1", s1.optBoolean("next_interstitial", true));
+                }
+                if (onboardingObj.has("onboarding_2")) {
+                    org.json.JSONObject s2 = onboardingObj.getJSONObject("onboarding_2");
+                    preferenceClass.setBoolean("onboarding_inter_step_2", s2.optBoolean("next_interstitial", true));
+                }
+                if (onboardingObj.has("onboarding_3")) {
+                    org.json.JSONObject s3 = onboardingObj.getJSONObject("onboarding_3");
+                    preferenceClass.setBoolean("onboarding_inter_step_3", s3.optBoolean("next_interstitial", true));
+                }
+                String onbInterId = onboardingObj.optString("interstitial_ad_id", "");
+                if (!onbInterId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("OnboardingInterAdID", onbInterId.trim());
+                    preferenceClass.setAdsId("interstitial_ad_id", onbInterId.trim());
+                    preferenceClass.setAdsId("InterstitalAdunitID", onbInterId.trim());
+                }
             }
 
             // 3. Home Screen (Banner / Collapsible / Native)
@@ -1174,8 +1652,8 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 String adType = homeObj.optString("ad_type", "banner");
                 if (homeObj.has("banner_ad")) {
                     org.json.JSONObject bObj = homeObj.getJSONObject("banner_ad");
-                    if (bObj.has("enabled")) {
-                        homeEnabled = bObj.optBoolean("enabled", true);
+                    if (bObj.has("enabled") && !bObj.optBoolean("enabled", true)) {
+                        homeEnabled = false;
                     }
                     if (bObj.has("ad_id") && !bObj.optString("ad_id").trim().isEmpty()) {
                         preferenceClass.setAdsId("BannerAdunitID", bObj.optString("ad_id").trim());
@@ -1225,6 +1703,31 @@ public class MailER_SplashScreen extends AppCompatActivity {
                         preferenceClass.setAdsId("preview_poster_banner_ad_id", pbId.trim());
                     }
                 }
+                if (tplObj.has("preview_native_ad")) {
+                    org.json.JSONObject pnObj = tplObj.getJSONObject("preview_native_ad");
+                    boolean pnEnabled = pnObj.optBoolean("enabled", pnObj.optBoolean("is_show", true));
+                    preferenceClass.setBoolean("preview_poster_native_enabled", pnEnabled);
+                    String pnId = pnObj.optString("ad_id", pnObj.optString("native_ad_id", ""));
+                    if (!pnId.trim().isEmpty()) {
+                        preferenceClass.setAdsId("preview_poster_native_ad_id", pnId.trim());
+                    }
+                    String pnType = pnObj.optString("type", pnObj.optString("ad_type", "compact"));
+                    preferenceClass.setDataType("preview_poster_native_type", pnType);
+                    int pnH = pnObj.optInt("height", 100);
+                    preferenceClass.setInt("preview_poster_native_height", pnH);
+                } else if (tplObj.has("preview_ad")) {
+                    org.json.JSONObject pnObj = tplObj.getJSONObject("preview_ad");
+                    boolean pnEnabled = pnObj.optBoolean("enabled", pnObj.optBoolean("is_show", true));
+                    preferenceClass.setBoolean("preview_poster_native_enabled", pnEnabled);
+                    String pnId = pnObj.optString("ad_id", pnObj.optString("native_ad_id", ""));
+                    if (!pnId.trim().isEmpty()) {
+                        preferenceClass.setAdsId("preview_poster_native_ad_id", pnId.trim());
+                    }
+                    String pnType = pnObj.optString("type", pnObj.optString("ad_type", "compact"));
+                    preferenceClass.setDataType("preview_poster_native_type", pnType);
+                    int pnH = pnObj.optInt("height", 100);
+                    preferenceClass.setInt("preview_poster_native_height", pnH);
+                }
                 if (tplObj.has("native_ad")) {
                     org.json.JSONObject nObj = tplObj.getJSONObject("native_ad");
                     boolean nEnabled = nObj.optBoolean("enabled", true);
@@ -1260,6 +1763,31 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     if (!pbId.trim().isEmpty()) {
                         preferenceClass.setAdsId("preview_bg_banner_ad_id", pbId.trim());
                     }
+                }
+                if (bgObj.has("preview_native_ad")) {
+                    org.json.JSONObject pnObj = bgObj.getJSONObject("preview_native_ad");
+                    boolean pnEnabled = pnObj.optBoolean("enabled", pnObj.optBoolean("is_show", true));
+                    preferenceClass.setBoolean("preview_bg_native_enabled", pnEnabled);
+                    String pnId = pnObj.optString("ad_id", pnObj.optString("native_ad_id", ""));
+                    if (!pnId.trim().isEmpty()) {
+                        preferenceClass.setAdsId("preview_bg_native_ad_id", pnId.trim());
+                    }
+                    String pnType = pnObj.optString("type", pnObj.optString("ad_type", "compact"));
+                    preferenceClass.setDataType("preview_bg_native_type", pnType);
+                    int pnH = pnObj.optInt("height", 100);
+                    preferenceClass.setInt("preview_bg_native_height", pnH);
+                } else if (bgObj.has("preview_ad")) {
+                    org.json.JSONObject pnObj = bgObj.getJSONObject("preview_ad");
+                    boolean pnEnabled = pnObj.optBoolean("enabled", pnObj.optBoolean("is_show", true));
+                    preferenceClass.setBoolean("preview_bg_native_enabled", pnEnabled);
+                    String pnId = pnObj.optString("ad_id", pnObj.optString("native_ad_id", ""));
+                    if (!pnId.trim().isEmpty()) {
+                        preferenceClass.setAdsId("preview_bg_native_ad_id", pnId.trim());
+                    }
+                    String pnType = pnObj.optString("type", pnObj.optString("ad_type", "compact"));
+                    preferenceClass.setDataType("preview_bg_native_type", pnType);
+                    int pnH = pnObj.optInt("height", 100);
+                    preferenceClass.setInt("preview_bg_native_height", pnH);
                 }
                 if (bgObj.has("native_ad")) {
                     org.json.JSONObject nObj = bgObj.getJSONObject("native_ad");
@@ -1515,6 +2043,26 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 preferenceClass.setAdsStatus("bannerAdStatus", 1);
             }
 
+            boolean bannerShimmerOnFail = true;
+            if (root.has("banner_show_shimmer_on_fail")) {
+                bannerShimmerOnFail = root.optBoolean("banner_show_shimmer_on_fail", true);
+            } else if (root.has("banner_shimmer_on_fail")) {
+                bannerShimmerOnFail = root.optBoolean("banner_shimmer_on_fail", true);
+            } else if (root.has("banner") && root.getJSONObject("banner").has("show_shimmer_on_fail")) {
+                bannerShimmerOnFail = root.getJSONObject("banner").optBoolean("show_shimmer_on_fail", true);
+            }
+            preferenceClass.setBoolean("banner_show_shimmer_on_fail", bannerShimmerOnFail);
+
+            boolean nativeShimmerOnFail = true;
+            if (root.has("native_show_shimmer_on_fail")) {
+                nativeShimmerOnFail = root.optBoolean("native_show_shimmer_on_fail", true);
+            } else if (root.has("native_shimmer_on_fail")) {
+                nativeShimmerOnFail = root.optBoolean("native_shimmer_on_fail", true);
+            } else if (root.has("native") && root.getJSONObject("native").has("show_shimmer_on_fail")) {
+                nativeShimmerOnFail = root.getJSONObject("native").optBoolean("show_shimmer_on_fail", true);
+            }
+            preferenceClass.setBoolean("native_show_shimmer_on_fail", nativeShimmerOnFail);
+
             // 11. Loading Screen (Progress Bar, Medium Native Ad, Timer Duration)
             if (root.has("loading_screen")) {
                 org.json.JSONObject loadObj = root.getJSONObject("loading_screen");
@@ -1531,6 +2079,10 @@ public class MailER_SplashScreen extends AppCompatActivity {
                     org.json.JSONObject nObj = loadObj.getJSONObject("native_ad");
                     boolean nEnabled = nObj.optBoolean("enabled", true);
                     preferenceClass.setBoolean("loading_screen_native_enabled", nEnabled);
+                    int nHeight = nObj.optInt("height", 280);
+                    preferenceClass.setInt("loading_screen_native_height", nHeight);
+                    String nType = nObj.optString("type", "video");
+                    preferenceClass.setDataType("loading_screen_native_type", nType);
                     String nId = nObj.optString("ad_id", "");
                     if (!nId.trim().isEmpty()) {
                         preferenceClass.setAdsId("LoadingScreenNativeAdID", nId.trim());
@@ -1544,24 +2096,241 @@ public class MailER_SplashScreen extends AppCompatActivity {
                 preferenceClass.setBoolean("loading_screen_native_enabled", true);
             }
 
-            // 12. Premium / Pro Templates & Ads Configuration
-            if (root.has("premium_config")) {
-                org.json.JSONObject pObj = root.getJSONObject("premium_config");
-                boolean pEnabled = pObj.optBoolean("enabled", true);
-                preferenceClass.setBoolean("premium_enabled", pEnabled);
-                int pInterval = pObj.optInt("post_interval", 3);
-                preferenceClass.setInt("PremiumPostCount", pEnabled ? pInterval : 0);
-                String pAdType = pObj.optString("ad_type", "reward");
-                preferenceClass.setDataType("PremiumAdType", pAdType);
-                boolean pAdEnabled = pObj.optBoolean("ad_enabled", true);
-                preferenceClass.setBoolean("premium_ad_enabled", pAdEnabled);
-                String pRwId = pObj.optString("reward_ad_id", "");
-                if (!pRwId.trim().isEmpty()) {
-                    preferenceClass.setAdsId("premium_reward_ad_id", pRwId.trim());
+            // 12. Premium / Pro Templates, Background & Branding Poster Configuration
+            org.json.JSONObject pObj = root.optJSONObject("premium_config");
+            
+            // Global / Fallback values
+            boolean globalPEnabled = true;
+            int globalPInterval = 3;
+            String globalPAdType = "reward";
+            boolean globalPAdEnabled = true;
+            String globalPRwId = "";
+            String globalPIntId = "";
+            if (pObj != null) {
+                globalPEnabled = pObj.optBoolean("enabled", true);
+                preferenceClass.setBoolean("premium_enabled", globalPEnabled);
+                globalPInterval = pObj.optInt("post_interval", pObj.optInt("interval", 3));
+                preferenceClass.setInt("PremiumPostCount", globalPEnabled ? globalPInterval : 0);
+                globalPAdType = pObj.optString("ad_type", "reward");
+                preferenceClass.setDataType("PremiumAdType", globalPAdType);
+                globalPAdEnabled = pObj.optBoolean("ad_enabled", true);
+                preferenceClass.setBoolean("premium_ad_enabled", globalPAdEnabled);
+                globalPRwId = pObj.optString("reward_ad_id", "");
+                if (!globalPRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_reward_ad_id", globalPRwId.trim());
                 }
-                String pIntId = pObj.optString("interstitial_ad_id", "");
-                if (!pIntId.trim().isEmpty()) {
-                    preferenceClass.setAdsId("premium_interstitial_ad_id", pIntId.trim());
+                globalPIntId = pObj.optString("interstitial_ad_id", "");
+                if (!globalPIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_interstitial_ad_id", globalPIntId.trim());
+                }
+
+                // Pro Dialog Native Ad
+                boolean pDialogNativeEnabled = true;
+                String pDialogNativeId = "";
+                if (pObj.has("dialog_native_ad")) {
+                    org.json.JSONObject dnObj = pObj.getJSONObject("dialog_native_ad");
+                    pDialogNativeEnabled = dnObj.optBoolean("enabled", true);
+                    pDialogNativeId = dnObj.optString("ad_id", "");
+                } else if (pObj.has("native_ad")) {
+                    org.json.JSONObject dnObj = pObj.getJSONObject("native_ad");
+                    pDialogNativeEnabled = dnObj.optBoolean("enabled", true);
+                    pDialogNativeId = dnObj.optString("ad_id", "");
+                }
+                preferenceClass.setBoolean("premium_dialog_native_enabled", pDialogNativeEnabled);
+                if (!pDialogNativeId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("premium_dialog_native_id", pDialogNativeId.trim());
+                }
+            }
+
+            if (root.has("premium_dialog_native_enabled")) {
+                preferenceClass.setBoolean("premium_dialog_native_enabled", root.optBoolean("premium_dialog_native_enabled", true));
+            }
+            if (root.has("premium_dialog_native_id") && !root.optString("premium_dialog_native_id").trim().isEmpty()) {
+                preferenceClass.setAdsId("premium_dialog_native_id", root.optString("premium_dialog_native_id").trim());
+            }
+
+            // 12a. Templates Premium
+            org.json.JSONObject tplObj = root.optJSONObject("templates_premium");
+            if (tplObj == null && pObj != null) {
+                tplObj = pObj.optJSONObject("templates");
+            }
+            if (tplObj != null) {
+                boolean tEnabled = tplObj.optBoolean("enabled", globalPEnabled);
+                preferenceClass.setBoolean("templates_premium_enabled", tEnabled);
+                int tInterval = tplObj.optInt("interval", tplObj.optInt("post_interval", globalPInterval));
+                preferenceClass.setInt("templates_premium_interval", tEnabled ? tInterval : 0);
+                preferenceClass.setDataType("templates_premium_ad_type", tplObj.optString("ad_type", globalPAdType));
+                preferenceClass.setBoolean("templates_premium_ad_enabled", tplObj.optBoolean("ad_enabled", globalPAdEnabled));
+                String tRwId = tplObj.optString("reward_ad_id", globalPRwId);
+                if (!tRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("templates_reward_ad_id", tRwId.trim());
+                }
+                String tIntId = tplObj.optString("interstitial_ad_id", globalPIntId);
+                if (!tIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("templates_interstitial_ad_id", tIntId.trim());
+                }
+            } else {
+                preferenceClass.setBoolean("templates_premium_enabled", globalPEnabled);
+                preferenceClass.setInt("templates_premium_interval", globalPEnabled ? globalPInterval : 0);
+                preferenceClass.setDataType("templates_premium_ad_type", globalPAdType);
+                preferenceClass.setBoolean("templates_premium_ad_enabled", globalPAdEnabled);
+                if (!globalPRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("templates_reward_ad_id", globalPRwId.trim());
+                }
+                if (!globalPIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("templates_interstitial_ad_id", globalPIntId.trim());
+                }
+            }
+
+            // 12b. Background Premium
+            org.json.JSONObject bgObj = root.optJSONObject("background_premium");
+            if (bgObj == null && pObj != null) {
+                bgObj = pObj.optJSONObject("background");
+            }
+            if (bgObj != null) {
+                boolean bEnabled = bgObj.optBoolean("enabled", globalPEnabled);
+                preferenceClass.setBoolean("background_premium_enabled", bEnabled);
+                int bInterval = bgObj.optInt("interval", bgObj.optInt("post_interval", globalPInterval));
+                preferenceClass.setInt("background_premium_interval", bEnabled ? bInterval : 0);
+                preferenceClass.setDataType("background_premium_ad_type", bgObj.optString("ad_type", globalPAdType));
+                preferenceClass.setBoolean("background_premium_ad_enabled", bgObj.optBoolean("ad_enabled", globalPAdEnabled));
+                String bRwId = bgObj.optString("reward_ad_id", globalPRwId);
+                if (!bRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("background_reward_ad_id", bRwId.trim());
+                }
+                String bIntId = bgObj.optString("interstitial_ad_id", globalPIntId);
+                if (!bIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("background_interstitial_ad_id", bIntId.trim());
+                }
+            } else {
+                preferenceClass.setBoolean("background_premium_enabled", globalPEnabled);
+                preferenceClass.setInt("background_premium_interval", globalPEnabled ? globalPInterval : 0);
+                preferenceClass.setDataType("background_premium_ad_type", globalPAdType);
+                preferenceClass.setBoolean("background_premium_ad_enabled", globalPAdEnabled);
+                if (!globalPRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("background_reward_ad_id", globalPRwId.trim());
+                }
+                if (!globalPIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("background_interstitial_ad_id", globalPIntId.trim());
+                }
+            }
+
+            // 12c. Branding Poster Premium
+            org.json.JSONObject brObj = root.optJSONObject("branding_poster_premium");
+            if (brObj == null && pObj != null) {
+                brObj = pObj.optJSONObject("branding_poster");
+            }
+            if (brObj == null && pObj != null) {
+                brObj = pObj.optJSONObject("branding");
+            }
+            if (brObj != null) {
+                boolean brEnabled = brObj.optBoolean("enabled", globalPEnabled);
+                preferenceClass.setBoolean("branding_premium_enabled", brEnabled);
+                int brInterval = brObj.optInt("interval", brObj.optInt("post_interval", globalPInterval));
+                preferenceClass.setInt("branding_premium_interval", brEnabled ? brInterval : 0);
+                preferenceClass.setDataType("branding_premium_ad_type", brObj.optString("ad_type", globalPAdType));
+                preferenceClass.setBoolean("branding_premium_ad_enabled", brObj.optBoolean("ad_enabled", globalPAdEnabled));
+                String brRwId = brObj.optString("reward_ad_id", globalPRwId);
+                if (!brRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("branding_reward_ad_id", brRwId.trim());
+                }
+                String brIntId = brObj.optString("interstitial_ad_id", globalPIntId);
+                if (!brIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("branding_interstitial_ad_id", brIntId.trim());
+                }
+            } else {
+                preferenceClass.setBoolean("branding_premium_enabled", globalPEnabled);
+                preferenceClass.setInt("branding_premium_interval", globalPEnabled ? globalPInterval : 0);
+                preferenceClass.setDataType("branding_premium_ad_type", globalPAdType);
+                preferenceClass.setBoolean("branding_premium_ad_enabled", globalPAdEnabled);
+                if (!globalPRwId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("branding_reward_ad_id", globalPRwId.trim());
+                }
+                if (!globalPIntId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("branding_interstitial_ad_id", globalPIntId.trim());
+                }
+            }
+
+            // 13. Screenshots Configuration: true = chalu (allowed), false = banth (blocked)
+            boolean scEnabled = true;
+            if (root.has("screenshot_enabled")) {
+                scEnabled = root.optBoolean("screenshot_enabled", true);
+            } else if (root.has("screenshot")) {
+                org.json.JSONObject scObj = root.optJSONObject("screenshot");
+                if (scObj != null) {
+                    scEnabled = scObj.optBoolean("enabled", true);
+                }
+            } else if (root.has("allow_screenshot")) {
+                scEnabled = root.optBoolean("allow_screenshot", true);
+            } else if (root.has("disable_screenshots")) {
+                scEnabled = !root.optBoolean("disable_screenshots", false);
+            }
+            preferenceClass.setBoolean("screenshot_enabled", scEnabled);
+            com.festival.flyer.postermaker.MyApplication.applyScreenshotSecurity(MailER_SplashScreen.this);
+
+            // 14. App Exit Dialog (On pressing Back button on Main Screen)
+            if (root.has("app_exit_dialog")) {
+                org.json.JSONObject exitObj = root.getJSONObject("app_exit_dialog");
+                boolean appExitDialogEnabled = exitObj.optBoolean("enabled", true);
+                preferenceClass.setBoolean("app_exit_dialog_enabled", appExitDialogEnabled);
+
+                boolean exitNativeEnabled = exitObj.optBoolean("native_ad_enabled", true);
+                String exitNativeId = exitObj.optString("native_ad_id", "");
+                String exitNativeType = exitObj.optString("ad_type", "medium");
+
+                if (exitObj.has("native_ad")) {
+                    org.json.JSONObject nObj = exitObj.getJSONObject("native_ad");
+                    exitNativeEnabled = nObj.optBoolean("enabled", exitNativeEnabled);
+                    String nid = nObj.optString("ad_id", "");
+                    if (!nid.trim().isEmpty()) exitNativeId = nid;
+                    exitNativeType = nObj.optString("ad_type", exitNativeType);
+                }
+
+                preferenceClass.setBoolean("app_exit_native_enabled", exitNativeEnabled);
+                if (!exitNativeId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("app_exit_native_id", exitNativeId.trim());
+                }
+                preferenceClass.setDataType("app_exit_native_type", exitNativeType);
+            }
+
+            // 15. App Update / Force Update via Remote Config
+            if (root.has("app_update")) {
+                org.json.JSONObject updateObj = root.optJSONObject("app_update");
+                if (updateObj != null) {
+                    boolean uAv = updateObj.optBoolean("update_available", updateObj.optInt("UpdateAvailable", updateObj.optInt("update_available", 0)) == 1);
+                    boolean fUp = updateObj.optBoolean("force_update", updateObj.optInt("ForceUpdate", updateObj.optInt("force_update", 0)) == 1);
+                    String vName = updateObj.optString("update_version_name", updateObj.optString("UpdateVersionName", "1.0"));
+                    preferenceClass.setInt("UpdateAvailable", uAv ? 1 : 0);
+                    preferenceClass.setInt("ForceUpdate", fUp ? 1 : 0);
+                    if (!vName.trim().isEmpty()) {
+                        preferenceClass.setDataType("UpdateVersionName", vName.trim());
+                    }
+                    String uTitle = updateObj.optString("update_title", "");
+                    if (!uTitle.trim().isEmpty()) {
+                        preferenceClass.setDataType("update_dialog_title", uTitle.trim());
+                    }
+                    String uDesc = updateObj.optString("update_description", "");
+                    if (!uDesc.trim().isEmpty()) {
+                        preferenceClass.setDataType("update_dialog_desc", uDesc.trim());
+                    }
+                }
+            } else {
+                if (root.has("update_available")) {
+                    boolean uAv = root.optBoolean("update_available", false);
+                    preferenceClass.setInt("UpdateAvailable", uAv ? 1 : 0);
+                } else if (root.has("UpdateAvailable")) {
+                    preferenceClass.setInt("UpdateAvailable", root.optInt("UpdateAvailable", 0));
+                }
+                if (root.has("force_update")) {
+                    boolean fUp = root.optBoolean("force_update", false);
+                    preferenceClass.setInt("ForceUpdate", fUp ? 1 : 0);
+                } else if (root.has("ForceUpdate")) {
+                    preferenceClass.setInt("ForceUpdate", root.optInt("ForceUpdate", 0));
+                }
+                if (root.has("update_version_name")) {
+                    preferenceClass.setDataType("UpdateVersionName", root.optString("update_version_name", "1.0").trim());
+                } else if (root.has("UpdateVersionName")) {
+                    preferenceClass.setDataType("UpdateVersionName", root.optString("UpdateVersionName", "1.0").trim());
                 }
             }
 

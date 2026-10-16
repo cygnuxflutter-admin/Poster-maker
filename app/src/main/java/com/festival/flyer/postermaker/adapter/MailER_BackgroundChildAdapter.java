@@ -49,6 +49,17 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         this.likeManager = new MailER_LikeManager(activity);
     }
 
+    private static final int TYPE_BG = 0;
+    private static final int TYPE_AD = 1;
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position < bgImages.size() && bgImages.get(position) == null) {
+            return TYPE_AD;
+        }
+        return TYPE_BG;
+    }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -59,6 +70,10 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         if (bgImages.get(position) != null) {
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if (lp != null) {
                 lp.width = cellWidth;
@@ -139,6 +154,10 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
             });
         } else {
             // Full Width Native Ad Item (covering height of 2 backgrounds in the row)
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if (lp != null) {
                 lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -159,7 +178,16 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
             holder.content_layout.setVisibility(View.GONE);
             holder.ad_layout.setVisibility(View.VISIBLE);
             holder.iv_lock.setVisibility(View.GONE);
-            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position);
+            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position, null, new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                }
+
+                @Override
+                public void onAdFailed() {
+                    // Keep the shimmer card intact so background grid never shifts or breaks
+                }
+            });
         }
     }
 
@@ -174,7 +202,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
+        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container, rlMain;
         private final ImageView iv_image, iv_like;
         private final TextView iv_lock;
         private final ProgressBar progress_bar;
@@ -182,6 +210,7 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
         MyViewHolder(View itemView) {
             super(itemView);
 
+            rlMain = itemView.findViewById(R.id.rlMain);
             iv_image = itemView.findViewById(R.id.iv_image);
             progress_bar = itemView.findViewById(R.id.progress_bar);
             iv_like = itemView.findViewById(R.id.iv_like);
@@ -189,8 +218,6 @@ public class MailER_BackgroundChildAdapter extends RecyclerView.Adapter<MailER_B
             content_layout = itemView.findViewById(R.id.content_layout);
             ad_layout = itemView.findViewById(R.id.ad_layout);
             native_banner_ad_container = itemView.findViewById(R.id.native_banner_ad_container);
-//            ImageView titanicTextView = itemView.findViewById(R.id.titanicTextView);
-            // new Titanic().start(titanicTextView);
         }
     }
 }

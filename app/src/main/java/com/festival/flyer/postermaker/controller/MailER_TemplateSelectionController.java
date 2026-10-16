@@ -268,6 +268,24 @@ public class MailER_TemplateSelectionController {
         }
     }
 
+    public static int currentSelectedCategoryIndex = 0;
+
+    public void selectCategory(int index) {
+        currentSelectedCategoryIndex = index;
+        if (activity == null || activity.isFinishing()) return;
+        ViewPager vp = activity.findViewById(R.id.viewPager);
+        androidx.recyclerview.widget.RecyclerView rvCategories = activity.findViewById(R.id.rv_category_tabs);
+        if (vp != null && allCategoriesData != null && index >= 0 && index < allCategoriesData.size()) {
+            vp.setCurrentItem(index, false);
+            if (rvCategories != null && rvCategories.getAdapter() instanceof com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter) {
+                com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter tabAdapter = (com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter) rvCategories.getAdapter();
+                updateTabsData(tabAdapter, allCategoriesData, index);
+                int rvSelectedIndex = (index > 2) ? 3 : index;
+                rvCategories.smoothScrollToPosition(rvSelectedIndex);
+            }
+        }
+    }
+
     private void setPagerAdapter(ArrayList<MailER_PosterModel> posterModel) {
         allCategoriesData = new ArrayList<>(posterModel); // Save original for More bottom sheet
 
@@ -278,38 +296,36 @@ public class MailER_TemplateSelectionController {
 
         setupTabsIcons(rvCategories, viewPager, posterModel);
 
-        if (activity.getIntent().getBooleanExtra("open_all_categories", false)) {
-            activity.getIntent().removeExtra("open_all_categories");
-            globalSelectionListener = new CategorySelectionListener() {
-                @Override
-                public void onCategorySelected(int actualIndex) {
-                    if (viewPager != null) {
-                        viewPager.setCurrentItem(actualIndex);
-                    }
-                }
-            };
-            Intent intent = new Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
-            if (viewPager != null) {
-                intent.putExtra("selected_index", viewPager.getCurrentItem());
-            }
-            activity.startActivity(intent);
-        }
-
         if (initialCategoryToSelect != null && !initialCategoryToSelect.isEmpty()) {
             for (int i = 0; i < posterModel.size(); i++) {
                 if (posterModel.get(i).getCat_name().toLowerCase().contains(initialCategoryToSelect.toLowerCase()) ||
                     String.valueOf(posterModel.get(i).getCat_id()).equals(initialCategoryToSelect)) {
-                    viewPager.setCurrentItem(i, false);
+                    currentSelectedCategoryIndex = i;
                     break;
                 }
             }
             initialCategoryToSelect = null; // Clear it so it only applies on first load
         }
 
+        if (currentSelectedCategoryIndex > 0 && currentSelectedCategoryIndex < posterModel.size()) {
+            selectCategory(currentSelectedCategoryIndex);
+        }
+
+        if (activity.getIntent().getBooleanExtra("open_all_categories", false)) {
+            activity.getIntent().removeExtra("open_all_categories");
+            globalSelectionListener = this::selectCategory;
+            Intent intent = new Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
+            if (viewPager != null) {
+                intent.putExtra("selected_index", currentSelectedCategoryIndex);
+            }
+            activity.startActivity(intent);
+        }
+
         dismissMaterialDialog();
     }
     
     private void updateTabsData(com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter adapter, ArrayList<MailER_PosterModel> allCategories, int selectedIndex) {
+        if (adapter == null || allCategories == null || allCategories.isEmpty()) return;
         ArrayList<MailER_PosterModel> visibleTabs = new ArrayList<>();
         
         // Add up to first 3 categories
@@ -319,7 +335,7 @@ public class MailER_TemplateSelectionController {
         
         // Handle hidden selected category and More tab
         if (allCategories.size() > 3) {
-            if (selectedIndex > 2) {
+            if (selectedIndex > 2 && selectedIndex < allCategories.size()) {
                 // User wants: 3 fixed + Selected Hidden + More (More is not removed)
                 visibleTabs.add(allCategories.get(selectedIndex));
             }
@@ -341,29 +357,31 @@ public class MailER_TemplateSelectionController {
         
         adapter = new com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter(activity, new ArrayList<>(), false, (position, model) -> {
             if ("More".equalsIgnoreCase(model.getCat_name())) {
-                globalSelectionListener = new CategorySelectionListener() {
-                    @Override
-                    public void onCategorySelected(int actualIndex) {
-                        viewPager.setCurrentItem(actualIndex);
-                    }
-                };
+                globalSelectionListener = this::selectCategory;
                 android.content.Intent intent = new android.content.Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
                 if (viewPager != null) {
-                    intent.putExtra("selected_index", viewPager.getCurrentItem());
+                    intent.putExtra("selected_index", currentSelectedCategoryIndex);
                 }
                 activity.startActivity(intent);
             } else {
                 // Find the actual index of the clicked model in the original posterModel list
-                int actualIndex = posterModel.indexOf(model);
+                int actualIndex = -1;
+                for (int i = 0; i < posterModel.size(); i++) {
+                    if (posterModel.get(i).getCat_id() == model.getCat_id() ||
+                        (posterModel.get(i).getCat_name() != null && posterModel.get(i).getCat_name().equalsIgnoreCase(model.getCat_name()))) {
+                        actualIndex = i;
+                        break;
+                    }
+                }
                 if (actualIndex != -1) {
-                    viewPager.setCurrentItem(actualIndex);
+                    selectCategory(actualIndex);
                 }
             }
         });
         rvCategories.setAdapter(adapter);
 
         // Initial setup
-        updateTabsData(adapter, posterModel, viewPager.getCurrentItem());
+        updateTabsData(adapter, posterModel, currentSelectedCategoryIndex);
         
         com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter finalAdapter = adapter;
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -372,6 +390,7 @@ public class MailER_TemplateSelectionController {
 
             @Override
             public void onPageSelected(int position) {
+                currentSelectedCategoryIndex = position;
                 updateTabsData(finalAdapter, posterModel, position);
                 int rvSelectedIndex = (position > 2) ? 3 : position;
                 rvCategories.smoothScrollToPosition(rvSelectedIndex);

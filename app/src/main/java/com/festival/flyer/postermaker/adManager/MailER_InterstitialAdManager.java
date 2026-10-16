@@ -32,12 +32,21 @@ public class MailER_InterstitialAdManager {
         this.context = context;
         preferenceClass = new MailER_PreferenceClass(context);
         admobInterstitialAdId = getAdUnitId();
-        loadAd();
     }
 
     private String getAdUnitId() {
         if (preferenceClass == null) return "";
-        String id = preferenceClass.getAdsId("interstitial_ad_id");
+        boolean isOnboardingDone = preferenceClass.getRateSubmited("isOnboardingDone");
+        String id = "";
+        if (!isOnboardingDone) {
+            id = preferenceClass.getAdsId("OnboardingInterAdID");
+        }
+        if (id == null || id.trim().isEmpty()) {
+            id = preferenceClass.getAdsId("interstitial_ad_id");
+        }
+        if (id == null || id.trim().isEmpty()) {
+            id = preferenceClass.getAdsId("OnboardingInterAdID");
+        }
         if (id == null || id.trim().isEmpty()) {
             id = preferenceClass.getAdsId("InterstitalAdunitID");
         }
@@ -54,8 +63,9 @@ public class MailER_InterstitialAdManager {
 
         boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
                 preferenceClass.getBoolean("interstitial_global_enabled", true));
+        boolean isOnbEnabled = preferenceClass.getBoolean("is_onboarding_inter_enabled", true);
         String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
-        if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
+        if ((!isEnabled && !isOnbEnabled) || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
             Log.d("AdTracker", "Interstitial Ad is disabled or type is none. Skipping load.");
             return;
         }
@@ -127,23 +137,43 @@ public class MailER_InterstitialAdManager {
                 }
 
                 @Override
+                public void onAdClicked() {
+                    super.onAdClicked();
+                    MailER_AppOpenManager.notifyAdClicked();
+                }
+
+                @Override
                 public void onAdDismissedFullScreenContent() {
                     mInterstitialAd = null;
                     if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
                     isADTimer = false;
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> isADTimer = true, InterAdTimer);
-                    loadAd(); // Preload next ad immediately
+                    loadAd();
                 }
             });
             mInterstitialAd.show(activity);
         } else {
             pendingActivity = activity;
             pendingInterface = onAdLoadInterface;
-            if (progressDialog == null || !progressDialog.isShowing()) {
-                progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
+            boolean isSplashScreen = (activity != null && activity.getClass().getSimpleName().contains("SplashScreen"));
+            if (!isSplashScreen) {
+                if (progressDialog == null || !progressDialog.isShowing()) {
+                    progressDialog = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(activity);
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+                }
             }
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (pendingActivity != null && pendingInterface != null) {
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        try { progressDialog.dismiss(); } catch (Exception ignored) {}
+                    }
+                    OnAdLoadInterface inf = pendingInterface;
+                    pendingActivity = null;
+                    pendingInterface = null;
+                    if (inf != null) inf.onAdClose();
+                }
+            }, 4000);
             if (!isLoading) {
                 loadAd();
             }
@@ -203,13 +233,22 @@ public class MailER_InterstitialAdManager {
     }
 
     public void showInterstitialAd(Activity activity, OnAdLoadInterface onAdLoadInterface) {
-        boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
-                preferenceClass.getBoolean("interstitial_global_enabled", true));
-        String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
+        boolean isOnboarding = (activity != null && activity.getClass().getSimpleName().contains("Onboarding"));
+        if (isOnboarding) {
+            boolean isOnbEnabled = preferenceClass.getBoolean("is_onboarding_inter_enabled", true);
+            if (!isOnbEnabled) {
+                if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                return;
+            }
+        } else {
+            boolean isEnabled = preferenceClass.getBoolean("interstitial_enabled",
+                    preferenceClass.getBoolean("interstitial_global_enabled", true));
+            String adType = preferenceClass.getDataType("interstitial_ad_type", "interstitial");
 
-        if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
-            if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
-            return;
+            if (!isEnabled || "none".equalsIgnoreCase(adType) || "off".equalsIgnoreCase(adType) || "false".equalsIgnoreCase(adType)) {
+                if (onAdLoadInterface != null) onAdLoadInterface.onAdClose();
+                return;
+            }
         }
         loadAndShowAdmob(activity, onAdLoadInterface);
     }

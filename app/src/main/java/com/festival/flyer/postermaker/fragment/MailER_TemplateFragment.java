@@ -43,6 +43,9 @@ public class MailER_TemplateFragment extends Fragment {
         //noinspection unchecked
         preferenceClass = new MailER_PreferenceClass(getActivity());
         posterThumbFulls = (ArrayList<MailER_PosterImage>) getArguments().getSerializable("posterDataLists");
+        if (posterThumbFulls == null) {
+            posterThumbFulls = new ArrayList<>();
+        }
         this.getPosterListener = (GetPosterListener) getActivity();
         template_rv = view.findViewById(R.id.template_rv);
         template_rv.setAdapter(null);
@@ -74,10 +77,17 @@ public class MailER_TemplateFragment extends Fragment {
         int cellHeight = (700 * cellWidth) / 507;
 
         boolean isNativeEnabled = preferenceClass.getInt("templates_native_enabled", 1) == 1;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null && rc.getValue("templates_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                isNativeEnabled = rc.getBoolean("templates_native_enabled");
+            }
+        } catch (Exception ignored) {}
         int firstAdCount = preferenceClass.getInt("First_rv_count", 4);
         int repeatAdCount = preferenceClass.getInt("rv_count", 6);
         int itemsSinceLastAd = 0;
 
+        tempposterThumbFulls.clear();
         for (int j = 0; j < posterThumbFulls.size(); j++) {
             if (isNativeEnabled && j != 0 && firstAdCount > 0 && repeatAdCount > 0) {
                 itemsSinceLastAd++;

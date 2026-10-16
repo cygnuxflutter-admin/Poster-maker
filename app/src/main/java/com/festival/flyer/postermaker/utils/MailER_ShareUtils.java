@@ -10,6 +10,7 @@ import com.festival.flyer.postermaker.R;
 public class MailER_ShareUtils {
 
     public static void onShare(Context context) {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
 
         String shareBody = "I'm using amazing Poster maker App, I just created a new poster within 2 min and it's completely free. I recommend you to try this app. \n\n" +
                 "https://play.google.com/store/apps/details?id=" + context.getApplicationContext().getPackageName();
@@ -22,6 +23,7 @@ public class MailER_ShareUtils {
     }
 
     public static void rateUs(Context context) {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         try {
             context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + context.getApplicationContext().getPackageName())));
         } catch (ActivityNotFoundException e) {
@@ -30,9 +32,9 @@ public class MailER_ShareUtils {
     }
 
     public static void onInstagram(Context context) {
-
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/postersmakerapp?igshid=YmMyMTA2M2Y=" + context.getApplicationContext().getPackageName())));
-        }
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
+        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/postersmakerapp?igshid=YmMyMTA2M2Y=" + context.getApplicationContext().getPackageName())));
+    }
 
     public  static void onPrivacyPolicy(Context context){
 

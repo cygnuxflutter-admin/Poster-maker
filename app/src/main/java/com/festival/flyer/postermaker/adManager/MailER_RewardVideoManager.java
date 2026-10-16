@@ -37,7 +37,11 @@ public class MailER_RewardVideoManager {
     }
 
     public static void showRewardVideoAd(final Activity context, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
-        showRewardVideoAd(context, new OnRewardVideoResultListener() {
+        showRewardVideoAd(context, null, onAdLoadInterface);
+    }
+
+    public static void showRewardVideoAd(final Activity context, String customAdId, MailER_InterstitialAdManager.OnRewardAdLoadInterface onAdLoadInterface) {
+        showRewardVideoAd(context, customAdId, new OnRewardVideoResultListener() {
             @Override
             public void onRewardEarned() {
                 if (onAdLoadInterface != null) {
@@ -53,18 +57,26 @@ public class MailER_RewardVideoManager {
     }
 
     public static void showRewardVideoAd(final Activity context, OnRewardVideoResultListener resultListener) {
+        showRewardVideoAd(context, null, resultListener);
+    }
+
+    public static void showRewardVideoAd(final Activity context, String customAdId, OnRewardVideoResultListener resultListener) {
         if (preferenceClass == null) {
             preferenceClass = new MailER_PreferenceClass(context);
         }
-        AD_google_Rw = preferenceClass.getAdsId("premium_reward_ad_id");
-        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
-            AD_google_Rw = preferenceClass.getAdsId("RewardVideoUnitID");
-        }
-        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
-            AD_google_Rw = preferenceClass.getAdsId("editor_reward_ad_id");
-        }
-        if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
-            AD_google_Rw = preferenceClass.getAdsId("google_Rw_ID");
+        if (customAdId != null && !customAdId.trim().isEmpty()) {
+            AD_google_Rw = customAdId.trim();
+        } else {
+            AD_google_Rw = preferenceClass.getAdsId("premium_reward_ad_id");
+            if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+                AD_google_Rw = preferenceClass.getAdsId("RewardVideoUnitID");
+            }
+            if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+                AD_google_Rw = preferenceClass.getAdsId("editor_reward_ad_id");
+            }
+            if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
+                AD_google_Rw = preferenceClass.getAdsId("google_Rw_ID");
+            }
         }
 
         if (AD_google_Rw == null || AD_google_Rw.isEmpty()) {
@@ -127,6 +139,12 @@ public class MailER_RewardVideoManager {
                         super.onAdShowedFullScreenContent();
                         Log.d("[ADS_LOG]", "📺 Reward Video Displayed on Screen!");
                     }
+
+                    @Override
+                    public void onAdClicked() {
+                        super.onAdClicked();
+                        MailER_AppOpenManager.notifyAdClicked();
+                    }
                 });
                 ad.show(context, rewardItem -> {
                     isEarned[0] = true;
@@ -177,7 +195,9 @@ public class MailER_RewardVideoManager {
             }
 
             @Override
-            public void onAdClicked(Ad ad) {}
+            public void onAdClicked(Ad ad) {
+                MailER_AppOpenManager.notifyAdClicked();
+            }
 
             @Override
             public void onLoggingImpression(Ad ad) {}

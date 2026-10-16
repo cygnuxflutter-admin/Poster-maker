@@ -28,6 +28,126 @@ public class MailER_PreferenceClass {
         FALLBACK_AD_IDS.put("editor_undo_redo_ad_id", "ca-app-pub-5706123402805812/6490071289");
     }
 
+    public static String getMasterConfigJson(com.google.firebase.remoteconfig.FirebaseRemoteConfig rc) {
+        if (rc == null) return "";
+        try {
+            if (rc.getValue("postermaker").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                return rc.getString("postermaker");
+            }
+            if (rc.getValue("app_ad_config").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                return rc.getString("app_ad_config");
+            }
+            String pm = rc.getString("postermaker");
+            if (pm != null && !pm.trim().isEmpty() && !pm.equals("{}")) {
+                return pm;
+            }
+            return rc.getString("app_ad_config");
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static boolean isBannerShimmerOnFail(Context context) {
+        if (context == null) return true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("banner_show_shimmer_on_fail")) {
+                        return root.optBoolean("banner_show_shimmer_on_fail", true);
+                    }
+                    if (root.has("banner_shimmer_on_fail")) {
+                        return root.optBoolean("banner_shimmer_on_fail", true);
+                    }
+                    if (root.has("show_banner_shimmer_on_fail")) {
+                        return root.optBoolean("show_banner_shimmer_on_fail", true);
+                    }
+                    org.json.JSONObject bObj = root.optJSONObject("banner");
+                    if (bObj == null) bObj = root.optJSONObject("banner_ad");
+                    if (bObj != null) {
+                        if (bObj.has("show_shimmer_on_fail")) {
+                            return bObj.optBoolean("show_shimmer_on_fail", true);
+                        }
+                        if (bObj.has("shimmer_on_fail")) {
+                            return bObj.optBoolean("shimmer_on_fail", true);
+                        }
+                        if (bObj.has("keep_loader_on_fail")) {
+                            return bObj.optBoolean("keep_loader_on_fail", true);
+                        }
+                    }
+                }
+                if (rc.getKeysByPrefix("").contains("banner_show_shimmer_on_fail")) {
+                    return rc.getBoolean("banner_show_shimmer_on_fail");
+                }
+                if (rc.getKeysByPrefix("").contains("banner_shimmer_on_fail")) {
+                    return rc.getBoolean("banner_shimmer_on_fail");
+                }
+            }
+        } catch (Exception ignored) {}
+        MailER_PreferenceClass pref = new MailER_PreferenceClass(context);
+        return pref.getBoolean("banner_show_shimmer_on_fail", true);
+    }
+
+    public static boolean isNativeShimmerOnFail(Context context) {
+        if (context == null) return true;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("native_show_shimmer_on_fail")) {
+                        return root.optBoolean("native_show_shimmer_on_fail", true);
+                    }
+                    if (root.has("native_shimmer_on_fail")) {
+                        return root.optBoolean("native_shimmer_on_fail", true);
+                    }
+                    if (root.has("show_native_shimmer_on_fail")) {
+                        return root.optBoolean("show_native_shimmer_on_fail", true);
+                    }
+                    org.json.JSONObject nObj = root.optJSONObject("native");
+                    if (nObj == null) nObj = root.optJSONObject("native_ad");
+                    if (nObj != null) {
+                        if (nObj.has("show_shimmer_on_fail")) {
+                            return nObj.optBoolean("show_shimmer_on_fail", true);
+                        }
+                        if (nObj.has("shimmer_on_fail")) {
+                            return nObj.optBoolean("shimmer_on_fail", true);
+                        }
+                        if (nObj.has("keep_loader_on_fail")) {
+                            return nObj.optBoolean("keep_loader_on_fail", true);
+                        }
+                    }
+                }
+                if (rc.getKeysByPrefix("").contains("native_show_shimmer_on_fail")) {
+                    return rc.getBoolean("native_show_shimmer_on_fail");
+                }
+                if (rc.getKeysByPrefix("").contains("native_shimmer_on_fail")) {
+                    return rc.getBoolean("native_shimmer_on_fail");
+                }
+            }
+        } catch (Exception ignored) {}
+        MailER_PreferenceClass pref = new MailER_PreferenceClass(context);
+        return pref.getBoolean("native_show_shimmer_on_fail", true);
+    }
+
+    public static String getSafeAdUnitId(String requestedId, String type) {
+        if (com.festival.flyer.postermaker.BuildConfig.DEBUG) {
+            if (type != null) {
+                String t = type.toLowerCase();
+                if (t.contains("appopen")) return "ca-app-pub-3940256099942544/9257395921";
+                if (t.contains("inter")) return "ca-app-pub-3940256099942544/1033173712";
+                if (t.contains("banner") || t.contains("collapsible")) return "ca-app-pub-3940256099942544/6300978111";
+                if (t.contains("native")) return "ca-app-pub-3940256099942544/2247696110";
+                if (t.contains("reward")) return "ca-app-pub-3940256099942544/5224354917";
+            }
+            return "ca-app-pub-3940256099942544/6300978111";
+        }
+        return (requestedId != null) ? requestedId.trim() : "";
+    }
+
     public MailER_PreferenceClass(Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }

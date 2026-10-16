@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import android.view.ViewGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -216,10 +217,22 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
         
         ivBack.setOnClickListener(v -> prevStep());
 
-        // Preload Interstitial Ad for Onboarding
+        // Preload Interstitial ad for Onboarding Continue buttons
         try {
-            ((MyApplication) getApplicationContext()).loadInterstitialAd();
+            JSONObject configObj = getOnboardingConfigJson();
+            if (configObj != null) {
+                String onbInterId = configObj.optString("interstitial_ad_id", "");
+                if (!onbInterId.trim().isEmpty()) {
+                    preferenceClass.setAdsId("OnboardingInterAdID", onbInterId.trim());
+                    preferenceClass.setAdsId("interstitial_ad_id", onbInterId.trim());
+                    preferenceClass.setAdsId("InterstitalAdunitID", onbInterId.trim());
+                }
+                boolean onboardingInterEnabled = configObj.optBoolean("is_interstitial_enabled", configObj.optBoolean("interstitial_enabled", true));
+                preferenceClass.setBoolean("is_onboarding_inter_enabled", onboardingInterEnabled);
+            }
         } catch (Exception ignored) {}
+
+        ((MyApplication) getApplication()).loadInterstitialAd();
 
         updateUI();
     }
@@ -260,12 +273,22 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
         try {
             JSONObject configObj = getOnboardingConfigJson();
             if (configObj != null) {
+                String onbInterId = configObj.optString("interstitial_ad_id", "");
+                if (!onbInterId.trim().isEmpty() && preferenceClass != null) {
+                    preferenceClass.setAdsId("OnboardingInterAdID", onbInterId.trim());
+                    preferenceClass.setAdsId("interstitial_ad_id", onbInterId.trim());
+                    preferenceClass.setAdsId("InterstitalAdunitID", onbInterId.trim());
+                }
+
                 // Global onboarding interstitial toggle check
                 boolean isGlobalInterEnabled = true;
                 if (configObj.has("is_interstitial_enabled")) {
                     isGlobalInterEnabled = configObj.optBoolean("is_interstitial_enabled", true);
                 } else if (configObj.has("interstitial_enabled")) {
                     isGlobalInterEnabled = configObj.optBoolean("interstitial_enabled", true);
+                }
+                if (preferenceClass != null) {
+                    preferenceClass.setBoolean("is_onboarding_inter_enabled", isGlobalInterEnabled);
                 }
 
                 if (!isGlobalInterEnabled) {
@@ -283,6 +306,8 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
                     // Custom Ad ID check if present in screen config
                     String customInterId = screenObj.optString("interstitial_ad_id", screenObj.optString("ad_id", ""));
                     if (!customInterId.trim().isEmpty() && preferenceClass != null) {
+                        preferenceClass.setAdsId("OnboardingInterAdID", customInterId.trim());
+                        preferenceClass.setAdsId("interstitial_ad_id", customInterId.trim());
                         preferenceClass.setAdsId("InterstitalAdunitID", customInterId.trim());
                     }
                 }
@@ -330,7 +355,7 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
     private JSONObject getOnboardingConfigJson() {
         try {
             FirebaseRemoteConfig rc = FirebaseRemoteConfig.getInstance();
-            String masterJson = rc.getString("app_ad_config");
+            String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc);
             if (masterJson != null && !masterJson.trim().isEmpty()) {
                 JSONObject root = new JSONObject(masterJson);
                 if (root.has("onboarding")) {
@@ -377,50 +402,155 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
             return;
         }
 
-        String screenKey = "onboarding_" + (currentStep + 1);
+        String screenKey1 = "screen_" + (currentStep + 1);
+        String screenKey2 = "onboarding_" + (currentStep + 1);
         boolean showNative = false;
         String customNativeId = "";
-        String adType = "compact";
+        String adType = (currentStep == 1) ? "compact" : "compact";
+        int customHeightDp = -1;
 
         try {
             JSONObject configObj = getOnboardingConfigJson();
-            if (configObj != null && configObj.has(screenKey)) {
-                JSONObject screenObj = configObj.getJSONObject(screenKey);
-                showNative = screenObj.optBoolean("show_native_ad", screenObj.optBoolean("show_ad", false));
-                customNativeId = screenObj.optString("native_ad_id", screenObj.optString("ad_id", ""));
-                if (screenObj.has("ad_type")) {
-                    adType = screenObj.optString("ad_type", adType);
-                } else if (screenObj.has("type")) {
-                    adType = screenObj.optString("type", adType);
+            if (configObj != null) {
+                JSONObject screenObj = null;
+                if (configObj.has(screenKey1)) {
+                    screenObj = configObj.getJSONObject(screenKey1);
+                } else if (configObj.has(screenKey2)) {
+                    screenObj = configObj.getJSONObject(screenKey2);
+                }
+
+                if (screenObj != null) {
+                    JSONObject inlineAd = screenObj.optJSONObject("inline_ad");
+                    if (inlineAd != null) {
+                        showNative = inlineAd.optBoolean("is_show", inlineAd.optBoolean("show_ad", true));
+                        customNativeId = inlineAd.optString("ad_id", inlineAd.optString("native_ad_id", ""));
+                        adType = inlineAd.optString("type", inlineAd.optString("ad_type", adType));
+                        customHeightDp = inlineAd.optInt("height", -1);
+                    } else {
+                        showNative = screenObj.optBoolean("show_native_ad", screenObj.optBoolean("show_ad", screenObj.optBoolean("is_show", false)));
+                        customNativeId = screenObj.optString("native_ad_id", screenObj.optString("ad_id", ""));
+                        adType = screenObj.optString("ad_type", screenObj.optString("type", adType));
+                        customHeightDp = screenObj.optInt("height", -1);
+                    }
                 }
             }
         } catch (Exception ignored) {
         }
 
-        // Onboarding Screen 2 enforces compact native ad for full canvas & animation coverage
-        if (currentStep == 1) {
-            adType = "compact";
-        }
-
         if (showNative) {
             rlOnboardingNative.setVisibility(View.VISIBLE);
-            if (!customNativeId.trim().isEmpty()) {
-                if ("banner".equalsIgnoreCase(adType)) {
-                    preferenceClass.setAdsId("BannerAdunitID", customNativeId.trim());
-                } else {
-                    preferenceClass.setAdsId("NativeUnitID", customNativeId.trim());
+            if (nativeAdContainer != null) {
+                nativeAdContainer.removeAllViews();
+            }
+
+            boolean isCompact = "compact".equalsIgnoreCase(adType) || "small".equalsIgnoreCase(adType) || (customHeightDp > 0 && customHeightDp <= 120 && !"medium".equalsIgnoreCase(adType));
+            boolean isMedium = !isCompact && ("medium".equalsIgnoreCase(adType) || "native_medium".equalsIgnoreCase(adType) || (customHeightDp >= 150));
+
+            // Shimmer while loading
+            int initialHeight = (customHeightDp > 0) ? (int) dpToPx(customHeightDp) : (int) dpToPx(isMedium ? 185 : 90);
+            if (nativeShimmerContainer != null) {
+                nativeShimmerContainer.setVisibility(View.VISIBLE);
+                nativeShimmerContainer.startShimmer();
+                ViewGroup.LayoutParams sLp = nativeShimmerContainer.getLayoutParams();
+                if (sLp != null) {
+                    sLp.height = initialHeight;
+                    nativeShimmerContainer.setLayoutParams(sLp);
+                }
+                View shimmerMedia = nativeShimmerContainer.findViewById(R.id.shimmer_media_box);
+                if (shimmerMedia != null) {
+                    shimmerMedia.setVisibility(isMedium ? View.VISIBLE : View.GONE);
                 }
             }
+
+            // Container height: Use WRAP_CONTENT so media content is NEVER cut off
+            ViewGroup.LayoutParams lp = rlOnboardingNative.getLayoutParams();
+            if (lp != null) {
+                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                rlOnboardingNative.setLayoutParams(lp);
+            }
+            ViewGroup.LayoutParams cLp = nativeAdContainer.getLayoutParams();
+            if (cLp != null) {
+                cLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                nativeAdContainer.setLayoutParams(cLp);
+            }
+
+            final int targetHeightDp = customHeightDp;
+            MailER_NativeAdUtil.OnAdLoadListener adListener = new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    runOnUiThread(() -> {
+                        if (nativeShimmerContainer != null) {
+                            nativeShimmerContainer.stopShimmer();
+                            nativeShimmerContainer.setVisibility(View.GONE);
+                            nativeShimmerContainer.hideShimmer();
+                        }
+                        // Ensure layout expands naturally to WRAP_CONTENT so nothing is cut off
+                        if (rlOnboardingNative != null && rlOnboardingNative.getLayoutParams() != null) {
+                            rlOnboardingNative.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                            rlOnboardingNative.requestLayout();
+                        }
+                        if (nativeAdContainer != null) {
+                            if (nativeAdContainer.getLayoutParams() != null) {
+                                nativeAdContainer.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                                nativeAdContainer.requestLayout();
+                            }
+                            if (targetHeightDp > 90 && nativeAdContainer.getChildCount() > 0) {
+                                View child = nativeAdContainer.getChildAt(0);
+                                View mediaContainer = child.findViewById(R.id.media_container);
+                                if (mediaContainer != null) {
+                                    int targetMediaHeight = (int) dpToPx(targetHeightDp - 65);
+                                    if (targetMediaHeight >= (int) dpToPx(120)) {
+                                        mediaContainer.getLayoutParams().height = targetMediaHeight;
+                                        mediaContainer.requestLayout();
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onAdFailed() {
+                    runOnUiThread(() -> {
+                        boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(MailER_OnboardingActivity.this);
+                        if (showShimmerOnFail) {
+                            if (nativeShimmerContainer != null) {
+                                nativeShimmerContainer.startShimmer();
+                                nativeShimmerContainer.setVisibility(View.VISIBLE);
+                            }
+                            if (rlOnboardingNative != null) {
+                                rlOnboardingNative.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            if (nativeShimmerContainer != null) {
+                                nativeShimmerContainer.stopShimmer();
+                                nativeShimmerContainer.setVisibility(View.GONE);
+                                nativeShimmerContainer.hideShimmer();
+                            }
+                            if (rlOnboardingNative != null) {
+                                rlOnboardingNative.setVisibility(View.GONE);
+                            }
+                            if (nativeAdContainer != null) {
+                                nativeAdContainer.setVisibility(View.GONE);
+                            }
+                        }
+                    });
+                }
+            };
+
             if ("banner".equalsIgnoreCase(adType)) {
-                MailER_LoadAds.loadAdmobBannerAd(this, nativeAdContainer, nativeShimmerContainer);
-            } else if (currentStep == 1 || "compact".equalsIgnoreCase(adType)) {
-                MailER_NativeAdUtil.loadCompactNativeAd(nativeAdContainer, this, nativeShimmerContainer);
-            } else if ("medium".equalsIgnoreCase(adType) || "native_medium".equalsIgnoreCase(adType)) {
-                MailER_NativeAdUtil.loadMediumNativeAd(nativeAdContainer, this, nativeShimmerContainer);
+                MailER_LoadAds.loadAdmobBannerAd(this, nativeAdContainer, nativeShimmerContainer, customNativeId.isEmpty() ? null : customNativeId);
+            } else if (isMedium) {
+                MailER_NativeAdUtil.loadMediumNativeAd(nativeAdContainer, this, nativeShimmerContainer, customNativeId.isEmpty() ? null : customNativeId, adListener);
             } else {
-                MailER_NativeAdUtil.loadCompactNativeAd(nativeAdContainer, this, nativeShimmerContainer);
+                MailER_NativeAdUtil.loadCompactNativeAd(nativeAdContainer, this, nativeShimmerContainer, customNativeId.isEmpty() ? null : customNativeId, adListener);
             }
         } else {
+            if (nativeShimmerContainer != null) {
+                nativeShimmerContainer.stopShimmer();
+                nativeShimmerContainer.setVisibility(View.GONE);
+                nativeShimmerContainer.hideShimmer();
+            }
             rlOnboardingNative.setVisibility(View.GONE);
         }
     }
@@ -1097,7 +1227,7 @@ public class MailER_OnboardingActivity extends AppCompatActivity {
         boolean isLoadingScreenEnabled = true;
         try {
             FirebaseRemoteConfig rc = FirebaseRemoteConfig.getInstance();
-            String masterJson = rc.getString("app_ad_config");
+            String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc);
             if (masterJson != null && !masterJson.trim().isEmpty()) {
                 JSONObject root = new JSONObject(masterJson);
                 if (root.has("loading_screen")) {

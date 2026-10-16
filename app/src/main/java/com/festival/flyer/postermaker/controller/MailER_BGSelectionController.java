@@ -364,6 +364,7 @@ public class MailER_BGSelectionController {
 //            }
 //        }
 
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction("android.intent.action.PICK");
@@ -385,6 +386,7 @@ public class MailER_BGSelectionController {
 //            }
 //        }
 
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
 //        camera_file = new File(Environment.getExternalStorageDirectory(), ".temp.jpg");
         camera_file = new File(activity.getCacheDir(), ".temp.jpg");

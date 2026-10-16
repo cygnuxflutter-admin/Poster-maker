@@ -138,6 +138,7 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
     private ImageView background_img, btn_save_poster;
     private Button btn_size_square, btn_size_portrait;
     private LinearLayout ll_size_toggle;
+    private boolean isPosterSaved = false;
 
     private JSONObject squareObj = null;
     private JSONObject portraitObj = null;
@@ -740,30 +741,39 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
     private void handleSaveOrDownload(boolean isDownload) {
         com.festival.flyer.postermaker.utils.MailER_PreferenceClass prefManager = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
 
-        boolean isDownloadAdEnabled = true;
-        int freeAllowed = 2;
-        String adType = "reward";
+        boolean isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
+        int freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
+        String adType = prefManager.getDataType("editor_download_ad_type", "reward");
 
         try {
             com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
-            if (rc != null && rc.getInfo().getLastFetchStatus() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.LAST_FETCH_STATUS_SUCCESS) {
-                isDownloadAdEnabled = rc.getBoolean("editor_download_ad_enabled");
-                if (rc.getLong("editor_free_downloads_allowed") >= 0) {
-                    freeAllowed = (int) rc.getLong("editor_free_downloads_allowed");
+            if (rc != null) {
+                String masterJson = com.festival.flyer.postermaker.utils.MailER_PreferenceClass.getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject obj = new org.json.JSONObject(masterJson);
+                    if (obj.has("editor")) {
+                        org.json.JSONObject edObj = obj.getJSONObject("editor");
+                        if (edObj.has("download")) {
+                            org.json.JSONObject dlObj = edObj.getJSONObject("download");
+                            isDownloadAdEnabled = dlObj.optBoolean("enabled", isDownloadAdEnabled);
+                            freeAllowed = dlObj.optInt("free_downloads_allowed", freeAllowed);
+                            adType = dlObj.optString("ad_type", adType);
+                        }
+                    }
+                } else {
+                    if (rc.getValue("editor_download_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        isDownloadAdEnabled = rc.getBoolean("editor_download_ad_enabled");
+                    }
+                    if (rc.getValue("editor_free_downloads_allowed").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        freeAllowed = (int) rc.getLong("editor_free_downloads_allowed");
+                    }
+                    if (rc.getValue("editor_download_ad_type").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        String remoteType = rc.getString("editor_download_ad_type");
+                        if (!remoteType.trim().isEmpty()) adType = remoteType.trim();
+                    }
                 }
-                if (rc.getString("editor_download_ad_type") != null && !rc.getString("editor_download_ad_type").isEmpty()) {
-                    adType = rc.getString("editor_download_ad_type");
-                }
-            } else {
-                isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
-                freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
-                adType = prefManager.getDataType("editor_download_ad_type", "reward");
             }
-        } catch (Exception e) {
-            isDownloadAdEnabled = prefManager.getBoolean("editor_download_ad_enabled", true);
-            freeAllowed = prefManager.getInt("editor_free_downloads_allowed", 2);
-            adType = prefManager.getDataType("editor_download_ad_type", "reward");
-        }
+        } catch (Exception ignored) {}
 
         if (!isDownloadAdEnabled) {
             new SaveTask(isDownload).execute();
@@ -883,6 +893,7 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String path) {
             if (path != null) {
+                isPosterSaved = true;
                 if (isDownload) {
                     com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_AutoPosterEditActivity.this, () -> {
                         Intent intent = new Intent(MailER_AutoPosterEditActivity.this, MailER_ShareActivity.class);
@@ -910,11 +921,16 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
                 activeView = null;
             }
         } else {
+            if (isPosterSaved) {
+                finish();
+                return;
+            }
             leaveDialog();
         }
     }
 
     private void saveDialog() {
+        isPosterSaved = true;
         android.app.Dialog dialog = new android.app.Dialog(this, 16974126);
         dialog.requestWindowFeature(1);
         dialog.setCancelable(false);
@@ -932,7 +948,19 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
         if (new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
-            com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+            com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, null, new com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onAdFailed() {
+                }
+            });
         } else {
             if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
             if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
@@ -948,7 +976,19 @@ public class MailER_AutoPosterEditActivity extends AppCompatActivity {
         RelativeLayout native_banner_ad_container = dialog.findViewById(R.id.native_banner_ad_containers);
         com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = dialog.findViewById(R.id.shimmer_view_container);
         if (new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this).getAdsStatus("ExitDialog_NativeAD") == 1) {
-            com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container);
+            com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd(native_banner_ad_container, this, shimmer_view_container, null, new com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onAdFailed() {
+                }
+            });
         } else {
             if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
             if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);

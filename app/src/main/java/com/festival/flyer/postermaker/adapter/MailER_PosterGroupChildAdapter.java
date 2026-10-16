@@ -44,6 +44,17 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         likeManager = new MailER_TemplateLikeManager(activity);
     }
 
+    private static final int TYPE_POSTER = 0;
+    private static final int TYPE_AD = 1;
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position < posterThumbLists.size() && posterThumbLists.get(position) == null) {
+            return TYPE_AD;
+        }
+        return TYPE_POSTER;
+    }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -54,6 +65,10 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         if (posterThumbLists.get(position) != null) {
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if (lp != null) {
                 lp.width = cellWidth;
@@ -115,6 +130,10 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
             });
         } else {
             // Full Width Native Ad Item (covering height of 2 posters in the row)
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if (lp != null) {
                 lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -135,7 +154,16 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
             holder.content_layout.setVisibility(View.GONE);
             holder.ad_layout.setVisibility(View.VISIBLE);
             holder.iv_lock.setVisibility(View.GONE);
-            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position);
+            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position, null, new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                }
+
+                @Override
+                public void onAdFailed() {
+                    // Keep the shimmer card intact so poster grid never shifts or breaks
+                }
+            });
         }
     }
 
@@ -150,7 +178,7 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
+        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container, rlMain;
         private final ImageView iv_image, iv_like;
         private final TextView iv_lock;
         private final ProgressBar progress_bar;
@@ -158,6 +186,7 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         MyViewHolder(View itemView) {
             super(itemView);
 
+            rlMain = itemView.findViewById(R.id.rlMain);
             iv_image = itemView.findViewById(R.id.iv_image);
             progress_bar = itemView.findViewById(R.id.progress_bar);
             iv_like = itemView.findViewById(R.id.iv_like);
