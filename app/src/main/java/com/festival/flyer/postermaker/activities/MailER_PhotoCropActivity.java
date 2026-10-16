@@ -39,6 +39,7 @@ public class MailER_PhotoCropActivity extends AppCompatActivity implements MailE
 
         String imageLink = getIntent().getStringExtra("selectedImage");
 
+        RelativeLayout fullImage = findViewById(R.id.fullImage);
         RelativeLayout freeRatio = findViewById(R.id.freeRatio);
         RelativeLayout ratio1 = findViewById(R.id.ratio1);
         RelativeLayout ratio2 = findViewById(R.id.ratio2);
@@ -53,6 +54,11 @@ public class MailER_PhotoCropActivity extends AppCompatActivity implements MailE
 
 //        new loadBitmapTask(imageLink).execute();
         cropImageView.setImageUriAsync(MailER_PosterEditActivity.imguri);
+                fullImage.setOnClickListener(v -> {
+            cropImageView.clearAspectRatio();
+            cropImageView.setCropRect(cropImageView.getWholeImageRect());
+            cropImageView.resetCropRect();
+        });
         freeRatio.setOnClickListener(v -> cropImageView.clearAspectRatio());
         ratio1.setOnClickListener(v -> cropImageView.setAspectRatio(1, 1));
         ratio2.setOnClickListener(v -> cropImageView.setAspectRatio(16, 9));

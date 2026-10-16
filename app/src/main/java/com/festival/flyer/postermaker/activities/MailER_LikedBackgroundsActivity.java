@@ -39,6 +39,13 @@ public class MailER_LikedBackgroundsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_liked_backgrounds);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_LikedBackgroundsActivity.this, () -> finish());
+            }
+        });
+
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -76,27 +83,20 @@ public class MailER_LikedBackgroundsActivity extends AppCompatActivity {
 
         adapter = new MailER_BackgroundChildAdapter(this, likedImages, cellWidth, cellHeight, (path, premium) -> {
             if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-                ArrayList<String> strings = new ArrayList<>();
-                strings.add(path);
-                progressDialog.show();
-                new MailER_DlBgAsync(this, strings, new MailER_DlBgAsync.OnDownloadTemplateListener() {
-                    @Override
-                    public void onDownloadComplete() {
-                        progressDialog.dismiss();
-                        String localPath = MailER_FileUtils.getFile(MailER_LikedBackgroundsActivity.this, path);
-                        Intent intent = new Intent(MailER_LikedBackgroundsActivity.this, MailER_PosterEditActivity.class);
-                        intent.putExtra("bg_path", localPath);
-                        intent.putExtra("loadUserFrame", true);
-                        intent.putExtra("Temp_Type", "MY_TEMP");
-                        MyApplication.showInterstitialAd(MailER_LikedBackgroundsActivity.this, () -> startActivity(intent));
+                int pos = 0;
+                for (int i = 0; i < likedImages.size(); i++) {
+                    if (likedImages.get(i) != null && path.equals(likedImages.get(i).getImage_url())) {
+                        pos = i;
+                        break;
                     }
-
-                    @Override
-                    public void onError() {
-                        progressDialog.dismiss();
-                        MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_LikedBackgroundsActivity.this, "Something went wrong!!!");
-                    }
-                }).execute();
+                }
+                Intent intent = new Intent(this, MailER_BackgroundPreviewActivity.class);
+                intent.putExtra("cat_name", "Favorites");
+                intent.putExtra("selected_position", pos);
+                intent.putExtra("selected_path", path);
+                MailER_BackgroundPreviewActivity.tempBgList = likedImages;
+                intent.putExtra("bg_list", likedImages);
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Make sure you are connected to internet!!", Toast.LENGTH_SHORT).show();
             }
@@ -104,12 +104,35 @@ public class MailER_LikedBackgroundsActivity extends AppCompatActivity {
         rvLiked.setAdapter(adapter);
     }
 
+    private void downloadAndOpenBg(String path) {
+        ArrayList<String> strings = new ArrayList<>();
+        strings.add(path);
+        new MailER_DlBgAsync(this, strings, new MailER_DlBgAsync.OnDownloadTemplateListener() {
+            @Override
+            public void onDownloadComplete() {
+                String localPath = MailER_FileUtils.getFile(MailER_LikedBackgroundsActivity.this, path);
+                Intent intent = new Intent(MailER_LikedBackgroundsActivity.this, MailER_PosterEditActivity.class);
+                intent.putExtra("bg_path", localPath);
+                intent.putExtra("loadUserFrame", true);
+                intent.putExtra("Temp_Type", "MY_TEMP");
+                MyApplication.showInterstitialAd(MailER_LikedBackgroundsActivity.this, () -> startActivity(intent));
+            }
+
+            @Override
+            public void onError() {
+                MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_LikedBackgroundsActivity.this, "Something went wrong!!!");
+            }
+        }).execute();
+    }
+
     private void loadLikedBackgrounds() {
         likedImages.clear();
         Set<String> urls = likeManager.getLikedUrls();
+        Set<String> premiumUrls = likeManager.getPremiumUrls();
         int idCounter = 1;
         for (String url : urls) {
-            likedImages.add(new MailER_BgImage(idCounter++, url, url, false));
+            boolean isPrem = premiumUrls.contains(url);
+            likedImages.add(new MailER_BgImage(idCounter++, url, url, isPrem));
         }
 
         if (likedImages.isEmpty()) {

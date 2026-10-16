@@ -31,6 +31,7 @@ import com.festival.flyer.postermaker.adManager.MailER_LoadAds;
 import com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager;
 import com.festival.flyer.postermaker.controller.MailER_TemplateSelectionController;
 import com.festival.flyer.postermaker.fragment.MailER_TemplateFragment;
+import com.festival.flyer.postermaker.model.MailER_PosterImage;
 import com.festival.flyer.postermaker.model.MailER_StickerModel;
 import com.festival.flyer.postermaker.model.MailER_TemplateModel;
 import com.festival.flyer.postermaker.model.MailER_TextModel;
@@ -67,6 +68,13 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_template_selection);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_TemplateSelectionActivity.this, () -> finish());
+            }
+        });
+
 
         // Preload reward ad for premium template unlock
 
@@ -94,12 +102,10 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
 
         int BannerAdStatus = preferenceClass.getAdsStatus("ReadymadePoste_BannerAD");
+        if (btm != null) btm.setVisibility(View.GONE);
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (BannerAdStatus == 1) {
-                btm.setVisibility(View.VISIBLE);
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
-            } else {
-                btm.setVisibility(View.GONE);
             }
         }
 
@@ -173,60 +179,23 @@ public class MailER_TemplateSelectionActivity extends AppCompatActivity implemen
 
 
     @Override
-    public void onPosterClick(int cat_id, int post_id, boolean premium) {
+    public void onPosterClick(int cat_id, int post_id, boolean premium, ArrayList<MailER_PosterImage> posterList, int position, String catName) {
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PERMISSION_GRANTED || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            local_permission = true;
-            this.cat_id = cat_id;
-            this.post_id = post_id;
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
-            if (premium) {
-                this.cat_id = cat_id;
-                this.post_id = post_id;
-
-                MailER_MaterialDialogUtils.getInstance().rewardDialog(this, "Use Template(One Time)", "Use premium template by watching Ads", materialDialog -> {
-                    if (materialDialog != null && materialDialog.isShowing())
-                        materialDialog.dismiss();
-                    MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(this);
-                    if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
-                        MailER_RewardVideoManager.showRewardVideoAd(MailER_TemplateSelectionActivity.this, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
-                            @Override
-                            public void onAdClose() {
-                                isRewarded = true;
-                                templateSelectionController.startMaterialDialog();
-                                loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
-                            }
-                        });
-                    } else {
-                        MyApplication.showInterstitialAdWithOutCount(MailER_TemplateSelectionActivity.this, () ->
-                        {
-                            isRewarded = true;
-                            templateSelectionController.startMaterialDialog();
-                            loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
-
-                        });
-                    }
-                }, materialDialog -> {
-                    if (materialDialog != null && materialDialog.isShowing())
-                        materialDialog.dismiss();
-                });
-
-            } else {
-                templateSelectionController.startMaterialDialog();
-                loadPoster(preferenceClass.getDataType("field_0"), cat_id, post_id);
-            }
+            Intent intent = new Intent(this, MailER_TemplatePreviewActivity.class);
+            intent.putExtra("cat_id", cat_id);
+            intent.putExtra("cat_name", catName);
+            intent.putExtra("selected_position", position);
+            intent.putExtra("selected_post_id", post_id);
+            MailER_TemplatePreviewActivity.tempPosterList = posterList;
+            intent.putExtra("poster_list", posterList);
+            startActivity(intent);
         } else {
             MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_TemplateSelectionActivity.this, "Make sure you are connected to internet!!");
         }
+    }
+
+    public void onPosterClick(int cat_id, int post_id, boolean premium) {
+        onPosterClick(cat_id, post_id, premium, null, 0, "");
     }
 
     public void loadPoster(String key, final int cat_id, final int pos_id) {

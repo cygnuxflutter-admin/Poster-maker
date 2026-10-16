@@ -41,6 +41,13 @@ public class MailER_MyDesignActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         setContentView(R.layout.spawner_activity_my_design);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_MyDesignActivity.this, () -> finish());
+            }
+        });
+
         
         // Use modern approach for fullscreen to avoid black flash on transition
         // This must be called AFTER setContentView so the DecorView exists

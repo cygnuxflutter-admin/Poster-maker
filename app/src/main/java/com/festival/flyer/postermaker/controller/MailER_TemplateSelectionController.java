@@ -1,8 +1,11 @@
 package com.festival.flyer.postermaker.controller;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Base64;
 import android.util.Log;
+
+import android.view.View;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
@@ -12,6 +15,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.activities.MailER_MainSecurity;
 import com.festival.flyer.postermaker.fragment.MailER_TemplateFragment;
@@ -39,6 +43,10 @@ public class MailER_TemplateSelectionController {
     private final MailER_PreferenceClass preferenceClass;
     private MaterialDialog materialDialog;
 
+    private ShimmerFrameLayout shimmerSkeleton;
+    private View viewPagerLay;
+    private View viewPager;
+
     private String initialCategoryToSelect;
 
     public MailER_TemplateSelectionController(Activity activity, FragmentManager supportFragmentManager, MailER_PreferenceClass preferenceClass, String initialCategoryToSelect) {
@@ -46,15 +54,68 @@ public class MailER_TemplateSelectionController {
         this.supportFragmentManager = supportFragmentManager;
         this.preferenceClass = preferenceClass;
         this.initialCategoryToSelect = initialCategoryToSelect;
+        initSkeletonViews();
         loadTemplates();
     }
 
+    private void initSkeletonViews() {
+        if (activity != null) {
+            shimmerSkeleton = activity.findViewById(R.id.shimmer_skeleton_container);
+            viewPagerLay = activity.findViewById(R.id.viewPagerLay);
+            viewPager = activity.findViewById(R.id.viewPager);
+        }
+    }
+
+    public void showSkeleton() {
+        if (shimmerSkeleton == null) {
+            initSkeletonViews();
+        }
+        if (shimmerSkeleton != null) {
+            shimmerSkeleton.setVisibility(View.VISIBLE);
+            shimmerSkeleton.startShimmer();
+        }
+        if (viewPagerLay != null) {
+            viewPagerLay.setVisibility(View.GONE);
+        }
+        if (viewPager != null) {
+            viewPager.setVisibility(View.GONE);
+        }
+    }
+
+    public void hideSkeleton() {
+        if (shimmerSkeleton == null) {
+            initSkeletonViews();
+        }
+        if (shimmerSkeleton != null) {
+            shimmerSkeleton.stopShimmer();
+            shimmerSkeleton.setVisibility(View.GONE);
+        }
+        if (viewPagerLay != null) {
+            viewPagerLay.setVisibility(View.VISIBLE);
+        }
+        if (viewPager != null) {
+            viewPager.setVisibility(View.VISIBLE);
+        }
+    }
+
     public void loadTemplates() {
-        startMaterialDialog();
-        getTemplateThumb(preferenceClass.getDataType("field_0"));
+        String cachedTemplates = com.festival.flyer.postermaker.utils.MailER_AppCacheManager.getTemplates(activity);
+        boolean hasCache = false;
+        if (cachedTemplates != null && !cachedTemplates.trim().isEmpty()) {
+            hasCache = parseAndLoadTemplateData(cachedTemplates, true);
+        }
+
+        if (!hasCache) {
+            showSkeleton();
+        }
+        getTemplateThumb(preferenceClass.getDataType("field_0"), hasCache);
     }
 
     public void getTemplateThumb(final String key) {
+        getTemplateThumb(key, false);
+    }
+
+    public void getTemplateThumb(final String key, final boolean hasCache) {
         String requestUrl = preferenceClass.getDataType("field_51") + preferenceClass.getDataType("field_34") + preferenceClass.getDataType("field_35");
         android.util.Log.d("API_CALL_DEBUG", "REQUEST URL (Template): " + requestUrl);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, response -> {
@@ -64,61 +125,48 @@ public class MailER_TemplateSelectionController {
                 JSONObject jsonObject = new JSONObject(response);
                 int error = jsonObject.getInt(preferenceClass.getDataType("field_3"));
                 if (error == 0 || error == 404) {
-                    dismissMaterialDialog();
-                    MailER_MaterialDialogUtils.getInstance().errorDialog2(activity, activity.getResources().getString(R.string.something_went_wrong));
+                    if (!hasCache) {
+                        dismissMaterialDialog();
+                        MailER_MaterialDialogUtils.getInstance().errorDialog2(activity, activity.getResources().getString(R.string.something_went_wrong));
+                    }
                     return;
                 }
                 if (error == 1) {
-                    JSONArray jsonArray = jsonObject.getJSONArray(preferenceClass.getDataType("field_4"));
-                    if (jsonArray.length() == 0) {
-                        MailER_MaterialDialogUtils.getInstance().errorDialog2(activity, activity.getResources().getString(R.string.something_went_wrong));
-                    } else {
-                        MailER_TemplateFragment.TempisFirstShow = false;
-                        new MailER_GetTemplateData(preferenceClass, jsonArray, new MailER_GetTemplateData.OnGetCatDataListener() {
-                            @Override
-                            public void onGetDataComplete(ArrayList<MailER_PosterModel> posterDataLists) {
-                                new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 1200);
-                            }
-
-                            @Override
-                            public void onError() {
-                                dismissMaterialDialog();
-                                MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
-                            }
-                        }).execute();
+                    boolean success = parseAndLoadTemplateData(response, false);
+                    if (success) {
+                        com.festival.flyer.postermaker.utils.MailER_AppCacheManager.saveTemplates(activity, response);
                     }
                 }
             } catch (Exception e) {
-                dismissMaterialDialog();
-
-                try {
-
-                    String text11 = null;
-                    if (preferenceClass.getDecryptionType() == 0) {
-                        byte[] octets = Base64.decode(response, Base64.URL_SAFE);
-                        String text_base = new String(octets, StandardCharsets.UTF_8);
-                        byte[] octets1 = Base64.decode(text_base, Base64.URL_SAFE);
-                        text11 = new String(octets1, StandardCharsets.UTF_8);
-                    } else if (preferenceClass.getDecryptionType() == 1) {
-                        MailER_MainSecurity decrypted = MailER_MainSecurity.decrypt(preferenceClass.getDataType("main_key"), response);
-                        text11 = decrypted.getData();
+                if (!hasCache) {
+                    dismissMaterialDialog();
+                    try {
+                        String text11 = null;
+                        if (preferenceClass.getDecryptionType() == 0) {
+                            byte[] octets = Base64.decode(response, Base64.URL_SAFE);
+                            String text_base = new String(octets, StandardCharsets.UTF_8);
+                            byte[] octets1 = Base64.decode(text_base, Base64.URL_SAFE);
+                            text11 = new String(octets1, StandardCharsets.UTF_8);
+                        } else if (preferenceClass.getDecryptionType() == 1) {
+                            MailER_MainSecurity decrypted = MailER_MainSecurity.decrypt(preferenceClass.getDataType("main_key"), response);
+                            text11 = decrypted.getData();
+                        }
+                        MailER_MaterialDialogUtils.getInstance().errorDialog(activity, text11);
+                    } catch (Exception e1) {
+                        MailER_MaterialDialogUtils.getInstance().errorDialog(activity, e.getMessage());
                     }
-
-                    MailER_MaterialDialogUtils.getInstance().errorDialog(activity, text11);
-                    e.printStackTrace();
-                } catch (Exception e1) {
-                    MailER_MaterialDialogUtils.getInstance().errorDialog(activity, e.getMessage());
-                    e.printStackTrace();
                 }
             }
         }, error -> {
             Log.e("---API_DATA---", "--- ERROR (Template Thumb) ---");
             Log.e("---API_DATA---", "URL: " + requestUrl);
             Log.e("---API_DATA---", "Error: " + error.getMessage());
-            dismissMaterialDialog();
-            MailER_MaterialDialogUtils.getInstance().errorDialog(activity, error.getMessage());
-            error.printStackTrace();
-
+            if (!hasCache) {
+                dismissMaterialDialog();
+                MailER_MaterialDialogUtils.getInstance().errorDialog(activity, error.getMessage());
+            } else {
+                dismissMaterialDialog();
+            }
         }) {
             @Override
             protected Map<String, String> getParams() {
@@ -139,6 +187,41 @@ public class MailER_TemplateSelectionController {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         Volley.newRequestQueue(activity).add(stringRequest);
+    }
+
+    private boolean parseAndLoadTemplateData(String response, boolean fromCache) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            int error = jsonObject.getInt(preferenceClass.getDataType("field_3"));
+            if (error == 1) {
+                JSONArray jsonArray = jsonObject.getJSONArray(preferenceClass.getDataType("field_4"));
+                if (jsonArray.length() > 0) {
+                    MailER_TemplateFragment.TempisFirstShow = false;
+                    new MailER_GetTemplateData(preferenceClass, jsonArray, new MailER_GetTemplateData.OnGetCatDataListener() {
+                        @Override
+                        public void onGetDataComplete(ArrayList<MailER_PosterModel> posterDataLists) {
+                            if (fromCache) {
+                                setPagerAdapter(posterDataLists);
+                            } else {
+                                new android.os.Handler().postDelayed(() -> setPagerAdapter(posterDataLists), 400);
+                            }
+                        }
+
+                        @Override
+                        public void onError() {
+                            if (!fromCache) {
+                                dismissMaterialDialog();
+                                MailER_MaterialDialogUtils.getInstance().errorDialog(activity, activity.getResources().getString(R.string.something_went_wrong));
+                            }
+                        }
+                    }).execute();
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static ArrayList<MailER_PosterModel> allCategoriesData;
@@ -185,6 +268,24 @@ public class MailER_TemplateSelectionController {
         }
     }
 
+    public static int currentSelectedCategoryIndex = 0;
+
+    public void selectCategory(int index) {
+        currentSelectedCategoryIndex = index;
+        if (activity == null || activity.isFinishing()) return;
+        ViewPager vp = activity.findViewById(R.id.viewPager);
+        androidx.recyclerview.widget.RecyclerView rvCategories = activity.findViewById(R.id.rv_category_tabs);
+        if (vp != null && allCategoriesData != null && index >= 0 && index < allCategoriesData.size()) {
+            vp.setCurrentItem(index, false);
+            if (rvCategories != null && rvCategories.getAdapter() instanceof com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter) {
+                com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter tabAdapter = (com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter) rvCategories.getAdapter();
+                updateTabsData(tabAdapter, allCategoriesData, index);
+                int rvSelectedIndex = (index > 2) ? 3 : index;
+                rvCategories.smoothScrollToPosition(rvSelectedIndex);
+            }
+        }
+    }
+
     private void setPagerAdapter(ArrayList<MailER_PosterModel> posterModel) {
         allCategoriesData = new ArrayList<>(posterModel); // Save original for More bottom sheet
 
@@ -199,17 +300,32 @@ public class MailER_TemplateSelectionController {
             for (int i = 0; i < posterModel.size(); i++) {
                 if (posterModel.get(i).getCat_name().toLowerCase().contains(initialCategoryToSelect.toLowerCase()) ||
                     String.valueOf(posterModel.get(i).getCat_id()).equals(initialCategoryToSelect)) {
-                    viewPager.setCurrentItem(i, false);
+                    currentSelectedCategoryIndex = i;
                     break;
                 }
             }
             initialCategoryToSelect = null; // Clear it so it only applies on first load
         }
 
+        if (currentSelectedCategoryIndex > 0 && currentSelectedCategoryIndex < posterModel.size()) {
+            selectCategory(currentSelectedCategoryIndex);
+        }
+
+        if (activity.getIntent().getBooleanExtra("open_all_categories", false)) {
+            activity.getIntent().removeExtra("open_all_categories");
+            globalSelectionListener = this::selectCategory;
+            Intent intent = new Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
+            if (viewPager != null) {
+                intent.putExtra("selected_index", currentSelectedCategoryIndex);
+            }
+            activity.startActivity(intent);
+        }
+
         dismissMaterialDialog();
     }
     
     private void updateTabsData(com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter adapter, ArrayList<MailER_PosterModel> allCategories, int selectedIndex) {
+        if (adapter == null || allCategories == null || allCategories.isEmpty()) return;
         ArrayList<MailER_PosterModel> visibleTabs = new ArrayList<>();
         
         // Add up to first 3 categories
@@ -219,7 +335,7 @@ public class MailER_TemplateSelectionController {
         
         // Handle hidden selected category and More tab
         if (allCategories.size() > 3) {
-            if (selectedIndex > 2) {
+            if (selectedIndex > 2 && selectedIndex < allCategories.size()) {
                 // User wants: 3 fixed + Selected Hidden + More (More is not removed)
                 visibleTabs.add(allCategories.get(selectedIndex));
             }
@@ -241,29 +357,31 @@ public class MailER_TemplateSelectionController {
         
         adapter = new com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter(activity, new ArrayList<>(), false, (position, model) -> {
             if ("More".equalsIgnoreCase(model.getCat_name())) {
-                globalSelectionListener = new CategorySelectionListener() {
-                    @Override
-                    public void onCategorySelected(int actualIndex) {
-                        viewPager.setCurrentItem(actualIndex);
-                    }
-                };
+                globalSelectionListener = this::selectCategory;
                 android.content.Intent intent = new android.content.Intent(activity, com.festival.flyer.postermaker.activities.MailER_AllCategoriesActivity.class);
                 if (viewPager != null) {
-                    intent.putExtra("selected_index", viewPager.getCurrentItem());
+                    intent.putExtra("selected_index", currentSelectedCategoryIndex);
                 }
                 activity.startActivity(intent);
             } else {
                 // Find the actual index of the clicked model in the original posterModel list
-                int actualIndex = posterModel.indexOf(model);
+                int actualIndex = -1;
+                for (int i = 0; i < posterModel.size(); i++) {
+                    if (posterModel.get(i).getCat_id() == model.getCat_id() ||
+                        (posterModel.get(i).getCat_name() != null && posterModel.get(i).getCat_name().equalsIgnoreCase(model.getCat_name()))) {
+                        actualIndex = i;
+                        break;
+                    }
+                }
                 if (actualIndex != -1) {
-                    viewPager.setCurrentItem(actualIndex);
+                    selectCategory(actualIndex);
                 }
             }
         });
         rvCategories.setAdapter(adapter);
 
         // Initial setup
-        updateTabsData(adapter, posterModel, viewPager.getCurrentItem());
+        updateTabsData(adapter, posterModel, currentSelectedCategoryIndex);
         
         com.festival.flyer.postermaker.adapter.MailER_CategoryTabAdapter finalAdapter = adapter;
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -272,6 +390,7 @@ public class MailER_TemplateSelectionController {
 
             @Override
             public void onPageSelected(int position) {
+                currentSelectedCategoryIndex = position;
                 updateTabsData(finalAdapter, posterModel, position);
                 int rvSelectedIndex = (position > 2) ? 3 : position;
                 rvCategories.smoothScrollToPosition(rvSelectedIndex);
@@ -290,8 +409,17 @@ public class MailER_TemplateSelectionController {
     }
 
     public void dismissMaterialDialog() {
-        if (materialDialog != null && materialDialog.isShowing())
-            materialDialog.dismiss();
+        hideSkeleton();
+        try {
+            if (activity instanceof Activity) {
+                if (!activity.isFinishing()) {
+                    if (materialDialog != null && materialDialog.isShowing())
+                        materialDialog.dismiss();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

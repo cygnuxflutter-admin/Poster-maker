@@ -56,7 +56,13 @@ public class MailER_GetTemplateData extends AsyncTask<Void, Void, String> {
             for (int j = 0; j < field_7.length(); j++) {
                 JSONObject jsonObject = field_7.getJSONObject(j);
                 String field_10 = jsonObject.getString(preferenceClass.getDataType("field_10"));
-                String field_11 = jsonObject.getString(preferenceClass.getDataType("field_11"));
+                String field_11 = jsonObject.optString("thumbnail_image", "");
+                if (field_11.isEmpty()) {
+                    field_11 = jsonObject.optString("thumbnail", "");
+                }
+                if (field_11.isEmpty()) {
+                    field_11 = jsonObject.optString(preferenceClass.getDataType("field_11"), "");
+                }
                 String field_8 = jsonObject.getString(preferenceClass.getDataType("field_8"));
 
 //                if (j != 0) {
@@ -77,7 +83,9 @@ public class MailER_GetTemplateData extends AsyncTask<Void, Void, String> {
 //                    }
 //                }
 
-                boolean isPremium = (j % preferenceClass.getInt("PremiumPostCount", 3) == 0);
+                boolean premiumEnabled = preferenceClass.getBoolean("templates_premium_enabled", preferenceClass.getBoolean("premium_enabled", true));
+                int premiumCount = preferenceClass.getInt("templates_premium_interval", preferenceClass.getInt("PremiumPostCount", 3));
+                boolean isPremium = premiumEnabled && (premiumCount > 0) && (j != 0) && (j % premiumCount == 0);
                 posterThumbFullArrayList.add(new MailER_PosterImage(field_10, field_11, field_8, isPremium));
             }
             return posterThumbFullArrayList;

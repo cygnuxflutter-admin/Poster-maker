@@ -47,32 +47,103 @@ public class MailER_CreateActivity extends AppCompatActivity {
     public File camera_file;
     public int CAMERA_INTENT = 1001;
     public int GALLERY_INTENT = 1002;
-    
-    // Bottom nav tabs
-    private LinearLayout tabHome, tabExplore, tabCreate, tabCreations, tabSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_create);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_CreateActivity.this, () -> finish());
+            }
+        });
+
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_create);
 
 
         findViewById(R.id.ic_back).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        findViewById(R.id.btn_gallery).setOnClickListener(v -> openPhotoGallery());
-        findViewById(R.id.btn_camera).setOnClickListener(v -> openCamera());
-        findViewById(R.id.btn_colors).setOnClickListener(v -> openColorDialog());
+        findViewById(R.id.btn_gallery).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openPhotoGallery);
+        });
+        findViewById(R.id.btn_camera).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openCamera);
+        });
+        findViewById(R.id.btn_colors).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, this::openColorDialog);
+        });
 
-        setupBottomNavigation();
+                loadRemoteConfigAds();
+    }
+
+    private void loadRemoteConfigAds() {
+        android.widget.RelativeLayout btm = findViewById(R.id.btm);
+        if (btm == null) return;
+
+        if (!com.festival.flyer.postermaker.utils.MailER_NetworkUtils.isNetworkAvailable(this)) {
+            btm.setVisibility(android.view.View.GONE);
+            return;
+        }
+
+        com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(this);
+        boolean isBannerEnabled = preferenceClass.getBoolean("create_banner_ad_enabled", preferenceClass.getAdsStatus("CreateScreen_BannerAD") != 0);
+        String bannerType = preferenceClass.getDataType("create_banner_ad_type", "banner");
+        String customAdId = preferenceClass.getAdsId("create_banner_ad_id");
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                if (rc.getValue("create_banner_ad_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isBannerEnabled = rc.getBoolean("create_banner_ad_enabled");
+                }
+                if (rc.getValue("create_banner_ad_type").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    bannerType = rc.getString("create_banner_ad_type");
+                }
+                if (rc.getValue("create_banner_ad_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    String remoteId = rc.getString("create_banner_ad_id");
+                    if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (bannerType == null || bannerType.trim().isEmpty()) {
+            bannerType = "banner";
+        }
+
+        if (!isBannerEnabled || "none".equalsIgnoreCase(bannerType) || "false".equalsIgnoreCase(bannerType)) {
+            btm.setVisibility(android.view.View.GONE);
+            return;
+        }
+
+        android.widget.RelativeLayout rl_collapsible = findViewById(R.id.rl_collapsible);
+        android.widget.FrameLayout collapsibleContainer = findViewById(R.id.CollapsibleContainer);
+        com.facebook.shimmer.ShimmerFrameLayout shimmerCollapsible = findViewById(R.id.shimmer_view_CollapsibleContainer);
+
+        android.widget.RelativeLayout rl_banner_ad = findViewById(R.id.rl_banner_ad);
+        android.widget.RelativeLayout rl_ad = findViewById(R.id.rl_ad);
+        com.facebook.shimmer.ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
+
+        if (btm != null) btm.setVisibility(android.view.View.GONE);
+        if ("collapsible".equalsIgnoreCase(bannerType) && collapsibleContainer != null) {
+            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.GONE);
+            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.GONE);
+            com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadCollapsibleBanner(this, collapsibleContainer, rl_ad, shimmerCollapsible, customAdId);
+        } else {
+            if (rl_collapsible != null) rl_collapsible.setVisibility(android.view.View.GONE);
+            if (rl_banner_ad != null) rl_banner_ad.setVisibility(android.view.View.GONE);
+            com.festival.flyer.postermaker.adManager.MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container, customAdId);
+        }
     }
 
     public void openPhotoGallery() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, GALLERY_INTENT);
     }
 
     public void openCamera() {
+        com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
         camera_file = new File(getCacheDir(), ".temp.jpg");
         intent.putExtra(MediaStore.EXTRA_OUTPUT,
@@ -163,39 +234,6 @@ public class MailER_CreateActivity extends AppCompatActivity {
                 new AspectRatio("5:4", 5, 4),
                 new AspectRatio("4:5", 4, 5));
         uCrop.withOptions(options).start(this);
-    }
-
-    private void setupBottomNavigation() {
-        tabHome = findViewById(R.id.tab_home);
-        tabExplore = findViewById(R.id.tab_explore);
-        tabCreate = findViewById(R.id.tab_create);
-        tabCreations = findViewById(R.id.tab_creations);
-        tabSettings = findViewById(R.id.tab_settings);
-
-        tabHome.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_PosterMainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(intent);
-            finish();
-        });
-
-        tabExplore.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
-        tabCreations.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_MyCreationActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
-        tabSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MailER_SettingsActivity.class);
-            startActivity(intent);
-            finish();
-        });
     }
 
     @Override

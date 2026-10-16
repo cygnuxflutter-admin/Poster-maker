@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true">
+
+    <!-- Top Action Bar -->
+    <RelativeLayout
+        android:id="@+id/top_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_48sdp"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
+        android:elevation="4dp">
+
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/ic_back"
+            android:layout_width="@dimen/_44sdp"
+            android:layout_height="@dimen/_44sdp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/_12sdp"
+            android:src="@drawable/spawner_ic_chevron_left_new"
+            app:tint="#381079" />
+
+        <!-- Title & Subtitle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginEnd="@dimen/_16sdp"
+            android:layout_toEndOf="@+id/ic_back"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:maxLines="1"
+                android:text="Backgrounds"
+                android:textColor="#381079"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/spawner_visbyroundcf_medium"
+                android:maxLines="1"
+                android:text="Background 1 of 1"
+                android:textColor="#9E9E9E"
+                android:textSize="@dimen/_9ssp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- Main ViewPager2 for Vertical Poster Browsing -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/layout_bottom_container"
+        android:layout_below="@+id/top_toolbar"
+        android:background="@color/white" />
+
+    <!-- Swipe Up Hint Pill -->
+    <LinearLayout
+        android:id="@+id/lyt_swipe_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/layout_bottom_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/spawner_bg_swipe_hint"
+        android:elevation="3dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingVertical="@dimen/_5sdp">
+
+        <ImageView
+            android:id="@+id/iv_swipe_arrow"
+            android:layout_width="@dimen/_14sdp"
+            android:layout_height="@dimen/_14sdp"
+            android:src="@drawable/spawner_ic_chevron_up"
+            app:tint="@color/text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:fontFamily="@font/spawner_visbyroundcf_bold"
+            android:text="Swipe up for more"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/_10ssp" />
+    </LinearLayout>
+
+    <!-- Bottom Container: Native Ad + Bottom Edit Button -->
+    <LinearLayout
+        android:id="@+id/layout_bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/_4sdp"
+        android:paddingBottom="@dimen/_8sdp">
+
+        <!-- Native Ad Card / Container -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_native_ad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_6sdp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="@dimen/_8sdp"
+            app:cardElevation="@dimen/_2sdp">
+
+            <RelativeLayout
+                android:id="@+id/rl_native_ad_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Real Native Ad View loaded here -->
+                <RelativeLayout
+                    android:id="@+id/native_ad_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible" />
+
+                <!-- Shimmer Loading Placeholder -->
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/native_shimmer_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:visibility="visible"
+                    app:shimmer_auto_start="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/_6sdp">
+
+                        <View
+                            android:layout_width="@dimen/_44sdp"
+                            android:layout_height="@dimen/_44sdp"
+                            android:background="#E2E8F0" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <View
+                                android:layout_width="120dp"
+                                android:layout_height="@dimen/_10sdp"
+                                android:background="#E2E8F0" />
+
+                            <View
+                                android:layout_width="80dp"
+                                android:layout_height="@dimen/_8sdp"
+                                android:layout_marginTop="@dimen/_4sdp"
+                                android:background="#E2E8F0" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="@dimen/_54sdp"
+                            android:layout_height="@dimen/_26sdp"
+                            android:layout_marginStart="@dimen/_6sdp"
+                            android:background="#E2E8F0" />
+                    </LinearLayout>
+                </com.facebook.shimmer.ShimmerFrameLayout>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Prominent Bottom Edit Button (Directly BELOW Native Ad) -->
+        <LinearLayout
+            android:id="@+id/btn_edit_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_42sdp"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:background="@drawable/spawner_bg_gradient_button"
+            android:clickable="true"
+            android:elevation="3dp"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_edit_icon"
+                android:layout_width="@dimen/_16sdp"
+                android:layout_height="@dimen/_16sdp"
+                android:src="@drawable/spawner_ic_edit_white"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_6sdp"
+                android:fontFamily="@font/spawner_visbyroundcf_bold"
+                android:text="Use Background"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_12ssp"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/pb_edit_loading"
+                android:layout_width="@dimen/_16sdp"
+                android:layout_height="@dimen/_16sdp"
+                android:layout_marginStart="@dimen/_6sdp"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

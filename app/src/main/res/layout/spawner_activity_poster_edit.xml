@@ -58,6 +58,21 @@
                 android:background="@color/white"
                 android:rotation="180" />
 
+            
+        <!-- Switch Size Button for Auto Personalization -->
+        <Button
+            android:id="@+id/btn_switch_size"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Switch Size"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:backgroundTint="#2196F3"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:paddingHorizontal="12dp" />
+
             <TextView
                 android:id="@+id/txtHeader"
                 android:layout_width="match_parent"
@@ -222,24 +237,24 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/bottom_ly"
+            android:layout_above="@+id/fl_bottom_popups"
             android:layout_below="@id/top_ly"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
             android:background="@color/white"
             android:visibility="visible">
 
-            <ScrollView
+            <RelativeLayout
                 android:id="@+id/lay_scroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true">
 
                 <com.festival.flyer.postermaker.view.MailER_AspectRatioFrameLayout
                     android:id="@+id/center_rel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_centerInParent="true"
                     android:background="@color/white"
                     app:resize_mode="fit"
                     tools:ignore="MissingClass">
@@ -248,7 +263,7 @@
                         android:id="@+id/main_rel"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
                         tools:ignore="MissingClass">
 
                         <ImageView
@@ -281,196 +296,55 @@
 
                     <RelativeLayout
                         android:id="@+id/rl_watermark"
-                        android:layout_width="@dimen/_50sdp"
-                        android:layout_height="@dimen/_50sdp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginBottom="@dimen/_8sdp"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:visibility="visible">
 
                         <ImageView
                             android:id="@+id/btn_watermark"
-                            android:layout_width="@dimen/_50sdp"
+                            android:layout_width="@dimen/_60sdp"
                             android:layout_height="@dimen/_50sdp"
-                            android:src="@drawable/newlogo" />
+                            android:adjustViewBounds="true"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/spawner_watermark" />
 
                         <ImageView
                             android:id="@+id/btn_watermark_remove"
-                            android:layout_width="@dimen/_10sdp"
-                            android:layout_height="@dimen/_10sdp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_gravity="end|bottom"
-                            android:background="@color/black"
+                            android:layout_width="@dimen/_14sdp"
+                            android:layout_height="@dimen/_14sdp"
+                            android:layout_alignTop="@+id/btn_watermark"
+                            android:layout_alignEnd="@+id/btn_watermark"
+                            android:background="@drawable/spawner_bg_watermark_close"
+                            android:elevation="4dp"
+                            android:padding="@dimen/_3sdp"
                             android:src="@drawable/spawner_ic_close"
-                            android:visibility="visible" />
+                            android:visibility="gone" />
 
                     </RelativeLayout>
                 </com.festival.flyer.postermaker.view.MailER_AspectRatioFrameLayout>
 
-            </ScrollView>
+            </RelativeLayout>
 
         </RelativeLayout>
 
-        <FrameLayout
-            android:id="@+id/lay_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_ly"
-            android:layout_below="@+id/top_ly"
-            android:layout_marginTop="@dimen/_10sdp"
-            android:layout_marginBottom="@dimen/_10sdp"
-            android:visibility="gone" />
+        
 
-        <RelativeLayout
-            android:id="@+id/bottom_ly"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_55sdp"
-            android:layout_alignParentBottom="true"
-            android:background="@color/white"
-            android:elevation="@dimen/_1sdp">
+        
+    <FrameLayout
+        android:id="@+id/fl_bottom_popups"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottom_ly">
+        
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:weightSum="5">
-
-
-                <LinearLayout
-                    android:id="@+id/add_text"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_21sdp"
-                        android:layout_height="@dimen/_21sdp"
-                        app:tint="@color/new_selected"
-                        android:src="@drawable/spawner_text_press" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:gravity="center"
-                        android:text="@string/text"
-                        android:layout_marginTop="@dimen/_2sdp"
-                        android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/add_sticker"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/img_sticker"
-                        android:layout_width="@dimen/_21sdp"
-                        android:layout_height="@dimen/_21sdp"
-                        app:tint="@color/new_selected"
-                        android:src="@drawable/spawner_sticker_press" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:gravity="center"
-                        android:layout_marginTop="@dimen/_2sdp"
-                        android:text="@string/stickers"
-                        android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/add_effect"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/img_effect"
-                        android:layout_width="@dimen/_21sdp"
-                        android:layout_height="@dimen/_21sdp"
-                        app:tint="@color/new_selected"
-                        android:src="@drawable/spawner_effect_press" />
-
-                    <TextView
-
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:gravity="center"
-                        android:text="@string/effects"
-                        android:layout_marginTop="@dimen/_2sdp"
-                        android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/add_user_image"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_21sdp"
-                        android:layout_height="@dimen/_21sdp"
-                        app:tint="@color/new_selected"
-                        android:src="@drawable/spawner_image_press" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:gravity="center"
-                        android:text="@string/image"
-                        android:layout_marginTop="@dimen/_2sdp"
-                        android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/add_bg"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_21sdp"
-                        android:layout_height="@dimen/_21sdp"
-                        app:tint="@color/new_selected"
-                        android:src="@drawable/spawner_bg_press" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/spawner_visbyroundcf_bold"
-                        android:gravity="center"
-                        android:text="@string/background"
-                        android:layout_marginTop="@dimen/_2sdp"
-                        android:textColor="@color/new_selected"
-                        android:textSize="@dimen/_10ssp" android:maxLines="1" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
+        
         <include layout="@layout/spawner_text_controller" />
 
         <include layout="@layout/spawner_sticker_controller" />
@@ -511,6 +385,197 @@
                 android:layout_below="@+id/pagerLay" />
 
         </RelativeLayout>
+        
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/lay_container"
+        android:layout_width="@dimen/_220sdp"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_ly"
+        android:layout_below="@id/top_ly"
+        android:layout_alignParentStart="true"
+        android:background="@color/white"
+        android:elevation="@dimen/_5sdp"
+        android:visibility="gone" />
+
+    <RelativeLayout
+            android:id="@+id/bottom_ly"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_55sdp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white"
+            android:elevation="@dimen/_1sdp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:weightSum="5">
+
+
+                <LinearLayout
+                    android:id="@+id/add_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/_21sdp"
+                        android:layout_height="@dimen/_21sdp"
+                        app:tint="@color/new_selected"
+                        android:src="@drawable/spawner_text_press" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:text="@string/text"
+                        android:layout_marginTop="@dimen/_2sdp"
+                        android:textColor="@color/new_selected"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_sticker"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/img_sticker"
+                        android:layout_width="@dimen/_21sdp"
+                        android:layout_height="@dimen/_21sdp"
+                        app:tint="@color/new_selected"
+                        android:src="@drawable/spawner_sticker_press" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:layout_marginTop="@dimen/_2sdp"
+                        android:text="@string/stickers"
+                        android:textColor="@color/new_selected"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_effect"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/img_effect"
+                        android:layout_width="@dimen/_21sdp"
+                        android:layout_height="@dimen/_21sdp"
+                        app:tint="@color/new_selected"
+                        android:src="@drawable/spawner_effect_press" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:text="@string/effects"
+                        android:layout_marginTop="@dimen/_2sdp"
+                        android:textColor="@color/new_selected"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_user_image"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/_21sdp"
+                        android:layout_height="@dimen/_21sdp"
+                        app:tint="@color/new_selected"
+                        android:src="@drawable/spawner_image_press" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:text="@string/image"
+                        android:layout_marginTop="@dimen/_2sdp"
+                        android:textColor="@color/new_selected"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_bg"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/_21sdp"
+                        android:layout_height="@dimen/_21sdp"
+                        app:tint="@color/new_selected"
+                        android:src="@drawable/spawner_bg_press" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spawner_visbyroundcf_bold"
+                        android:gravity="center"
+                        android:text="@string/background"
+                        android:layout_marginTop="@dimen/_2sdp"
+                        android:textColor="@color/new_selected"
+                        android:textSize="@dimen/_9ssp"
+                        android:maxLines="1"
+                        android:includeFontPadding="false"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="7sp"
+                        app:autoSizeMaxTextSize="@dimen/_9ssp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        
 
     </RelativeLayout>
 

@@ -11,6 +11,15 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter;
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions;
+import android.graphics.Bitmap;
+import android.app.ProgressDialog;
+import android.widget.Toast;
+
+
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
@@ -245,13 +254,15 @@ public class MailER_StickerController {
             }
         });
 
+
+
     }
 
     private void showLayout(View view) {
-        ly_controlsShow.setVisibility(View.GONE);
-        lay_colorOpacity.setVisibility(View.GONE);
-        ly_stk_rotation.setVisibility(View.GONE);
-        view.setVisibility(View.VISIBLE);
+        ly_controlsShow.setVisibility(android.view.View.GONE);
+        lay_colorOpacity.setVisibility(android.view.View.GONE);
+        ly_stk_rotation.setVisibility(android.view.View.GONE);
+        view.setVisibility(android.view.View.VISIBLE);
     }
 
     public void setResizableStickerView(MailER_ResizableStickerView resizableStickerView, MailER_GridLine gridLine) {

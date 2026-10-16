@@ -118,6 +118,7 @@ public class MailER_MyCreationAdapter extends RecyclerView.Adapter<MailER_MyCrea
         }));
 
         holder.btn_share.setOnClickListener(v -> {
+            com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
             String shareBody = "I'm using amazing Poster maker App, I just created a new poster within 2 min and it's completely free. I recommend you to try this app. \n\n" +
                     "https://play.google.com/store/apps/details?id=" + activity.getApplicationContext().getPackageName();
             Intent shareIntent = new Intent(Intent.ACTION_SEND);

@@ -118,6 +118,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
 
         findViewById(R.id.btn_notification).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_Notification", "HomeScreen");
             nextActivity(MailER_NotificationActivity.class);
         });
         updateNotificationBadge();
@@ -127,9 +128,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
-
-        // OneSignal Permission Request
-        OneSignal.getNotifications().requestPermission(true, Continue.none());
 
         // OneSignal Token Logging
         if (OneSignal.getUser().getPushSubscription() != null) {
@@ -152,6 +150,28 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.utils.MailER_PreferenceClass preferenceClass = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(MailER_PosterMainActivity.this);
+                boolean showExitDialog = preferenceClass.getBoolean("app_exit_dialog_enabled", true);
+                try {
+                    com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+                    if (rc != null) {
+                        String masterJson = com.festival.flyer.postermaker.utils.MailER_PreferenceClass.getMasterConfigJson(rc);
+                        if (masterJson != null && !masterJson.isEmpty()) {
+                            org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                            if (root.has("app_exit_dialog")) {
+                                showExitDialog = root.getJSONObject("app_exit_dialog").optBoolean("enabled", showExitDialog);
+                            }
+                        } else if (rc.getValue("app_exit_dialog_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                            showExitDialog = rc.getBoolean("app_exit_dialog_enabled");
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                if (!showExitDialog) {
+                    MailER_PosterMainActivity.this.finish();
+                    System.exit(0);
+                    return;
+                }
                 MailER_MaterialDialogUtils.getInstance().exitAlertDialog(MailER_PosterMainActivity.this, "Exit Alert", "Do you really want to exit?", materialDialog -> {
                     materialDialog.dismiss();
                     MailER_PosterMainActivity.this.finish();
@@ -159,8 +179,6 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                 });
             }
         });
-
-        checkAccess();
 
 //        ConsentDebugSettings debugSettings = new ConsentDebugSettings.Builder(this)
 //                .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
@@ -178,16 +196,18 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                 this,
                 params,
                 (ConsentInformation.OnConsentInfoUpdateSuccessListener) () -> {
-                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(
-                            this,
-                            (ConsentForm.OnConsentFormDismissedListener) loadAndShowError -> {
-                                if (loadAndShowError != null) {
-                                    Log.w("TAG52451", String.format("%s: %s",
-                                            loadAndShowError.getErrorCode(),
-                                            loadAndShowError.getMessage()));
+                    new Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                                this,
+                                (ConsentForm.OnConsentFormDismissedListener) loadAndShowError -> {
+                                    if (loadAndShowError != null) {
+                                        Log.w("TAG52451", String.format("%s: %s",
+                                                loadAndShowError.getErrorCode(),
+                                                loadAndShowError.getMessage()));
+                                    }
                                 }
-                            }
-                    );
+                        );
+                    }, 500); // Add a 500ms delay to prevent window attachment conflict with AppOpenAd
                 },
                 (ConsentInformation.OnConsentInfoUpdateFailureListener) requestConsentError -> {
                     // Consent gathering failed.
@@ -205,6 +225,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         preferenceClass = new MailER_PreferenceClass(this);
 
         findByID();
+        MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
 
         SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         if (swipeRefreshLayout != null) {
@@ -224,6 +245,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         fetchTrendingFestivals();
 
         findViewById(R.id.lay_poster).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_CreatePoster", "HomeScreen");
             activityIndex = 1;
             if (!checkPermission()) {
                 try {
@@ -250,6 +272,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
 //            openActivity(MailER_BackgroundSelectionActivity.class);
         });
         findViewById(R.id.lay_template).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_ReadyTemplates", "HomeScreen");
             activityIndex = 2;
             if (!checkPermission()) {
                 try {
@@ -278,10 +301,29 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.lay_design).setOnClickListener(v -> {
-            MailER_ShareUtils.rateUs(MailER_PosterMainActivity.this);
+            com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_RateUs", "HomeScreen");
+            
+            // Coming Soon:
+            android.widget.Toast.makeText(MailER_PosterMainActivity.this, "Coming Soon! This feature will be available soon.", android.widget.Toast.LENGTH_SHORT).show();
+
+            /*
+            MyApplication.showInterstitialAd(MailER_PosterMainActivity.this, () -> {
+                android.content.SharedPreferences prefs = getSharedPreferences("BusinessProfile", android.content.Context.MODE_PRIVATE);
+                String savedName = prefs.getString("business_name", "");
+                
+                if (savedName.isEmpty()) {
+                    // First time, show form
+                    startActivity(new android.content.Intent(MailER_PosterMainActivity.this, com.festival.flyer.postermaker.makeityours.auto.MailER_BusinessProfileActivity.class));
+                } else {
+                    // Profile already exists, go directly to posters!
+                    startActivity(new android.content.Intent(MailER_PosterMainActivity.this, com.festival.flyer.postermaker.activities.MailER_CustomCategoryActivity.class));
+                }
+            });
+            */
         });
 
         findViewById(R.id.lay_creation).setOnClickListener(v -> {
+            com.festival.flyer.postermaker.utils.MailER_AnalyticsUtils.logButtonClick(MailER_PosterMainActivity.this, "Home_MyCreation", "HomeScreen");
             activityIndex = 4;
             if (!checkPermission()) {
                 try {
@@ -346,9 +388,9 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             }
         });
 
-        // Bottom Nav: My Creations tab -> same as lay_creation
+        // Bottom Nav: Background tab -> open Background Selection
         findViewById(R.id.tab_creations).setOnClickListener(v -> {
-            activityIndex = 4;
+            activityIndex = 1;
             if (!checkPermission()) {
                 try {
                     requestPermission();
@@ -358,7 +400,7 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             } else {
-                nextActivity(MailER_MyCreationActivity.class);
+                nextActivity(MailER_BackgroundSelectionActivity.class);
             }
         });
 
@@ -374,6 +416,15 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         findViewById(R.id.chip_sale).setOnClickListener(v -> openCategory("Sale"));
         findViewById(R.id.chip_birthday).setOnClickListener(v -> openCategory("Birthday"));
         findViewById(R.id.chip_business).setOnClickListener(v -> openCategory("Business"));
+
+        android.view.View chipViewAllCat = findViewById(R.id.btn_view_all_cat_top);
+        if (chipViewAllCat != null) {
+            chipViewAllCat.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(MailER_PosterMainActivity.this, MailER_TemplateSelectionActivity.class);
+                intent.putExtra("open_all_categories", true);
+                MyApplication.showInterstitialAd(MailER_PosterMainActivity.this, () -> startActivity(intent));
+            });
+        }
     }
 
     private void openCategory(String category) {
@@ -409,34 +460,27 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         ShimmerFrameLayout shimmer_view_container = findViewById(R.id.shimmer_view_container);
         ShimmerFrameLayout shimmer_view_container_banner = findViewById(R.id.shimmer_view_container_banner);
 
-        RelativeLayout rl_banner_ad = this.findViewById(R.id.rl_banner_ad);
-        RelativeLayout rl_native_ad = this.findViewById(R.id.rl_native_ad);
-        RelativeLayout rl_ad_banner = this.findViewById(R.id.rl_ad);
-        RelativeLayout rl_collapsible = this.findViewById(R.id.rl_collapsible);
-
+        RelativeLayout ad_container_wrapper = findViewById(R.id.ad_container_wrapper);
+        RelativeLayout rl_banner_ad = findViewById(R.id.rl_banner_ad);
+        RelativeLayout rl_native_ad = findViewById(R.id.rl_native_ad);
+        RelativeLayout rl_ad_banner = findViewById(R.id.rl_ad);
+        RelativeLayout rl_collapsible = findViewById(R.id.rl_collapsible);
         bannerContainer = findViewById(R.id.CollapsibleContainer);
         shimmerFrameLayout = findViewById(R.id.shimmer_view_CollapsibleContainer);
 
+        if (ad_container_wrapper != null) ad_container_wrapper.setVisibility(View.GONE);
+        if (rl_banner_ad != null) rl_banner_ad.setVisibility(View.GONE);
+        if (rl_native_ad != null) rl_native_ad.setVisibility(View.GONE);
+        if (rl_collapsible != null) rl_collapsible.setVisibility(View.GONE);
+
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-            if (preferenceClass.getInt("MainScreen_Native", 0) == 1) {
-                rl_collapsible.setVisibility(View.VISIBLE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.GONE);
+            int adMode = preferenceClass.getInt("MainScreen_Native", 2);
+            if (adMode == 1) {
                 MailER_LoadAds.loadCollapsibleBanner(this, bannerContainer, findViewById(R.id.rl_ad), shimmerFrameLayout);
-            } else if (preferenceClass.getInt("MainScreen_Native", 0) == 2) {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.VISIBLE);
+            } else if (adMode == 2) {
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad_banner, shimmer_view_container_banner);
-            } else if (preferenceClass.getInt("MainScreen_Native", 0) == 3) {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.VISIBLE);
-                rl_banner_ad.setVisibility(View.GONE);
+            } else if (adMode == 3) {
                 loadNativeAd(native_banner_ad_container, this, shimmer_view_container);
-            } else {
-                rl_collapsible.setVisibility(View.GONE);
-                rl_native_ad.setVisibility(View.GONE);
-                rl_banner_ad.setVisibility(View.GONE);
             }
         }
     }
@@ -531,95 +575,60 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         heroIndicatorLayout = findViewById(R.id.hero_indicator_layout);
         ShimmerFrameLayout shimmerHero = findViewById(R.id.shimmer_hero_container);
 
-        if (shimmerHero != null) {
-            shimmerHero.startShimmer();
-            shimmerHero.setVisibility(View.VISIBLE);
+        // 1. Instant Cache Load
+        String cachedHero = com.festival.flyer.postermaker.utils.MailER_AppCacheManager.getHeroBanners(this);
+        boolean hasCache = false;
+        if (cachedHero != null && !cachedHero.trim().isEmpty()) {
+            hasCache = parseAndDisplayHeroBanners(cachedHero);
+            if (hasCache) {
+                if (shimmerHero != null) {
+                    shimmerHero.stopShimmer();
+                    shimmerHero.setVisibility(View.GONE);
+                }
+                if (heroViewPager != null) {
+                    heroViewPager.setVisibility(View.VISIBLE);
+                }
+            }
         }
-        if (heroViewPager != null) {
-            heroViewPager.setVisibility(View.GONE);
+
+        if (!hasCache) {
+            if (shimmerHero != null) {
+                shimmerHero.startShimmer();
+                shimmerHero.setVisibility(View.VISIBLE);
+            }
+            if (heroViewPager != null) {
+                heroViewPager.setVisibility(View.GONE);
+            }
         }
         
+        // 2. Background Network Sync
         String url = "https://cygnux.in/postermaker/api/v1/poster/hero";
         Log.e("HERO_API", "Requesting URL: " + url);
 
+        final boolean finalHasCache = hasCache;
         StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
             Log.e("HERO_API", "Response SUCCESS: " + response);
-            if (shimmerHero != null) {
-                shimmerHero.stopShimmer();
-                shimmerHero.setVisibility(View.GONE);
-            }
-            if (heroViewPager != null) {
-                heroViewPager.setVisibility(View.VISIBLE);
-            }
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                if (jsonObject.getString("error").equals("1")) {
-                    JSONArray dataArray = jsonObject.getJSONArray("data");
-                    List<MailER_HeroBannerModel> list = new ArrayList<>();
-                    for (int i = 0; i < dataArray.length(); i++) {
-                        JSONObject obj = dataArray.getJSONObject(i);
-                        list.add(new MailER_HeroBannerModel(
-                                obj.getString("id"),
-                                obj.getString("banner_image"),
-                                obj.getString("action_url")
-                        ));
-                    }
-                    
-                    dynamicHeroAdapter = new MailER_DynamicHeroAdapter(this, list, item -> {
-                        String action = item.getAction_url();
-                        if (action != null && action.startsWith("category/")) {
-                            String catId = action.replace("category/", "");
-                            MyApplication.showInterstitialAd(this, () -> {
-                                Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
-                                intent.putExtra("selected_category", catId);
-                                startActivity(intent);
-                            });
-                        }
-                    });
-                    
-                    heroViewPager.setAdapter(dynamicHeroAdapter);
-                    setupSliderIndicators(list.size());
-                    setCurrentIndicator(0);
-                    
-                    sliderRunnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            if (heroViewPager.getAdapter() != null && heroViewPager.getAdapter().getItemCount() > 0) {
-                                int nextItem = heroViewPager.getCurrentItem() + 1;
-                                if (nextItem >= heroViewPager.getAdapter().getItemCount()) {
-                                    nextItem = 0;
-                                }
-                                heroViewPager.setCurrentItem(nextItem, true);
-                            }
-                        }
-                    };
-
-                    heroViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-                        @Override
-                        public void onPageSelected(int position) {
-                            super.onPageSelected(position);
-                            setCurrentIndicator(position);
-                            sliderHandler.removeCallbacks(sliderRunnable);
-                            sliderHandler.postDelayed(sliderRunnable, 3000);
-                        }
-                    });
-                    
-                    // Start auto-scroll
-                    sliderHandler.postDelayed(sliderRunnable, 3000);
-                } else {
-                    Log.e("HERO_API", "API Error: " + jsonObject.optString("message"));
+            boolean parsed = parseAndDisplayHeroBanners(response);
+            if (parsed) {
+                com.festival.flyer.postermaker.utils.MailER_AppCacheManager.saveHeroBanners(this, response);
+                if (shimmerHero != null) {
+                    shimmerHero.stopShimmer();
+                    shimmerHero.setVisibility(View.GONE);
                 }
-            } catch (JSONException e) {
-                Log.e("HERO_API", "JSON Parsing Error: " + e.getMessage());
+                if (heroViewPager != null) {
+                    heroViewPager.setVisibility(View.VISIBLE);
+                }
             }
         }, error -> {
             Log.e("HERO_API", "Response ERROR: " + error.getMessage());
-            if (shimmerHero != null) {
-                shimmerHero.stopShimmer();
-                shimmerHero.setVisibility(View.GONE);
-            }
-            if (heroViewPager != null) {
-                heroViewPager.setVisibility(View.VISIBLE);
+            if (!finalHasCache) {
+                if (shimmerHero != null) {
+                    shimmerHero.stopShimmer();
+                    shimmerHero.setVisibility(View.GONE);
+                }
+                if (heroViewPager != null) {
+                    heroViewPager.setVisibility(View.VISIBLE);
+                }
             }
         }) {
             @Override
@@ -633,68 +642,130 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(request);
     }
 
+    private boolean parseAndDisplayHeroBanners(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if (jsonObject.getString("error").equals("1")) {
+                JSONArray dataArray = jsonObject.getJSONArray("data");
+                List<MailER_HeroBannerModel> list = new ArrayList<>();
+                for (int i = 0; i < dataArray.length(); i++) {
+                    JSONObject obj = dataArray.getJSONObject(i);
+                    list.add(new MailER_HeroBannerModel(
+                            obj.getString("id"),
+                            obj.getString("banner_image"),
+                            obj.getString("action_url")
+                    ));
+                }
+
+                if (list.isEmpty()) return false;
+                
+                dynamicHeroAdapter = new MailER_DynamicHeroAdapter(this, list, item -> {
+                    String action = item.getAction_url();
+                    if (action != null && action.startsWith("category/")) {
+                        String catId = action.replace("category/", "");
+                        MyApplication.showInterstitialAd(this, () -> {
+                            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
+                            intent.putExtra("selected_category", catId);
+                            startActivity(intent);
+                        });
+                    }
+                });
+                
+                heroViewPager.setAdapter(dynamicHeroAdapter);
+                setupSliderIndicators(list.size());
+                setCurrentIndicator(0);
+                
+                sliderRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (heroViewPager.getAdapter() != null && heroViewPager.getAdapter().getItemCount() > 0) {
+                            int nextItem = heroViewPager.getCurrentItem() + 1;
+                            if (nextItem >= heroViewPager.getAdapter().getItemCount()) {
+                                nextItem = 0;
+                            }
+                            heroViewPager.setCurrentItem(nextItem, true);
+                        }
+                    }
+                };
+
+                heroViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        super.onPageSelected(position);
+                        setCurrentIndicator(position);
+                        sliderHandler.removeCallbacks(sliderRunnable);
+                        sliderHandler.postDelayed(sliderRunnable, 3000);
+                    }
+                });
+                
+                sliderHandler.removeCallbacks(sliderRunnable);
+                sliderHandler.postDelayed(sliderRunnable, 3000);
+                return true;
+            }
+        } catch (Exception e) {
+            Log.e("HERO_API", "Parsing error: " + e.getMessage());
+        }
+        return false;
+    }
+
     private void fetchTrendingFestivals() {
         RecyclerView rvTrending = findViewById(R.id.rv_trending_festivals);
         ShimmerFrameLayout shimmerTrending = findViewById(R.id.shimmer_trending_container);
 
-        if (shimmerTrending != null) {
-            shimmerTrending.startShimmer();
-            shimmerTrending.setVisibility(View.VISIBLE);
+        // 1. Instant Cache Load
+        String cachedTrending = com.festival.flyer.postermaker.utils.MailER_AppCacheManager.getTrendingFestivals(this);
+        boolean hasCache = false;
+        if (cachedTrending != null && !cachedTrending.trim().isEmpty()) {
+            hasCache = parseAndDisplayTrendingFestivals(cachedTrending);
+            if (hasCache) {
+                if (shimmerTrending != null) {
+                    shimmerTrending.stopShimmer();
+                    shimmerTrending.setVisibility(View.GONE);
+                }
+                if (rvTrending != null) {
+                    rvTrending.setVisibility(View.VISIBLE);
+                }
+            }
         }
-        if (rvTrending != null) {
-            rvTrending.setVisibility(View.GONE);
+
+        if (!hasCache) {
+            if (shimmerTrending != null) {
+                shimmerTrending.startShimmer();
+                shimmerTrending.setVisibility(View.VISIBLE);
+            }
+            if (rvTrending != null) {
+                rvTrending.setVisibility(View.GONE);
+            }
         }
-        rvTrending.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         
+        // 2. Background Network Sync
         String url = "https://cygnux.in/postermaker/api/v1/poster/trending";
         Log.e("TRENDING_API", "Requesting URL: " + url);
 
+        final boolean finalHasCache = hasCache;
         StringRequest request = new StringRequest(Request.Method.POST, url, response -> {
             Log.e("TRENDING_API", "Response SUCCESS: " + response);
-            if (shimmerTrending != null) {
-                shimmerTrending.stopShimmer();
-                shimmerTrending.setVisibility(View.GONE);
-            }
-            if (rvTrending != null) {
-                rvTrending.setVisibility(View.VISIBLE);
-            }
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                if (jsonObject.getString("error").equals("1")) {
-                    JSONArray dataArray = jsonObject.getJSONArray("data");
-                    List<MailER_TrendingFestivalModel> list = new ArrayList<>();
-                    for (int i = 0; i < dataArray.length(); i++) {
-                        JSONObject obj = dataArray.getJSONObject(i);
-                        list.add(new MailER_TrendingFestivalModel(
-                                obj.getString("cat_id"),
-                                obj.getString("cat_name"),
-                                obj.getString("banner_image")
-                        ));
-                    }
-                    Log.e("TRENDING_API", "Parsed " + list.size() + " items successfully.");
-                    MailER_TrendingFestivalAdapter adapter = new MailER_TrendingFestivalAdapter(this, list, item -> {
-                        MyApplication.showInterstitialAd(this, () -> {
-                            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
-                            intent.putExtra("selected_category", item.getCat_name());
-                            startActivity(intent);
-                        });
-                    });
-                    rvTrending.setAdapter(adapter);
-                } else {
-                    Log.e("TRENDING_API", "API returned error != 1. Message: " + jsonObject.optString("message"));
+            boolean parsed = parseAndDisplayTrendingFestivals(response);
+            if (parsed) {
+                com.festival.flyer.postermaker.utils.MailER_AppCacheManager.saveTrendingFestivals(this, response);
+                if (shimmerTrending != null) {
+                    shimmerTrending.stopShimmer();
+                    shimmerTrending.setVisibility(View.GONE);
                 }
-            } catch (JSONException e) {
-                Log.e("TRENDING_API", "JSON Parsing Error: " + e.getMessage());
-                e.printStackTrace();
+                if (rvTrending != null) {
+                    rvTrending.setVisibility(View.VISIBLE);
+                }
             }
         }, error -> {
             Log.e("TRENDING_API", "Response ERROR: " + error.getMessage());
-            if (shimmerTrending != null) {
-                shimmerTrending.stopShimmer();
-                shimmerTrending.setVisibility(View.GONE);
-            }
-            if (rvTrending != null) {
-                rvTrending.setVisibility(View.VISIBLE);
+            if (!finalHasCache) {
+                if (shimmerTrending != null) {
+                    shimmerTrending.stopShimmer();
+                    shimmerTrending.setVisibility(View.GONE);
+                }
+                if (rvTrending != null) {
+                    rvTrending.setVisibility(View.VISIBLE);
+                }
             }
             error.printStackTrace();
         }) {
@@ -708,6 +779,43 @@ public class MailER_PosterMainActivity extends AppCompatActivity {
             }
         };
         Volley.newRequestQueue(this).add(request);
+    }
+
+    private boolean parseAndDisplayTrendingFestivals(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if (jsonObject.getString("error").equals("1")) {
+                JSONArray dataArray = jsonObject.getJSONArray("data");
+                List<MailER_TrendingFestivalModel> list = new ArrayList<>();
+                for (int i = 0; i < dataArray.length(); i++) {
+                    JSONObject obj = dataArray.getJSONObject(i);
+                    list.add(new MailER_TrendingFestivalModel(
+                            obj.getString("cat_id"),
+                            obj.getString("cat_name"),
+                            obj.getString("banner_image")
+                    ));
+                }
+
+                if (list.isEmpty()) return false;
+
+                RecyclerView rvTrending = findViewById(R.id.rv_trending_festivals);
+                if (rvTrending != null) {
+                    rvTrending.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+                    MailER_TrendingFestivalAdapter adapter = new MailER_TrendingFestivalAdapter(this, list, item -> {
+                        MyApplication.showInterstitialAd(this, () -> {
+                            Intent intent = new Intent(this, MailER_TemplateSelectionActivity.class);
+                            intent.putExtra("selected_category", item.getCat_name());
+                            startActivity(intent);
+                        });
+                    });
+                    rvTrending.setAdapter(adapter);
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            Log.e("TRENDING_API", "Parsing error: " + e.getMessage());
+        }
+        return false;
     }
 
     private void setupSliderIndicators(int count) {

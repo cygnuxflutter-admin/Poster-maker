@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Personas -->
+    <string name="ob_p1_title">My Business</string>
+    <string name="ob_p1_emoji">🏢</string>
+    <string name="ob_p2_title">Social Media</string>
+    <string name="ob_p2_emoji">📱</string>
+    <string name="ob_p3_title">Personal Events</string>
+    <string name="ob_p3_emoji">🎉</string>
+    <string name="ob_p4_title">Promotions</string>
+    <string name="ob_p4_emoji">🛍️</string>
+    <string name="ob_p5_title">School / College</string>
+    <string name="ob_p5_emoji">🎓</string>
+    <string name="ob_p6_title">Community</string>
+    <string name="ob_p6_emoji">👥</string>
+    <string name="ob_p7_title">Just for Fun</string>
+    <string name="ob_p7_emoji">✨</string>
+
+    <!-- Interests -->
+    <string name="ob_i1_title">Festivals</string>
+    <string name="ob_i1_emoji">🪔</string>
+    <string name="ob_i2_title">Business &amp; Sales</string>
+    <string name="ob_i2_emoji">💼</string>
+    <string name="ob_i3_title">Special Days</string>
+    <string name="ob_i3_emoji">🎂</string>
+    <string name="ob_i4_title">Advertising</string>
+    <string name="ob_i4_emoji">📢</string>
+    <string name="ob_i5_title">Food &amp; Drinks</string>
+    <string name="ob_i5_emoji">🍔</string>
+    <string name="ob_i6_title">Education</string>
+    <string name="ob_i6_emoji">📚</string>
+    <string name="ob_i7_title">Beauty &amp; Fashion</string>
+    <string name="ob_i7_emoji">💄</string>
+    <string name="ob_i8_title">Health &amp; Fitness</string>
+    <string name="ob_i8_emoji">⚕️</string>
+    <string name="ob_i9_title">Services</string>
+    <string name="ob_i9_emoji">🛠️</string>
+    <string name="ob_i10_title">Events &amp; Parties</string>
+    <string name="ob_i10_emoji">🎊</string>
+
+    <!-- Backgrounds -->
+    <string name="ob_bg1_emoji">🌈</string>
+    <string name="ob_bg2_emoji">🎨</string>
+    <string name="ob_bg3_emoji">🖼️</string>
+    <string name="ob_bg4_emoji">🌿</string>
+    <string name="ob_bg5_emoji">🌑</string>
+    <string name="ob_bg6_emoji">✨</string>
+    <string name="ob_bg7_emoji">💕</string>
+    <string name="ob_bg8_emoji">🌸</string>
+    <string name="ob_bg9_emoji">📱</string>
+    <string name="ob_bg10_emoji">🌅</string>
+    <string name="ob_bg11_emoji">🌙</string>
+    <string name="ob_bg12_emoji">🎉</string>
+</resources>

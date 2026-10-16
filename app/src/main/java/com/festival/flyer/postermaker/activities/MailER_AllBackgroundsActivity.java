@@ -60,31 +60,20 @@ public class MailER_AllBackgroundsActivity extends AppCompatActivity {
 
         adapter = new MailER_BackgroundChildAdapter(this, allImages, cellWidth, cellHeight, (path, premium) -> {
             if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-                ArrayList<String> strings = new ArrayList<>();
-                strings.add(path);
-                
-                com.afollestad.materialdialogs.MaterialDialog pd = com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().createAnimationDialog(MailER_AllBackgroundsActivity.this);
-                pd.setCancelable(false);
-                pd.show();
-                
-                new com.festival.flyer.postermaker.threadTask.MailER_DlBgAsync(this, strings, new com.festival.flyer.postermaker.threadTask.MailER_DlBgAsync.OnDownloadTemplateListener() {
-                    @Override
-                    public void onDownloadComplete() {
-                        pd.dismiss();
-                        String localPath = com.festival.flyer.postermaker.utils.MailER_FileUtils.getFile(MailER_AllBackgroundsActivity.this, path);
-                        Intent intent = new Intent(MailER_AllBackgroundsActivity.this, MailER_PosterEditActivity.class);
-                        intent.putExtra("bg_path", localPath);
-                        intent.putExtra("loadUserFrame", true);
-                        intent.putExtra("Temp_Type", "MY_TEMP");
-                        com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_AllBackgroundsActivity.this, () -> startActivity(intent));
+                int pos = 0;
+                for (int i = 0; i < allImages.size(); i++) {
+                    if (allImages.get(i) != null && path.equals(allImages.get(i).getImage_url())) {
+                        pos = i;
+                        break;
                     }
-
-                    @Override
-                    public void onError() {
-                        pd.dismiss();
-                        com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils.getInstance().errorDialog(MailER_AllBackgroundsActivity.this, "Something went wrong!!!");
-                    }
-                }).execute();
+                }
+                Intent intent = new Intent(this, MailER_BackgroundPreviewActivity.class);
+                intent.putExtra("cat_name", "All Backgrounds");
+                intent.putExtra("selected_position", pos);
+                intent.putExtra("selected_path", path);
+                MailER_BackgroundPreviewActivity.tempBgList = allImages;
+                intent.putExtra("bg_list", allImages);
+                startActivity(intent);
             } else {
                 Toast.makeText(this, "Make sure you are connected to internet!!", Toast.LENGTH_SHORT).show();
             }

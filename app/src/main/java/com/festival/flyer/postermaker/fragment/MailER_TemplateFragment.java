@@ -25,12 +25,13 @@ public class MailER_TemplateFragment extends Fragment {
 
     private RecyclerView template_rv;
     private int catId;
+    private String catName;
     private GetPosterListener getPosterListener;
     private ArrayList<MailER_PosterImage> posterThumbFulls;
     private ArrayList<MailER_PosterImage> tempposterThumbFulls = new ArrayList<MailER_PosterImage>();
     private MailER_PreferenceClass preferenceClass;
     public interface GetPosterListener {
-        void onPosterClick(int cat_id, int post_id, boolean premium);
+        void onPosterClick(int cat_id, int post_id, boolean premium, ArrayList<MailER_PosterImage> posterList, int position, String catName);
     }
 
 
@@ -38,9 +39,13 @@ public class MailER_TemplateFragment extends Fragment {
         View view = inflater.inflate(R.layout.spawner_template_fragment, container, false);
         assert getArguments() != null;
         this.catId = getArguments().getInt("catId");
+        this.catName = getArguments().getString("catName", "");
         //noinspection unchecked
         preferenceClass = new MailER_PreferenceClass(getActivity());
         posterThumbFulls = (ArrayList<MailER_PosterImage>) getArguments().getSerializable("posterDataLists");
+        if (posterThumbFulls == null) {
+            posterThumbFulls = new ArrayList<>();
+        }
         this.getPosterListener = (GetPosterListener) getActivity();
         template_rv = view.findViewById(R.id.template_rv);
         template_rv.setAdapter(null);
@@ -52,6 +57,16 @@ public class MailER_TemplateFragment extends Fragment {
         template_rv.setHasFixedSize(true);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false);
 
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (tempposterThumbFulls != null && position < tempposterThumbFulls.size() && tempposterThumbFulls.get(position) == null) {
+                    return 2; // Full Width (both columns) for Native Ad!
+                }
+                return 1; // 1 column for poster item
+            }
+        });
+
         template_rv.setLayoutManager(layoutManager);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -61,12 +76,31 @@ public class MailER_TemplateFragment extends Fragment {
         int cellWidth = (int) (screenWidth - (42 * screenDensity)) / 2;
         int cellHeight = (700 * cellWidth) / 507;
 
-        int firstAdCount = preferenceClass.getInt("First_rv_count", 3);
-        int repeatAdCount = preferenceClass.getInt("rv_count", 10);
+        boolean isNativeEnabled = preferenceClass.getInt("templates_native_enabled", 1) == 1;
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, getActivity());
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("templates")) {
+                        org.json.JSONObject tObj = root.optJSONObject("templates");
+                        if (tObj != null && tObj.has("native_ad")) {
+                            isNativeEnabled = tObj.getJSONObject("native_ad").optBoolean("enabled", isNativeEnabled);
+                        }
+                    }
+                } else if (rc.getValue("templates_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    isNativeEnabled = rc.getBoolean("templates_native_enabled");
+                }
+            }
+        } catch (Exception ignored) {}
+        int firstAdCount = preferenceClass.getInt("First_rv_count", 4);
+        int repeatAdCount = preferenceClass.getInt("rv_count", 6);
         int itemsSinceLastAd = 0;
 
+        tempposterThumbFulls.clear();
         for (int j = 0; j < posterThumbFulls.size(); j++) {
-            if (j != 0) {
+            if (isNativeEnabled && j != 0 && firstAdCount > 0 && repeatAdCount > 0) {
                 itemsSinceLastAd++;
                 if (!TempisFirstShow) {
                     if (itemsSinceLastAd >= firstAdCount) {
@@ -84,7 +118,18 @@ public class MailER_TemplateFragment extends Fragment {
             tempposterThumbFulls.add(posterThumbFulls.get(j));
         }
 
-        MailER_PosterGroupChildAdapter posterGroupChildAdapter = new MailER_PosterGroupChildAdapter(getActivity(), tempposterThumbFulls, catId, cellWidth, cellHeight, (cat_id, post_id, premium) -> getPosterListener.onPosterClick(cat_id, post_id, premium));
+        MailER_PosterGroupChildAdapter posterGroupChildAdapter = new MailER_PosterGroupChildAdapter(getActivity(), tempposterThumbFulls, catId, cellWidth, cellHeight, (c_id, p_id, premium) -> {
+            int pos = 0;
+            if (posterThumbFulls != null) {
+                for (int i = 0; i < posterThumbFulls.size(); i++) {
+                    if (posterThumbFulls.get(i).getPost_id() == p_id) {
+                        pos = i;
+                        break;
+                    }
+                }
+            }
+            getPosterListener.onPosterClick(c_id, p_id, premium, posterThumbFulls, pos, catName);
+        });
         template_rv.setAdapter(posterGroupChildAdapter);
         template_rv.invalidate();
     }

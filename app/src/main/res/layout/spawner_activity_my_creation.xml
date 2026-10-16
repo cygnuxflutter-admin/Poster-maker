@@ -101,21 +101,25 @@
 
     <RelativeLayout
         android:id="@+id/btm"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_above="@+id/bottom_nav_bar"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
         <RelativeLayout
             android:id="@+id/rl_ad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            android:layout_below="@id/ad_space" />
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_view_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_50sdp"
-            app:shimmer_auto_start="true">
+            app:shimmer_auto_start="false"
+            android:layout_below="@id/ad_space">
 
             <TextView
                 android:id="@+id/yourTextView"

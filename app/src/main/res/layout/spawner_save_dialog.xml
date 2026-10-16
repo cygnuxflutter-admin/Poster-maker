@@ -26,7 +26,7 @@
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmer_view_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/_200sdp"
                 app:shimmer_auto_start="true">
 
                 <include layout="@layout/spawner_native_ad_layout"/>

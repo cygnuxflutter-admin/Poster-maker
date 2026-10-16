@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Eraser Cap (Top-Right) -->
+    <path
+        android:fillColor="#F472B6"
+        android:pathData="M37.5,7.5 L40.5,10.5 C41.8,11.8 41.8,13.9 40.5,15.2 L38.5,17.2 L30.8,9.5 L32.8,7.5 C34.1,6.2 36.2,6.2 37.5,7.5 Z" />
+
+    <!-- Metal Ferrule Ring -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M29.5,10.8 L37.2,18.5 L35.2,20.5 L27.5,12.8 Z" />
+
+    <!-- Pencil Hexagonal Barrel - Upper Facet (Bright Golden Amber) -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M26.5,13.8 L34.2,21.5 L17.5,38.2 L14.5,35.2 Z" />
+
+    <!-- Pencil Hexagonal Barrel - Center Facet (Rich Vibrant Violet) -->
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M24.5,15.8 L32.2,23.5 L15.5,40.2 L12.5,37.2 Z" />
+
+    <!-- Pencil Hexagonal Barrel - Lower Facet (Deep Indigo) -->
+    <path
+        android:fillColor="#4F46E5"
+        android:pathData="M22.5,17.8 L30.2,25.5 L13.5,42.2 L10.5,39.2 Z" />
+
+    <!-- Wooden Sharpened Cone Tip -->
+    <path
+        android:fillColor="#FDE68A"
+        android:pathData="M11,36.5 L16.5,42 L7,45 Z" />
+
+    <!-- Graphite Lead Tip (Point) -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M8.5,43.5 L10.5,45.5 L5,47 Z" />
+
+    <!-- Shine Highlight Line along barrel -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.35"
+        android:pathData="M27,13 L33,19 L17.5,34.5 L16,33 Z" />
+
+</vector>

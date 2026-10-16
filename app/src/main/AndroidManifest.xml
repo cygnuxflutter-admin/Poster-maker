@@ -43,7 +43,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PosterMaker"
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="false">
 
         <activity
             android:name=".activities.MailER_AllBackgroundsActivity"
@@ -55,7 +55,13 @@
             android:name=".activities.MailER_AllBgCategoriesActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.MailER_AllAutoCategoriesActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_LikedBackgroundsActivity"
+            android:screenOrientation="portrait" />
+                <activity
+            android:name=".activities.MailER_LikedAutoPostersActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_LikedTemplatesActivity"
@@ -82,19 +88,47 @@
             android:name=".activities.MailER_PosterEditActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".makeityours.auto.MailER_AutoPosterEditActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_CreateActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_TemplateSelectionActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.MailER_TemplatePreviewActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.MailER_BackgroundSelectionActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MailER_BackgroundPreviewActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_NotificationActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.MailER_OnboardingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Design.NoActionBar" />
+
+        <activity
+            android:name=".activities.MailER_AppLoadingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Design.NoActionBar" />
+
+        <activity
             android:name=".activities.MailER_PosterMainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".makeityours.MailER_MakeItYoursCategoryActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".makeityours.MailER_MakeItYoursPosterActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".makeityours.MailER_MakeItYoursEditorActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MailER_SplashScreen"
@@ -131,6 +165,9 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />
         <meta-data
+            android:name="com.google.android.gms.ads.flag.NATIVE_AD_DEBUGGER_ENABLED"
+            android:value="false" />
+        <meta-data
             android:name="com.festival.flyer.postermaker.binding.CachingGlideModule"
             android:value="AppGlideModule" />
         <meta-data
@@ -145,6 +182,23 @@
         <meta-data
             android:name="com.onesignal.NotificationServiceExtension"
             android:value="com.festival.flyer.postermaker.utils.MailER_NotificationServiceExtension" />
+            <activity
+            android:name=".activities.MailER_CustomCategoryActivity"
+            android:screenOrientation="portrait" />
+            <activity
+            android:name=".makeityours.auto.MailER_BusinessProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".makeityours.auto.MailER_AutoPersonalizationActivity"
+            android:screenOrientation="portrait" />
+
+        <!-- Override Google AdMob AdActivity theme to remove default system title bar ("Poster Maker") and fit ads perfectly from the top edge -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme" />
     </application>
 
 </manifest>

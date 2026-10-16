@@ -20,21 +20,24 @@
 
 
             <RelativeLayout
+                android:id="@+id/ad_layout_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_200sdp"
-                android:layout_margin="@dimen/_10sdp">
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_10sdp"
+                android:visibility="gone">
 
                 <RelativeLayout
                     android:id="@+id/native_banner_ad_containers"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_200sdp"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
                 <com.facebook.shimmer.ShimmerFrameLayout
                     android:id="@+id/shimmer_view_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:shimmer_auto_start="true">
+                    android:layout_height="@dimen/_200sdp"
+                    android:visibility="gone"
+                    app:shimmer_auto_start="false">
 
                     <include layout="@layout/spawner_native_ad_layout"/>
 

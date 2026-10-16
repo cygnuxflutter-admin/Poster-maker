@@ -37,15 +37,33 @@ public class MyApplication extends android.app.Application {
     public static MyApplication mInstance;
 
     public static void showInterstitialAd(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showAdIfAvailable(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: InterstitialAdManager is NULL! loadInterstitialAd() was not called.");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showAdIfAvailable(activity, onAdLoadInterface);
     }
 
     public static void showInterstitialAdWithOutCount(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showInterstitialAd(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: InterstitialAdManager is NULL! loadInterstitialAd() was not called.");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showInterstitialAd(activity, onAdLoadInterface);
     }
 
     public static void showEditInterstitialAd(Activity activity, MailER_InterstitialAdManager.OnAdLoadInterface onAdLoadInterface) {
-        ((MyApplication) activity.getApplication()).getInterstitialAdManager().showEDitAdIfAvailable(activity, onAdLoadInterface);
+        MailER_InterstitialAdManager manager = ((MyApplication) activity.getApplication()).getInterstitialAdManager();
+        if (manager == null) {
+            android.util.Log.e("[ADS_LOG]", "CRITICAL: Edit InterstitialAdManager is NULL!");
+            onAdLoadInterface.onAdClose();
+            return;
+        }
+        manager.showEDitAdIfAvailable(activity, onAdLoadInterface);
     }
 
     public MailER_InterstitialAdManager getInterstitialAdManager() {
@@ -56,8 +74,73 @@ public class MyApplication extends android.app.Application {
     }
 
     public void loadInterstitialAd() {
+        android.util.Log.e("[ADS_LOG]", ">>> loadInterstitialAd() called. Manager is " + (interstitialAdManager == null ? "NULL (will create)" : "ALREADY EXISTS"));
         if (interstitialAdManager == null)
             interstitialAdManager = new MailER_InterstitialAdManager(MyApplication.this);
+        interstitialAdManager.loadAd();
+    }
+
+    public static boolean isScreenshotAllowed(Context ctx) {
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                // 1. Check Master Config JSON (postermaker / app_ad_config)
+                String masterJson = com.festival.flyer.postermaker.utils.MailER_PreferenceClass.getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("screenshot_enabled")) {
+                        return root.optBoolean("screenshot_enabled", true);
+                    } else if (root.has("screenshot")) {
+                        org.json.JSONObject scObj = root.optJSONObject("screenshot");
+                        if (scObj != null) {
+                            return scObj.optBoolean("enabled", true);
+                        }
+                    } else if (root.has("allow_screenshot")) {
+                        return root.optBoolean("allow_screenshot", true);
+                    } else if (root.has("disable_screenshots")) {
+                        return !root.optBoolean("disable_screenshots", false);
+                    }
+                }
+
+                // 2. Standalone Remote Key (ONLY if from remote server, not just in defaults)
+                if (rc.getValue("screenshot_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    return rc.getBoolean("screenshot_enabled");
+                }
+                if (rc.getValue("allow_screenshot").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    return rc.getBoolean("allow_screenshot");
+                }
+                if (rc.getValue("disable_screenshots").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                    return !rc.getBoolean("disable_screenshots");
+                }
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            com.festival.flyer.postermaker.utils.MailER_PreferenceClass pref = new com.festival.flyer.postermaker.utils.MailER_PreferenceClass(ctx);
+            // Default: true (screenshots allowed/enabled by default)
+            return pref.getBoolean("screenshot_enabled", true);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    public static void applyScreenshotSecurity(Activity activity) {
+        if (activity == null || activity.isFinishing()) return;
+        activity.runOnUiThread(() -> {
+            try {
+                boolean isAllowed = isScreenshotAllowed(activity);
+                if (isAllowed) {
+                    // Remote Config has true: Screenshot is allowed / enabled (chalu)
+                    activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                } else {
+                    // Remote Config has false: Screenshot is blocked / disabled (banth)
+                    activity.getWindow().setFlags(
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                            WindowManager.LayoutParams.FLAG_SECURE
+                    );
+                }
+            } catch (Exception ignored) {}
+        });
     }
 
     private Activity currentActivity;
@@ -115,6 +198,9 @@ public class MyApplication extends android.app.Application {
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+                // Apply Remote Config screenshot security (true = chalu / allowed, false = banth / blocked)
+                applyScreenshotSecurity(activity);
+
                 View rootView = activity.getWindow().getDecorView().findViewById(android.R.id.content);
                 if (rootView != null) {
                     androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
@@ -131,10 +217,12 @@ public class MyApplication extends android.app.Application {
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
                 currentActivity = activity;
+                applyScreenshotSecurity(activity);
             }
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
                 currentActivity = activity;
+                applyScreenshotSecurity(activity);
                 if (activity.getClass().getSimpleName().contains("Splash")) {
                     return;
                 }
@@ -166,8 +254,8 @@ public class MyApplication extends android.app.Application {
             }
         });
 
-        // Debug ma tamara phone ne Test Device banave → Account Safe
-        // Release (Play Store) ma aa code chalse j nahi → Real Ads aavse
+        // Configure test device in debug mode for safe ad testing
+        // In release builds, this code is skipped and real ads are served
         if (BuildConfig.DEBUG) {
             List<String> testDeviceIds = Collections.singletonList("9EB1C89D5458256B2C93F844BAAC93F5");
             RequestConfiguration configuration = new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();

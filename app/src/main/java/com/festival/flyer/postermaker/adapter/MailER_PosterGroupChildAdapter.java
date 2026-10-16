@@ -44,6 +44,17 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         likeManager = new MailER_TemplateLikeManager(activity);
     }
 
+    private static final int TYPE_POSTER = 0;
+    private static final int TYPE_AD = 1;
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position < posterThumbLists.size() && posterThumbLists.get(position) == null) {
+            return TYPE_AD;
+        }
+        return TYPE_POSTER;
+    }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,26 +64,29 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
 
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
-
-        holder.native_banner_ad_container.getLayoutParams().width = cellWidth;
-        holder.native_banner_ad_container.getLayoutParams().height = cellHeight;
-        holder.native_banner_ad_container.invalidate();
-
-        holder.iv_image.getLayoutParams().width = cellWidth;
-        holder.iv_image.getLayoutParams().height = cellHeight;
-        holder.iv_image.invalidate();
-
         if (posterThumbLists.get(position) != null) {
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
+            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+            if (lp != null) {
+                lp.width = cellWidth;
+                lp.height = cellHeight;
+                holder.itemView.setLayoutParams(lp);
+            }
+            if (holder.iv_image.getLayoutParams() != null) {
+                holder.iv_image.getLayoutParams().width = cellWidth;
+                holder.iv_image.getLayoutParams().height = cellHeight;
+                holder.iv_image.invalidate();
+            }
+
             if (posterThumbLists.get(position).getPremium()) {
                 holder.iv_lock.setVisibility(View.VISIBLE);
             } else {
                 holder.iv_lock.setVisibility(View.GONE);
             }
-        } else {
-            holder.iv_lock.setVisibility(View.GONE);
-        }
 
-        if (posterThumbLists.get(position) != null) {
             holder.content_layout.setVisibility(View.VISIBLE);
             holder.ad_layout.setVisibility(View.GONE);
             holder.progress_bar.setVisibility(View.VISIBLE);
@@ -115,10 +129,67 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
                 onPosterClickListener.onPosterClick(actualCatId, posterThumbLists.get(position).getPost_id(), holder.iv_lock.getVisibility() == View.VISIBLE);
             });
         } else {
+            // Full Width Native Ad Item (covering height of 2 posters in the row)
+            holder.itemView.setVisibility(View.VISIBLE);
+            if (holder.rlMain != null) {
+                holder.rlMain.setVisibility(View.VISIBLE);
+            }
+            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+            if (lp != null) {
+                lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                lp.height = cellHeight;
+                holder.itemView.setLayoutParams(lp);
+            }
+            if (holder.native_banner_ad_container.getLayoutParams() != null) {
+                holder.native_banner_ad_container.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                holder.native_banner_ad_container.getLayoutParams().height = cellHeight;
+                holder.native_banner_ad_container.invalidate();
+            }
+            if (holder.ad_layout.getLayoutParams() != null) {
+                holder.ad_layout.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                holder.ad_layout.getLayoutParams().height = cellHeight;
+                holder.ad_layout.invalidate();
+            }
+
             holder.content_layout.setVisibility(View.GONE);
             holder.ad_layout.setVisibility(View.VISIBLE);
             holder.iv_lock.setVisibility(View.GONE);
-            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position);
+            nativeAdUtil.fillAdmobNativeAd(holder.native_banner_ad_container, position, null, new MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (holder.itemView != null) {
+                        holder.itemView.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+                        if (lp != null) {
+                            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                            lp.height = cellHeight;
+                            holder.itemView.setLayoutParams(lp);
+                        }
+                    }
+                    if (holder.rlMain != null) holder.rlMain.setVisibility(View.VISIBLE);
+                    if (holder.ad_layout != null) holder.ad_layout.setVisibility(View.VISIBLE);
+                    if (holder.native_banner_ad_container != null) holder.native_banner_ad_container.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAdFailed() {
+                    boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(activity);
+                    if (!showShimmerOnFail) {
+                        if (holder.itemView != null) {
+                            holder.itemView.setVisibility(View.GONE);
+                            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+                            if (lp != null) {
+                                lp.width = 0;
+                                lp.height = 0;
+                                holder.itemView.setLayoutParams(lp);
+                            }
+                        }
+                        if (holder.rlMain != null) holder.rlMain.setVisibility(View.GONE);
+                        if (holder.ad_layout != null) holder.ad_layout.setVisibility(View.GONE);
+                        if (holder.native_banner_ad_container != null) holder.native_banner_ad_container.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 
@@ -133,7 +204,7 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container;
+        private final RelativeLayout content_layout, ad_layout, native_banner_ad_container, rlMain;
         private final ImageView iv_image, iv_like;
         private final TextView iv_lock;
         private final ProgressBar progress_bar;
@@ -141,6 +212,7 @@ public class MailER_PosterGroupChildAdapter extends RecyclerView.Adapter<MailER_
         MyViewHolder(View itemView) {
             super(itemView);
 
+            rlMain = itemView.findViewById(R.id.rlMain);
             iv_image = itemView.findViewById(R.id.iv_image);
             progress_bar = itemView.findViewById(R.id.progress_bar);
             iv_like = itemView.findViewById(R.id.iv_like);

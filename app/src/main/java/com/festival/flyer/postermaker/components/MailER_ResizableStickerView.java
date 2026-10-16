@@ -606,6 +606,7 @@ public class MailER_ResizableStickerView extends RelativeLayout implements MailE
     }
 
     public void setMainImageBitmap(Bitmap bit) {
+        this.btmp = bit;
         this.main_iv.setImageBitmap(bit);
     }
 

@@ -26,6 +26,13 @@ public class MailER_SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.spawner_activity_settings);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_SettingsActivity.this, () -> finish());
+            }
+        });
+
         MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_settings);
 
 
@@ -36,16 +43,30 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
         setupSettingsOptions();
 
+        TextView tvAppVersion = findViewById(R.id.tv_app_version);
+        if (tvAppVersion != null) {
+            tvAppVersion.setText("Version " + com.festival.flyer.postermaker.BuildConfig.VERSION_NAME);
+        }
+
         findViewById(R.id.btn_back).setOnClickListener(v -> onBackPressed());
     }
 
     private void setupSettingsOptions() {
         findViewById(R.id.ll_liked_backgrounds).setOnClickListener(v -> {
-            startActivity(new Intent(this, MailER_LikedBackgroundsActivity.class));
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
+                startActivity(new Intent(this, MailER_LikedBackgroundsActivity.class));
+            });
+        });
+
+        
+        findViewById(R.id.ll_liked_auto_posters).setOnClickListener(v -> {
+            android.widget.Toast.makeText(this, "Coming Soon! This feature will be available soon.", android.widget.Toast.LENGTH_SHORT).show();
         });
 
         findViewById(R.id.ll_liked_templates).setOnClickListener(v -> {
-            startActivity(new Intent(this, MailER_LikedTemplatesActivity.class));
+            com.festival.flyer.postermaker.MyApplication.showInterstitialAd(this, () -> {
+                startActivity(new Intent(this, MailER_LikedTemplatesActivity.class));
+            });
         });
 
         findViewById(R.id.ll_share_app).setOnClickListener(v -> {
@@ -68,6 +89,7 @@ public class MailER_SettingsActivity extends AppCompatActivity {
 
         findViewById(R.id.ll_help).setOnClickListener(v -> {
             // Placeholder for Help
+            com.festival.flyer.postermaker.adManager.MailER_AppOpenManager.notifyExternalActionStarted();
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "support@cygnux.in", null));
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Support - Poster Maker App");
             startActivity(Intent.createChooser(emailIntent, "Send email..."));

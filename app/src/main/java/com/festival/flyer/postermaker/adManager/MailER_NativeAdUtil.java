@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -39,6 +40,7 @@ public class MailER_NativeAdUtil {
     private final int width;
     private final int height;
     public static ShimmerFrameLayout shimmerFrameLayout;
+    public ShimmerFrameLayout mInstanceShimmer;
     private NativeAd nativeAd;
     private NativeAdView adView;
     private boolean isLoadingAdMob = false;
@@ -52,6 +54,93 @@ public class MailER_NativeAdUtil {
         this.preferenceClass = new MailER_PreferenceClass(context);
     }
 
+    public static void hideParentAdCard(View v) {
+        if (v == null) return;
+        try {
+            v.setVisibility(View.GONE);
+            android.view.ViewParent parent = v.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int pid = pv.getId();
+                if (pid == com.festival.flyer.postermaker.R.id.ad_layout_container
+                        || pid == com.festival.flyer.postermaker.R.id.rl_native_ad
+                        || pid == com.festival.flyer.postermaker.R.id.rl_banner_ad
+                        || pid == com.festival.flyer.postermaker.R.id.ad_container_wrapper
+                        || pid == com.festival.flyer.postermaker.R.id.btm
+                        || pid == com.festival.flyer.postermaker.R.id.rl_collapsible
+                        || pid == com.festival.flyer.postermaker.R.id.ad_layout
+                        || pid == com.festival.flyer.postermaker.R.id.rlMain) {
+                    pv.setVisibility(View.GONE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    // Do NOT collapse if it's a dialog container containing buttons/title
+                    if (pv.findViewById(com.festival.flyer.postermaker.R.id.button1) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.button2) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.btn_dialog_watch) != null) {
+                        break;
+                    }
+                    pv.setVisibility(View.GONE);
+                    ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                    if (lp != null) {
+                        lp.width = 0;
+                        lp.height = 0;
+                        pv.setLayoutParams(lp);
+                    }
+                    break;
+                }
+                if (pid == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public static void showParentAdCard(View v, int fallbackHeight) {
+        if (v == null) return;
+        try {
+            v.setVisibility(View.VISIBLE);
+            android.view.ViewParent parent = v.getParent();
+            while (parent instanceof View) {
+                View pv = (View) parent;
+                int pid = pv.getId();
+                if (pid == com.festival.flyer.postermaker.R.id.ad_layout_container
+                        || pid == com.festival.flyer.postermaker.R.id.rl_native_ad
+                        || pid == com.festival.flyer.postermaker.R.id.rl_banner_ad
+                        || pid == com.festival.flyer.postermaker.R.id.ad_container_wrapper
+                        || pid == com.festival.flyer.postermaker.R.id.btm
+                        || pid == com.festival.flyer.postermaker.R.id.rl_collapsible
+                        || pid == com.festival.flyer.postermaker.R.id.ad_layout
+                        || pid == com.festival.flyer.postermaker.R.id.rlMain) {
+                    pv.setVisibility(View.VISIBLE);
+                }
+                if (pv instanceof androidx.cardview.widget.CardView) {
+                    if (pv.findViewById(com.festival.flyer.postermaker.R.id.button1) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.button2) != null
+                            || pv.findViewById(com.festival.flyer.postermaker.R.id.btn_dialog_watch) != null) {
+                        break;
+                    }
+                    ViewGroup.LayoutParams lp = pv.getLayoutParams();
+                    if (lp != null && (lp.width <= 0 || lp.height <= 0)) {
+                        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        lp.height = fallbackHeight > 0 ? fallbackHeight : ViewGroup.LayoutParams.WRAP_CONTENT;
+                        pv.setLayoutParams(lp);
+                    }
+                    break;
+                }
+                if (pid == android.R.id.content) {
+                    break;
+                }
+                parent = pv.getParent();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public interface OnAdLoadListener {
+        void onAdLoaded();
+        void onAdFailed();
+    }
+
     public MailER_NativeAdUtil(Context context) {
         this.context = context;
         this.width = -1;
@@ -59,16 +148,437 @@ public class MailER_NativeAdUtil {
         this.preferenceClass = new MailER_PreferenceClass(context);
     }
 
-    public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+    public static void loadDialogNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+        loadDialogNativeAd(nativeAdContainer, context, shimmer_view_container, null, null);
+    }
+
+    public static void loadDialogNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
+        loadDialogNativeAd(nativeAdContainer, context, shimmer_view_container, customAdUnitId, null);
+    }
+
+    public static void loadDialogNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId, OnAdLoadListener listener) {
+        if (shimmer_view_container != null) {
+            shimmer_view_container.setVisibility(View.VISIBLE);
+            shimmer_view_container.startShimmer();
+        }
         shimmerFrameLayout = shimmer_view_container;
         if (nativeAdContainer != null) {
             nativeAdContainer.setVisibility(View.VISIBLE);
         }
         MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
-        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1);
+        nativeAdUtil.mInstanceShimmer = shimmer_view_container;
+        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1, customAdUnitId, listener);
+    }
+
+    public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+        loadNativeAd(nativeAdContainer, context, shimmer_view_container, null);
+    }
+
+    public static void loadNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
+        if (shimmer_view_container != null) {
+            shimmer_view_container.setVisibility(View.VISIBLE);
+            shimmer_view_container.startShimmer();
+        }
+        shimmerFrameLayout = shimmer_view_container;
+        if (nativeAdContainer != null) {
+            nativeAdContainer.setVisibility(View.VISIBLE);
+        }
+        MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
+        nativeAdUtil.mInstanceShimmer = shimmer_view_container;
+        nativeAdUtil.fillAdmobNativeAd(nativeAdContainer, -1, customAdUnitId);
+    }
+
+    public static void loadCompactNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+        loadCompactNativeAd(nativeAdContainer, context, shimmer_view_container, null, null);
+    }
+
+    public static void loadCompactNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
+        loadCompactNativeAd(nativeAdContainer, context, shimmer_view_container, customAdUnitId, null);
+    }
+
+    public static void loadCompactNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId, OnAdLoadListener listener) {
+        if (shimmer_view_container != null) {
+            shimmer_view_container.setVisibility(View.VISIBLE);
+            shimmer_view_container.startShimmer();
+        }
+        shimmerFrameLayout = shimmer_view_container;
+        if (nativeAdContainer != null) {
+            nativeAdContainer.setVisibility(View.VISIBLE);
+        }
+        MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
+        nativeAdUtil.mInstanceShimmer = shimmer_view_container;
+        nativeAdUtil.fillAdmobCompactNativeAd(nativeAdContainer, customAdUnitId, listener);
+    }
+
+    public static void loadMediumNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container) {
+        loadMediumNativeAd(nativeAdContainer, context, shimmer_view_container, null, null);
+    }
+
+    public static void loadMediumNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId) {
+        loadMediumNativeAd(nativeAdContainer, context, shimmer_view_container, customAdUnitId, null);
+    }
+
+    public static void loadMediumNativeAd(RelativeLayout nativeAdContainer, Activity context, ShimmerFrameLayout shimmer_view_container, String customAdUnitId, OnAdLoadListener listener) {
+        if (shimmer_view_container != null) {
+            shimmer_view_container.setVisibility(View.VISIBLE);
+            shimmer_view_container.startShimmer();
+        }
+        shimmerFrameLayout = shimmer_view_container;
+        if (nativeAdContainer != null) {
+            nativeAdContainer.setVisibility(View.VISIBLE);
+        }
+        MailER_NativeAdUtil nativeAdUtil = new MailER_NativeAdUtil(context);
+        nativeAdUtil.mInstanceShimmer = shimmer_view_container;
+        nativeAdUtil.fillAdmobMediumNativeAd(nativeAdContainer, customAdUnitId, listener);
+    }
+
+    public void fillAdmobCompactNativeAd(final RelativeLayout nativeAdContainer) {
+        fillAdmobCompactNativeAd(nativeAdContainer, null, null);
+    }
+
+    public void fillAdmobCompactNativeAd(final RelativeLayout nativeAdContainer, String customAdUnitId) {
+        fillAdmobCompactNativeAd(nativeAdContainer, customAdUnitId, null);
+    }
+
+    public void fillAdmobCompactNativeAd(final RelativeLayout nativeAdContainer, String customAdUnitId, final OnAdLoadListener listener) {
+        if (nativeAdContainer == null) return;
+
+        String nativeId = (customAdUnitId != null && !customAdUnitId.trim().isEmpty()) ? customAdUnitId.trim() : preferenceClass.getAdsId("NativeUnitID");
+        nativeId = MailER_PreferenceClass.getSafeAdUnitId(nativeId, "native");
+        Log.d("AdTracker", "Requesting Compact Native Ad (AdMob) with ID: " + nativeId);
+        AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
+
+        builder.forNativeAd(nativeAd -> {
+            if (mInstanceShimmer != null) {
+                mInstanceShimmer.stopShimmer();
+                mInstanceShimmer.setVisibility(View.GONE);
+                mInstanceShimmer.hideShimmer();
+            }
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.setVisibility(View.GONE);
+                shimmerFrameLayout.hideShimmer();
+            }
+            NativeAdView adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_compact_native_ad_layout, null);
+            populateUnifiedCompactNativeAdView(nativeAd, adView);
+            nativeAdContainer.removeAllViews();
+            nativeAdContainer.addView(adView);
+            nativeAdContainer.setBackgroundColor(Color.TRANSPARENT);
+            nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, 0);
+            if (listener != null) listener.onAdLoaded();
+        });
+
+        VideoOptions videoOptions = new VideoOptions.Builder().setStartMuted(true).build();
+        NativeAdOptions adOptions = new NativeAdOptions.Builder().setVideoOptions(videoOptions).build();
+        builder.withNativeAdOptions(adOptions);
+
+        AdLoader adLoader = builder.withAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.d("AdTracker", "Compact Native Ad Failed to Load: " + loadAdError.getMessage());
+                boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(context);
+                if (showShimmerOnFail) {
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.startShimmer();
+                        mInstanceShimmer.setVisibility(View.VISIBLE);
+                    } else if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.startShimmer();
+                        shimmerFrameLayout.setVisibility(View.VISIBLE);
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.VISIBLE);
+                    }
+                    showParentAdCard(nativeAdContainer, 0);
+                } else {
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.stopShimmer();
+                        mInstanceShimmer.setVisibility(View.GONE);
+                        mInstanceShimmer.hideShimmer();
+                    }
+                    if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        shimmerFrameLayout.hideShimmer();
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.GONE);
+                    }
+                    hideParentAdCard(nativeAdContainer);
+                }
+                if (listener != null) listener.onAdFailed();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                if (mInstanceShimmer != null) {
+                    mInstanceShimmer.stopShimmer();
+                    mInstanceShimmer.setVisibility(View.GONE);
+                    mInstanceShimmer.hideShimmer();
+                }
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.hideShimmer();
+                }
+                super.onAdLoaded();
+                if (listener != null) listener.onAdLoaded();
+            }
+
+            @Override
+            public void onAdClicked() {
+                super.onAdClicked();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+        }).build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    public void populateUnifiedCompactNativeAdView(NativeAd unifiedNativeAd, NativeAdView unifiedNativeAdView) {
+        if (mInstanceShimmer != null) {
+            mInstanceShimmer.stopShimmer();
+            mInstanceShimmer.setVisibility(View.GONE);
+            mInstanceShimmer.hideShimmer();
+        }
+        if (shimmerFrameLayout != null) {
+            shimmerFrameLayout.stopShimmer();
+            shimmerFrameLayout.setVisibility(View.GONE);
+            shimmerFrameLayout.hideShimmer();
+        }
+
+        MediaView mediaView = unifiedNativeAdView.findViewById(R.id.ad_media);
+        ImageView appIconView = unifiedNativeAdView.findViewById(R.id.ad_app_icon);
+
+        if (unifiedNativeAd.getIcon() != null && appIconView != null) {
+            appIconView.setImageDrawable(unifiedNativeAd.getIcon().getDrawable());
+            appIconView.setVisibility(View.VISIBLE);
+            unifiedNativeAdView.setIconView(appIconView);
+            if (mediaView != null) {
+                mediaView.setVisibility(View.GONE);
+            }
+        } else if (unifiedNativeAd.getImages() != null && !unifiedNativeAd.getImages().isEmpty() && appIconView != null) {
+            appIconView.setImageDrawable(unifiedNativeAd.getImages().get(0).getDrawable());
+            appIconView.setVisibility(View.VISIBLE);
+            unifiedNativeAdView.setImageView(appIconView);
+            if (mediaView != null) {
+                mediaView.setVisibility(View.GONE);
+            }
+        } else if (mediaView != null) {
+            mediaView.setVisibility(View.GONE);
+        }
+
+        TextView headlineView = unifiedNativeAdView.findViewById(R.id.ad_headline);
+        if (headlineView != null) {
+            headlineView.setText(unifiedNativeAd.getHeadline());
+            unifiedNativeAdView.setHeadlineView(headlineView);
+        }
+
+        TextView bodyView = unifiedNativeAdView.findViewById(R.id.ad_body);
+        if (bodyView != null) {
+            if (unifiedNativeAd.getBody() != null && !unifiedNativeAd.getBody().isEmpty()) {
+                bodyView.setText(unifiedNativeAd.getBody());
+                bodyView.setVisibility(View.VISIBLE);
+            } else {
+                bodyView.setVisibility(View.GONE);
+            }
+            unifiedNativeAdView.setBodyView(bodyView);
+        }
+
+        Button callToActionView = unifiedNativeAdView.findViewById(R.id.ad_call_to_action);
+        if (callToActionView != null) {
+            if (unifiedNativeAd.getCallToAction() != null && !unifiedNativeAd.getCallToAction().isEmpty()) {
+                callToActionView.setText(unifiedNativeAd.getCallToAction());
+            }
+            unifiedNativeAdView.setCallToActionView(callToActionView);
+        }
+
+        unifiedNativeAdView.setNativeAd(unifiedNativeAd);
+    }
+
+    public void fillAdmobMediumNativeAd(final RelativeLayout nativeAdContainer) {
+        fillAdmobMediumNativeAd(nativeAdContainer, null, null);
+    }
+
+    public void fillAdmobMediumNativeAd(final RelativeLayout nativeAdContainer, String customAdUnitId) {
+        fillAdmobMediumNativeAd(nativeAdContainer, customAdUnitId, null);
+    }
+
+    public void fillAdmobMediumNativeAd(final RelativeLayout nativeAdContainer, String customAdUnitId, final OnAdLoadListener listener) {
+        if (nativeAdContainer == null) return;
+
+        String nativeId = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
+                ? customAdUnitId.trim()
+                : preferenceClass.getAdsId("NativeUnitID");
+        nativeId = MailER_PreferenceClass.getSafeAdUnitId(nativeId, "native");
+        Log.d("AdTracker", "Requesting Medium Native Ad (AdMob) with ID: " + nativeId);
+        AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
+
+        builder.forNativeAd(nativeAd -> {
+            if (mInstanceShimmer != null) {
+                mInstanceShimmer.stopShimmer();
+                mInstanceShimmer.setVisibility(View.GONE);
+                mInstanceShimmer.hideShimmer();
+            }
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.setVisibility(View.GONE);
+                shimmerFrameLayout.hideShimmer();
+            }
+            NativeAdView adView = (NativeAdView) LayoutInflater.from(context).inflate(R.layout.spawner_medium_native_ad_layout, null);
+            populateUnifiedMediumNativeAdView(nativeAd, adView);
+            nativeAdContainer.removeAllViews();
+            nativeAdContainer.addView(adView);
+            nativeAdContainer.setBackgroundColor(Color.TRANSPARENT);
+            nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, 0);
+            if (listener != null) listener.onAdLoaded();
+        });
+
+        VideoOptions videoOptions = new VideoOptions.Builder().setStartMuted(true).build();
+        NativeAdOptions adOptions = new NativeAdOptions.Builder().setVideoOptions(videoOptions).build();
+        builder.withNativeAdOptions(adOptions);
+
+        AdLoader adLoader = builder.withAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                Log.d("AdTracker", "Medium Native Ad Failed to Load: " + loadAdError.getMessage());
+                boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(context);
+                if (showShimmerOnFail) {
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.startShimmer();
+                        mInstanceShimmer.setVisibility(View.VISIBLE);
+                    } else if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.startShimmer();
+                        shimmerFrameLayout.setVisibility(View.VISIBLE);
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.VISIBLE);
+                    }
+                    showParentAdCard(nativeAdContainer, 0);
+                } else {
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.stopShimmer();
+                        mInstanceShimmer.setVisibility(View.GONE);
+                        mInstanceShimmer.hideShimmer();
+                    }
+                    if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        shimmerFrameLayout.hideShimmer();
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.GONE);
+                    }
+                    hideParentAdCard(nativeAdContainer);
+                }
+                if (listener != null) listener.onAdFailed();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                if (mInstanceShimmer != null) {
+                    mInstanceShimmer.stopShimmer();
+                    mInstanceShimmer.setVisibility(View.GONE);
+                    mInstanceShimmer.hideShimmer();
+                }
+                if (shimmerFrameLayout != null) {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.hideShimmer();
+                }
+                super.onAdLoaded();
+                if (listener != null) listener.onAdLoaded();
+            }
+
+            @Override
+            public void onAdClicked() {
+                super.onAdClicked();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+        }).build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
+    }
+
+    public void populateUnifiedMediumNativeAdView(NativeAd unifiedNativeAd, NativeAdView unifiedNativeAdView) {
+        if (mInstanceShimmer != null) {
+            mInstanceShimmer.stopShimmer();
+            mInstanceShimmer.setVisibility(View.GONE);
+            mInstanceShimmer.hideShimmer();
+        }
+        if (shimmerFrameLayout != null) {
+            shimmerFrameLayout.stopShimmer();
+            shimmerFrameLayout.setVisibility(View.GONE);
+            shimmerFrameLayout.hideShimmer();
+        }
+
+        MediaView mediaView = unifiedNativeAdView.findViewById(R.id.ad_media);
+        if (mediaView != null) {
+            unifiedNativeAdView.setMediaView(mediaView);
+            mediaView.setVisibility(View.VISIBLE);
+        }
+
+        ImageView appIconView = unifiedNativeAdView.findViewById(R.id.ad_app_icon);
+        if (appIconView != null) {
+            if (unifiedNativeAd.getIcon() != null) {
+                appIconView.setImageDrawable(unifiedNativeAd.getIcon().getDrawable());
+                appIconView.setVisibility(View.VISIBLE);
+                unifiedNativeAdView.setIconView(appIconView);
+            } else {
+                appIconView.setVisibility(View.GONE);
+            }
+        }
+
+        TextView headlineView = unifiedNativeAdView.findViewById(R.id.ad_headline);
+        if (headlineView != null) {
+            headlineView.setText(unifiedNativeAd.getHeadline());
+            unifiedNativeAdView.setHeadlineView(headlineView);
+        }
+
+        TextView bodyView = unifiedNativeAdView.findViewById(R.id.ad_body);
+        if (bodyView != null) {
+            if (unifiedNativeAd.getBody() != null && !unifiedNativeAd.getBody().isEmpty()) {
+                bodyView.setText(unifiedNativeAd.getBody());
+                bodyView.setVisibility(View.VISIBLE);
+            } else {
+                bodyView.setVisibility(View.GONE);
+            }
+            unifiedNativeAdView.setBodyView(bodyView);
+        }
+
+        Button callToActionView = unifiedNativeAdView.findViewById(R.id.ad_call_to_action);
+        if (callToActionView != null) {
+            if (unifiedNativeAd.getCallToAction() != null && !unifiedNativeAd.getCallToAction().isEmpty()) {
+                callToActionView.setText(unifiedNativeAd.getCallToAction());
+            }
+            unifiedNativeAdView.setCallToActionView(callToActionView);
+        }
+
+        unifiedNativeAdView.setNativeAd(unifiedNativeAd);
     }
 
     public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer, final int position) {
+        fillAdmobNativeAd(nativeAdContainer, position, null, null);
+    }
+
+    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer, final int position, String customAdUnitId) {
+        fillAdmobNativeAd(nativeAdContainer, position, customAdUnitId, null);
+    }
+
+    public void fillAdmobNativeAd(final RelativeLayout nativeAdContainer, final int position, String customAdUnitId, final OnAdLoadListener listener) {
         if (nativeAdContainer == null) return;
 
         if (nativeAdCache.containsKey(position) && nativeAdViewCache.containsKey(position)) {
@@ -80,13 +590,17 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.addView(cachedView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
             nativeAdContainer.setVisibility(View.VISIBLE);
+            if (listener != null) listener.onAdLoaded();
             return;
         }
 
         if (loadingPositions.contains(position)) return;
         loadingPositions.add(position);
 
-        String nativeId = preferenceClass.getAdsId("NativeUnitID");
+        String nativeId = (customAdUnitId != null && !customAdUnitId.trim().isEmpty())
+                ? customAdUnitId.trim()
+                : preferenceClass.getAdsId("NativeUnitID");
+        nativeId = MailER_PreferenceClass.getSafeAdUnitId(nativeId, "native");
         Log.d("AdTracker", "Requesting Native Ad (AdMob) with ID: " + nativeId);
         AdLoader.Builder builder = new AdLoader.Builder(context, nativeId);
 
@@ -105,6 +619,16 @@ public class MailER_NativeAdUtil {
             nativeAdContainer.addView(adView);
             nativeAdContainer.setBackgroundColor(Color.parseColor("#151515"));
             nativeAdContainer.setVisibility(View.VISIBLE);
+            showParentAdCard(nativeAdContainer, height);
+            if (shimmerFrameLayout != null) {
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.setVisibility(View.GONE);
+            }
+            if (mInstanceShimmer != null) {
+                mInstanceShimmer.stopShimmer();
+                mInstanceShimmer.setVisibility(View.GONE);
+            }
+            if (listener != null) listener.onAdLoaded();
         });
 
         VideoOptions videoOptions = new VideoOptions.Builder().setStartMuted(true).build();
@@ -118,21 +642,49 @@ public class MailER_NativeAdUtil {
                 isLoadingAdMob = false;
                 Log.d("[ADS_LOG]", "🔴 Native Ad (AdMob) Failed to Load: " + loadAdError.getMessage());
                 Log.d("AdTracker", "Native Ad (AdMob) Failed to Load! Error: " + loadAdError.getMessage());
-                Log.e("AdMob_Error", "AdMob Native Ad failed to load. Error: " + loadAdError.getMessage() + " | Code: " + loadAdError.getCode());
-                if (shimmerFrameLayout != null) {
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
+                boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(context);
+                if (showShimmerOnFail) {
+                    if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.startShimmer();
+                        shimmerFrameLayout.setVisibility(View.VISIBLE);
+                    }
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.startShimmer();
+                        mInstanceShimmer.setVisibility(View.VISIBLE);
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.VISIBLE);
+                    }
+                    showParentAdCard(nativeAdContainer, height);
+                } else {
+                    if (shimmerFrameLayout != null) {
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        shimmerFrameLayout.hideShimmer();
+                    }
+                    if (mInstanceShimmer != null) {
+                        mInstanceShimmer.stopShimmer();
+                        mInstanceShimmer.setVisibility(View.GONE);
+                        mInstanceShimmer.hideShimmer();
+                    }
+                    if (nativeAdContainer != null) {
+                        nativeAdContainer.setVisibility(View.GONE);
+                    }
+                    hideParentAdCard(nativeAdContainer);
                 }
-                if (nativeAdContainer != null) {
-                    nativeAdContainer.setVisibility(View.GONE);
+                if (listener != null) {
+                    listener.onAdFailed();
                 }
-                // fillAdXNativeAd(nativeAdContainer);
             }
             @Override
             public void onAdLoaded() {
                 if (shimmerFrameLayout != null) {
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.setVisibility(View.GONE);
+                }
+                if (mInstanceShimmer != null) {
+                    mInstanceShimmer.stopShimmer();
+                    mInstanceShimmer.setVisibility(View.GONE);
                 }
                 Log.d("[ADS_LOG]", "🟢 AdMob Native Ad Loaded & Displayed Successfully!");
                 Log.d("AdTracker", "AdMob Native Ad Loaded Successfully!");
@@ -143,6 +695,16 @@ public class MailER_NativeAdUtil {
             public void onAdImpression() {
                 super.onAdImpression();
                 Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdMob) IMPRESSION Logged!");
+            }
+            @Override
+            public void onAdClicked() {
+                super.onAdClicked();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+                MailER_AppOpenManager.notifyAdClicked();
             }
         }).build();
 
@@ -198,6 +760,16 @@ public class MailER_NativeAdUtil {
                 super.onAdImpression();
                 Log.d("[ADS_LOG]", "🟢 SUCCESS: Native Ad (AdX) IMPRESSION Logged!");
             }
+            @Override
+            public void onAdClicked() {
+                super.onAdClicked();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+                MailER_AppOpenManager.notifyAdClicked();
+            }
         }).build();
 
         adLoader.loadAd(new AdRequest.Builder().build());
@@ -220,11 +792,15 @@ public class MailER_NativeAdUtil {
             public void onError(Ad ad, AdError adError) {
                 // Native ad failed to load
                 Log.d("AdTracker", "Native Ad (Facebook) Failed to Load! Error: " + adError.getErrorMessage());
+                // User request: If ad fails to load (e.g. no internet, no fill), KEEP showing the shimmer!
                 if (shimmerFrameLayout!= null){
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.startShimmer();
+                    shimmerFrameLayout.setVisibility(View.VISIBLE);
                 }
-                nativeAdContainer.setVisibility(View.GONE);
+                nativeAdContainer.setVisibility(View.VISIBLE);
+                if (nativeAdContainer.getParent() instanceof android.view.ViewGroup) {
+                    ((android.view.ViewGroup) nativeAdContainer.getParent()).setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -248,7 +824,7 @@ public class MailER_NativeAdUtil {
 
             @Override
             public void onAdClicked(Ad ad) {
-                // Native ad clicked
+                MailER_AppOpenManager.notifyAdClicked();
             }
 
             @Override

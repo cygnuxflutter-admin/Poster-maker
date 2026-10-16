@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.festival.flyer.postermaker.MyApplication;
 import androidx.core.content.ContextCompat;
 
 import com.festival.flyer.postermaker.R;
@@ -31,6 +32,11 @@ public class MailER_BottomNavHelper {
         setTabState(activity, R.id.ic_tab_creations, R.id.txt_tab_creations, false);
         setTabState(activity, R.id.ic_tab_settings, R.id.txt_tab_settings, false);
 
+        TextView txtCreate = activity.findViewById(R.id.txt_tab_create);
+        if (txtCreate != null) {
+            txtCreate.setTextColor(ContextCompat.getColor(activity, activeTabId == R.id.tab_create ? R.color.bottom_nav_active : R.color.bottom_nav_inactive));
+        }
+
         // Set active
         if (activeTabId == R.id.tab_home) {
             setTabState(activity, R.id.ic_tab_home, R.id.txt_tab_home, true);
@@ -43,50 +49,42 @@ public class MailER_BottomNavHelper {
         }
 
         // Set listeners
-        tabHome.setOnClickListener(v -> {
-            if (activeTabId != R.id.tab_home || activity instanceof com.festival.flyer.postermaker.activities.MailER_BackgroundSelectionActivity) {
+        tabHome.setOnClickListener(v -> MyApplication.showInterstitialAd(activity, () -> {
+            if (activeTabId != R.id.tab_home) {
                 Intent intent = new Intent(activity, MailER_PosterMainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 activity.startActivity(intent);
                 activity.finish();
             }
-        });
+        }));
 
-        tabExplore.setOnClickListener(v -> {
+        tabExplore.setOnClickListener(v -> MyApplication.showInterstitialAd(activity, () -> {
             if (activeTabId != R.id.tab_explore) {
                 Intent intent = new Intent(activity, MailER_TemplateSelectionActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 activity.startActivity(intent);
-                if (!(activity instanceof MailER_PosterMainActivity)) activity.finish();
             }
-        });
+        }));
 
-        tabCreate.setOnClickListener(v -> {
+        tabCreate.setOnClickListener(v -> MyApplication.showInterstitialAd(activity, () -> {
             if (activeTabId != R.id.tab_create) {
                 Intent intent = new Intent(activity, MailER_CreateActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 activity.startActivity(intent);
-                if (!(activity instanceof MailER_PosterMainActivity)) activity.finish();
             }
-        });
+        }));
 
-        tabCreations.setOnClickListener(v -> {
+        tabCreations.setOnClickListener(v -> MyApplication.showInterstitialAd(activity, () -> {
             if (activeTabId != R.id.tab_creations) {
-                Intent intent = new Intent(activity, MailER_MyCreationActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Intent intent = new Intent(activity, com.festival.flyer.postermaker.activities.MailER_BackgroundSelectionActivity.class);
                 activity.startActivity(intent);
-                if (!(activity instanceof MailER_PosterMainActivity)) activity.finish();
             }
-        });
+        }));
 
-        tabSettings.setOnClickListener(v -> {
+        tabSettings.setOnClickListener(v -> MyApplication.showInterstitialAd(activity, () -> {
             if (activeTabId != R.id.tab_settings) {
                 Intent intent = new Intent(activity, MailER_SettingsActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 activity.startActivity(intent);
-                if (!(activity instanceof MailER_PosterMainActivity)) activity.finish();
             }
-        });
+        }));
     }
 
     private static void setTabState(Activity activity, int iconId, int textId, boolean isActive) {

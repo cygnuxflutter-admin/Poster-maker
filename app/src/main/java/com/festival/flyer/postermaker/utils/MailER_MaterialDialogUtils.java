@@ -1,6 +1,9 @@
 package com.festival.flyer.postermaker.utils;
 
 import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadNativeAd;
+import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadDialogNativeAd;
+import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadCompactNativeAd;
+import static com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.loadMediumNativeAd;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -199,13 +202,112 @@ public class MailER_MaterialDialogUtils {
         tv_title.setText(title);
         tv_description.setText(message);
 
-        button2.setOnClickListener(v -> positiveButton.onClick(materialDialog));
+        button2.setOnClickListener(v -> {
+            if (materialDialog != null && materialDialog.isShowing()) {
+                materialDialog.dismiss();
+            }
+            positiveButton.onClick(materialDialog);
+        });
         button1.setOnClickListener(v -> negativeButton.onClick(materialDialog));
 
+        View ad_layout_container = materialDialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
 
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(activity);
+        boolean isNativeEnabled = preferenceClass.getBoolean("premium_dialog_native_enabled", false);
+        String customAdId = preferenceClass.getAdsId("premium_dialog_native_id");
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc, activity);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("premium_dialog")) {
+                        org.json.JSONObject pdObj = root.optJSONObject("premium_dialog");
+                        if (pdObj != null) {
+                            if (pdObj.has("native_ad")) {
+                                org.json.JSONObject nObj = pdObj.optJSONObject("native_ad");
+                                if (nObj != null) {
+                                    isNativeEnabled = nObj.optBoolean("enabled", false);
+                                    String nid = nObj.optString("ad_id", "");
+                                    if (!nid.trim().isEmpty()) customAdId = nid.trim();
+                                }
+                            } else {
+                                isNativeEnabled = pdObj.optBoolean("enabled", false);
+                            }
+                        }
+                    } else if (root.has("reward_dialog")) {
+                        org.json.JSONObject rdObj = root.optJSONObject("reward_dialog");
+                        if (rdObj != null) {
+                            if (rdObj.has("native_ad")) {
+                                org.json.JSONObject nObj = rdObj.optJSONObject("native_ad");
+                                if (nObj != null) {
+                                    isNativeEnabled = nObj.optBoolean("enabled", false);
+                                    String nid = nObj.optString("ad_id", "");
+                                    if (!nid.trim().isEmpty()) customAdId = nid.trim();
+                                }
+                            } else {
+                                isNativeEnabled = rdObj.optBoolean("enabled", false);
+                            }
+                        }
+                    } else if (root.has("premium_config")) {
+                        org.json.JSONObject pcObj = root.optJSONObject("premium_config");
+                        if (pcObj != null && pcObj.has("dialog_native_ad")) {
+                            org.json.JSONObject nObj = pcObj.optJSONObject("dialog_native_ad");
+                            if (nObj != null) {
+                                isNativeEnabled = nObj.optBoolean("enabled", false);
+                                String nid = nObj.optString("ad_id", "");
+                                if (!nid.trim().isEmpty()) customAdId = nid.trim();
+                            }
+                        }
+                    }
+                }
+                if (rc.getKeysByPrefix("").contains("premium_dialog_native_enabled")) {
+                    isNativeEnabled = rc.getBoolean("premium_dialog_native_enabled");
+                }
+                if (rc.getKeysByPrefix("").contains("premium_dialog_native_id")) {
+                    String remoteId = rc.getString("premium_dialog_native_id");
+                    if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (isNativeEnabled && MailER_NetworkUtils.isNetworkAvailable(activity)) {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container, customAdId, new com.festival.flyer.postermaker.adManager.MailER_NativeAdUtil.OnAdLoadListener() {
+                @Override
+                public void onAdLoaded() {
+                    if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+                    if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.VISIBLE);
+                    if (shimmer_view_container != null) {
+                        shimmer_view_container.stopShimmer();
+                        shimmer_view_container.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onAdFailed() {
+                    boolean showShimmerOnFail = MailER_PreferenceClass.isNativeShimmerOnFail(activity);
+                    if (!showShimmerOnFail) {
+                        if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+                        if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
+                        if (shimmer_view_container != null) {
+                            shimmer_view_container.stopShimmer();
+                            shimmer_view_container.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            });
+        } else {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) {
+                shimmer_view_container.stopShimmer();
+                shimmer_view_container.setVisibility(android.view.View.GONE);
+            }
+        }
 
     }
 
@@ -243,9 +345,17 @@ public class MailER_MaterialDialogUtils {
         btn_yes.setOnClickListener(v -> positiveButton.onClick(materialDialog));
         btn_no.setOnClickListener(v -> negativeButton.onClick(materialDialog));
 
+        View ad_layout_container = materialDialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
     public void exitAlertDialog(Activity activity, String title, String message, MailER_DialogClickListener dialogClickListener) {
@@ -293,9 +403,66 @@ public class MailER_MaterialDialogUtils {
             }
         });
 
+        View ad_layout_container = materialDialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+
+        MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(activity);
+        boolean isNativeEnabled = preferenceClass.getBoolean("app_exit_native_enabled", preferenceClass.getAdsStatus("ExitDialog_NativeAD") == 1);
+        String customAdId = preferenceClass.getAdsId("app_exit_native_id");
+        String adType = preferenceClass.getDataType("app_exit_native_type", "medium");
+
+        try {
+            com.google.firebase.remoteconfig.FirebaseRemoteConfig rc = com.google.firebase.remoteconfig.FirebaseRemoteConfig.getInstance();
+            if (rc != null) {
+                String masterJson = MailER_PreferenceClass.getMasterConfigJson(rc);
+                if (masterJson != null && !masterJson.isEmpty()) {
+                    org.json.JSONObject root = new org.json.JSONObject(masterJson);
+                    if (root.has("app_exit_dialog")) {
+                        org.json.JSONObject exitObj = root.getJSONObject("app_exit_dialog");
+                        if (exitObj.has("native_ad")) {
+                            org.json.JSONObject nObj = exitObj.getJSONObject("native_ad");
+                            isNativeEnabled = nObj.optBoolean("enabled", isNativeEnabled);
+                            String nid = nObj.optString("ad_id", "");
+                            if (!nid.trim().isEmpty()) customAdId = nid.trim();
+                            adType = nObj.optString("ad_type", adType);
+                        } else {
+                            isNativeEnabled = exitObj.optBoolean("native_ad_enabled", isNativeEnabled);
+                            String nid = exitObj.optString("native_ad_id", "");
+                            if (!nid.trim().isEmpty()) customAdId = nid.trim();
+                            adType = exitObj.optString("ad_type", adType);
+                        }
+                    }
+                } else {
+                    if (rc.getValue("app_exit_native_enabled").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        isNativeEnabled = rc.getBoolean("app_exit_native_enabled");
+                    }
+                    if (rc.getValue("app_exit_native_id").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        String remoteId = rc.getString("app_exit_native_id");
+                        if (!remoteId.trim().isEmpty()) customAdId = remoteId.trim();
+                    }
+                    if (rc.getValue("app_exit_native_type").getSource() == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+                        String remoteType = rc.getString("app_exit_native_type");
+                        if (!remoteType.trim().isEmpty()) adType = remoteType.trim();
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (isNativeEnabled && MailER_NetworkUtils.isNetworkAvailable(activity)) {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+            if ("compact".equalsIgnoreCase(adType)) {
+                loadCompactNativeAd(native_banner_ad_container, activity, shimmer_view_container, customAdId);
+            } else if ("medium".equalsIgnoreCase(adType)) {
+                loadMediumNativeAd(native_banner_ad_container, activity, shimmer_view_container, customAdId);
+            } else {
+                loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container, customAdId);
+            }
+        } else {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(View.GONE);
+        }
     }
 
 
@@ -369,9 +536,17 @@ public class MailER_MaterialDialogUtils {
 
         btn_yes.setOnClickListener(v -> dialogClickListener.onClick(materialDialog));
 
+        View ad_layout_container = materialDialog.findViewById(R.id.ad_layout_container);
         RelativeLayout native_banner_ad_container = materialDialog.findViewById(R.id.native_banner_ad_containers);
         ShimmerFrameLayout shimmer_view_container = materialDialog.findViewById(R.id.shimmer_view_container);
-        loadNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        if (new MailER_PreferenceClass(activity).getAdsStatus("ExitDialog_NativeAD") == 1) {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.VISIBLE);
+            loadDialogNativeAd(native_banner_ad_container, activity, shimmer_view_container);
+        } else {
+            if (ad_layout_container != null) ad_layout_container.setVisibility(View.GONE);
+            if (native_banner_ad_container != null) native_banner_ad_container.setVisibility(android.view.View.GONE);
+            if (shimmer_view_container != null) shimmer_view_container.setVisibility(android.view.View.GONE);
+        }
     }
 
 }

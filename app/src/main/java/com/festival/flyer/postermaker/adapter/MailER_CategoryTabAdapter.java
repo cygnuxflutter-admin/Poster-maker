@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.festival.flyer.postermaker.R;
 import com.festival.flyer.postermaker.model.MailER_PosterModel;
 
@@ -100,7 +101,10 @@ public class MailER_CategoryTabAdapter extends RecyclerView.Adapter<MailER_Categ
         if (t.contains("sale") || t.contains("friday") || t.contains("monday")) return "🛍️";
         if (t.contains("diwali") || t.contains("krathong")) return "🪔";
         if (t.contains("halloween")) return "🎃";
-        if (t.contains("navratri") || t.contains("dance")) return "💃";
+        if (t.contains("dussehra") || t.contains("dasara") || t.contains("dashahara")) return "🏹";
+        if (t.contains("krishna") || t.contains("janmashtami") || t.contains("kanha")) return "🪈";
+        if (t.contains("ram") || t.contains("hanuman") || t.contains("shiva") || t.contains("mahadev")) return "🚩";
+        if (t.contains("navratri") || t.contains("garba") || t.contains("dance")) return "💃";
         if (t.contains("muharram") || t.contains("eid") || t.contains("night")) return "🌙";
         if (t.contains("brazilian")) return "🎭";
         if (t.contains("tour") || t.contains("travel")) return "✈️";
@@ -152,7 +156,13 @@ public class MailER_CategoryTabAdapter extends RecyclerView.Adapter<MailER_Categ
         String multiLineTitle = titleCase.toString();
         holder.tvText.setText(multiLineTitle);
 
-        holder.tvEmoji.setText(getEmojiForCategory(originalTitle));
+        if (holder.ivThumbnail != null) {
+            holder.ivThumbnail.setVisibility(View.GONE);
+        }
+        if (holder.tvEmoji != null) {
+            holder.tvEmoji.setText(getEmojiForCategory(originalTitle));
+            holder.tvEmoji.setVisibility(View.VISIBLE);
+        }
 
         boolean isSelected = (position == selectedPosition);
         holder.llRoot.setSelected(isSelected);
@@ -179,12 +189,14 @@ public class MailER_CategoryTabAdapter extends RecyclerView.Adapter<MailER_Categ
         LinearLayout llRoot;
         TextView tvEmoji;
         TextView tvText;
+        ImageView ivThumbnail;
 
         ViewHolder(View itemView) {
             super(itemView);
             llRoot = itemView.findViewById(R.id.ll_tab_root);
             tvEmoji = itemView.findViewById(R.id.tv_tab_emoji);
             tvText = itemView.findViewById(R.id.tv_tab_text);
+            ivThumbnail = itemView.findViewById(R.id.iv_tab_thumbnail);
         }
     }
 }

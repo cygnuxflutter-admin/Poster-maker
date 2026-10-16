@@ -90,23 +90,7 @@
         android:layout_margin="@dimen/_5sdp"
         android:orientation="vertical">
 
-        <RelativeLayout
-            android:id="@+id/remove_wm_ll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/_5sdp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_40sdp"
-                android:background="@drawable/spawner_btn_rounded_text_bg"
-                android:fontFamily="@font/spawner_visbyroundcf_bold"
-                android:gravity="center"
-                android:text="@string/remove_watermark"
-                android:textColor="@color/white"
-                android:textSize="@dimen/_18ssp" />
-
-        </RelativeLayout>
 
 
         <RelativeLayout
@@ -236,13 +220,14 @@
             <RelativeLayout
                 android:id="@+id/rl_ad"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmer_view_container"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_50sdp"
-                app:shimmer_auto_start="true">
+                app:shimmer_auto_start="false">
 
                 <TextView
                     android:id="@+id/yourTextView"

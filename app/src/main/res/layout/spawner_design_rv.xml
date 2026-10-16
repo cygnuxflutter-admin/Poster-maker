@@ -40,6 +40,7 @@
                 android:layout_width="@dimen/_24sdp"
                 android:layout_height="@dimen/_24sdp"
                 android:layout_marginHorizontal="@dimen/_16sdp"
+                android:visibility="gone"
                 android:src="@drawable/spawner_ic_delete" />
         </LinearLayout>
     </RelativeLayout>

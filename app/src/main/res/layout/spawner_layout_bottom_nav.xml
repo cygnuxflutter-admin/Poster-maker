@@ -18,7 +18,7 @@
                     android:orientation="horizontal"
                     android:clipChildren="false">
 
-                    <!-- Home Tab (Active) -->
+                    <!-- Home Tab -->
                     <LinearLayout
                         android:id="@+id/tab_home"
                         android:layout_width="0dp"
@@ -31,19 +31,21 @@
                         android:focusable="true">
 
                         <ImageView
+                            android:id="@+id/ic_tab_home"
                             android:layout_width="@dimen/_26sdp"
                             android:layout_height="@dimen/_26sdp"
                             android:src="@drawable/spawner_ic_home"
                             android:contentDescription="Home" />
 
                         <TextView
+                            android:id="@+id/txt_tab_home"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/_4sdp"
                             android:text="Home"
-                            android:textColor="@color/bottom_nav_active"
+                            android:textColor="@color/bottom_nav_inactive"
                             android:textSize="@dimen/_11ssp"
-                            android:fontFamily="@font/spawner_visbyroundcf_bold" />
+                            android:fontFamily="@font/spawner_visbyroundcf_medium" />
                     </LinearLayout>
 
                     <!-- Explore Tab -->
@@ -59,12 +61,14 @@
                         android:focusable="true">
 
                         <ImageView
+                            android:id="@+id/ic_tab_explore"
                             android:layout_width="@dimen/_26sdp"
                             android:layout_height="@dimen/_26sdp"
                             android:src="@drawable/spawner_ic_explore"
                             android:contentDescription="Explore" />
 
                         <TextView
+                            android:id="@+id/txt_tab_explore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/_4sdp"
@@ -88,6 +92,7 @@
                         android:focusable="true">
 
                         <RelativeLayout
+                            android:id="@+id/fab_create_bg"
                             android:layout_width="@dimen/_46sdp"
                             android:layout_height="@dimen/_46sdp"
                             android:background="@drawable/spawner_bg_fab_gradient"
@@ -105,7 +110,7 @@
                         </RelativeLayout>
                         
                         <TextView
-                            android:id="@+id/text_create"
+                            android:id="@+id/txt_tab_create"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/_4sdp"
@@ -115,7 +120,7 @@
                             android:fontFamily="@font/spawner_visbyroundcf_medium" />
                     </LinearLayout>
 
-                    <!-- My Creations Tab -->
+                    <!-- Background Tab -->
                     <LinearLayout
                         android:id="@+id/tab_creations"
                         android:layout_width="0dp"
@@ -128,18 +133,20 @@
                         android:focusable="true">
 
                         <ImageView
+                            android:id="@+id/ic_tab_creations"
                             android:layout_width="@dimen/_26sdp"
                             android:layout_height="@dimen/_26sdp"
-                            android:src="@drawable/spawner_ic_creations"
-                            android:contentDescription="My Creations" />
+                            android:src="@drawable/spawner_ic_backgrounds"
+                            android:contentDescription="Background" />
 
                         <TextView
+                            android:id="@+id/txt_tab_creations"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/_4sdp"
-                            android:text="Creations"
+                            android:text="Background"
                             android:textColor="@color/bottom_nav_inactive"
-                            android:textSize="@dimen/_11ssp"
+                            android:textSize="@dimen/_9ssp"
                             android:fontFamily="@font/spawner_visbyroundcf_medium" />
                     </LinearLayout>
 
@@ -156,12 +163,14 @@
                         android:focusable="true">
 
                         <ImageView
+                            android:id="@+id/ic_tab_settings"
                             android:layout_width="@dimen/_26sdp"
                             android:layout_height="@dimen/_26sdp"
                             android:src="@drawable/spawner_ic_settings_gear"
                             android:contentDescription="Settings" />
 
                         <TextView
+                            android:id="@+id/txt_tab_settings"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/_4sdp"

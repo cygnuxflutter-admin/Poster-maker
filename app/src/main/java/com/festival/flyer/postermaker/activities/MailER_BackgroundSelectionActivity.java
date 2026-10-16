@@ -32,6 +32,7 @@ import com.festival.flyer.postermaker.adManager.MailER_LoadAds;
 import com.festival.flyer.postermaker.adManager.MailER_RewardVideoManager;
 import com.festival.flyer.postermaker.controller.MailER_BGSelectionController;
 import com.festival.flyer.postermaker.fragment.MailER_BackgroundFragment;
+import com.festival.flyer.postermaker.model.MailER_BgImage;
 import com.festival.flyer.postermaker.threadTask.MailER_DlBgAsync;
 import com.festival.flyer.postermaker.utils.MailER_FileUtils;
 import com.festival.flyer.postermaker.utils.MailER_MaterialDialogUtils;
@@ -58,6 +59,13 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.spawner_activity_background_selection);
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                com.festival.flyer.postermaker.MyApplication.showInterstitialAd(MailER_BackgroundSelectionActivity.this, () -> finish());
+            }
+        });
+
 
         // Preload reward ad for premium background unlock
 
@@ -66,7 +74,7 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
             getSupportActionBar().hide();
         }
 
-        com.festival.flyer.postermaker.utils.MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_home);
+        com.festival.flyer.postermaker.utils.MailER_BottomNavHelper.setupBottomNav(this, R.id.tab_creations);
 
         View statusBarSpacer = findViewById(R.id.status_bar_spacer);
         // WindowInsets are handled by fitsSystemWindows on root now
@@ -86,12 +94,10 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
 
 
         int BannerAdStatus = preferenceClass.getAdsStatus("BGSelectScreen_BannerAD");
+        if (btm != null) btm.setVisibility(View.GONE);
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
             if (BannerAdStatus == 1) {
-                btm.setVisibility(View.VISIBLE);
                 MailER_LoadAds.loadAdmobBannerAd(this, rl_ad, shimmer_view_container);
-            } else {
-                btm.setVisibility(View.GONE);
             }
         }
 
@@ -169,6 +175,12 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == 101 && resultCode == RESULT_OK) {
+            setResult(RESULT_OK, data);
+            finish();
+            return;
+        }
+
         if (resultCode == RESULT_OK && requestCode == bgSelectionController.CAMERA_INTENT) {
             Uri selectedImage = Uri.fromFile(bgSelectionController.camera_file);
             if (mode.equals("user")) {
@@ -245,56 +257,26 @@ public class MailER_BackgroundSelectionActivity extends AppCompatActivity implem
     }
 
     @Override
-    public void onPosterClick(String path, boolean premium) {
+    public void onPosterClick(String path, boolean premium, ArrayList<MailER_BgImage> bgList, int position, String catName) {
         if (MailER_NetworkUtils.isNetworkAvailable(this)) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                if (checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED || checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED) {
-//                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                            || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-//                        requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"}, PERMISSION_GRANTED);
-//                    } else {
-//                        MailER_MaterialDialogUtils.getInstance().PermissionDialog(this);
-//                    }
-//                    return;
-//                }
-//            }
-            strings.clear();
-            strings.add(path);
-            if (premium) {
-                MailER_MaterialDialogUtils.getInstance().rewardDialog(this, "Use Background(One Time)", "Use premium background by watching Ads", materialDialog -> {
-//                    bgSelectionController.startMaterialDialog();
-                    MailER_PreferenceClass preferenceClass = new MailER_PreferenceClass(this);
-                    if (preferenceClass.getDataType("PremiumAdType") != null && preferenceClass.getDataType("PremiumAdType").equals("Reward")) {
-                        MailER_RewardVideoManager.showRewardVideoAd(MailER_BackgroundSelectionActivity.this, new MailER_InterstitialAdManager.OnRewardAdLoadInterface() {
-                            @Override
-                            public void onAdClose() {
-                                isRewarded = true;
-                                downloadTask(strings);
-                            }
-                        });
-                    } else {
-                        MyApplication.showInterstitialAdWithOutCount(MailER_BackgroundSelectionActivity.this, () -> {
-                            isRewarded = true;
-                            downloadTask(strings);
-                        });
-                    }
-//                    MyApplication.showInterstitialAd(this,() -> downloadTask(strings));
-                    if (materialDialog != null && materialDialog.isShowing())
-                        materialDialog.dismiss();
-                }, materialDialog -> {
-                    if (materialDialog != null && materialDialog.isShowing())
-                        materialDialog.dismiss();
-                });
-            } else {
-                downloadTask(strings);
-            }
+            Intent intent = new Intent(this, MailER_BackgroundPreviewActivity.class);
+            intent.putExtra("cat_name", catName);
+            intent.putExtra("selected_position", position);
+            intent.putExtra("selected_path", path);
+            intent.putExtra("mode", mode);
+            MailER_BackgroundPreviewActivity.tempBgList = bgList;
+            intent.putExtra("bg_list", bgList);
+            startActivityForResult(intent, 101);
         } else {
             Toast.makeText(this, "Make sure you are connected to internet!!", Toast.LENGTH_SHORT).show();
         }
     }
 
+    public void onPosterClick(String path, boolean premium) {
+        onPosterClick(path, premium, null, 0, "");
+    }
+
     private void downloadTask(ArrayList<String> strings) {
-        bgSelectionController.startMaterialDialog();
         new MailER_DlBgAsync(MailER_BackgroundSelectionActivity.this, strings, new MailER_DlBgAsync.OnDownloadTemplateListener() {
             @Override
             public void onDownloadComplete() {
